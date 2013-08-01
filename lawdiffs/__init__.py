@@ -10,7 +10,7 @@ log_formats = [
     '[%(levelname)s %(name)s.%(funcName)s:%(lineno)d]\n > %(message)s'
 ]
 
-format = log_formats[3]
+format = log_formats[2]
 handler = logging.StreamHandler()
 formatter = logging.Formatter(format)
 handler.setFormatter(formatter)

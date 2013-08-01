@@ -43,9 +43,18 @@ class OrLawParser(LawParser):
         self.laws = []
 
     def run(self):
-        self.create_laws_from_url(
-            'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
-        self.commit('1995')
+        # repos.wipe_and_init(self.REPO_REL_PATH)
+        # self.create_laws_from_url(
+        #     'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
+        # self.commit('1995')
+
+        # self.laws = []
+        # self.create_laws_from_url(
+        #     'http://www.leg.state.or.us/ors_archives/2009/007.html')
+        # self.commit('2009')
+
+        diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
+        print('diff: {v}'.format(v=diff))
 
     def fetch_urls(self):
         urls = []
