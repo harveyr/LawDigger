@@ -60,15 +60,23 @@ class Law(MongoDocument):
         self.subsection = subsection
         self.versions = {}
 
-    def set_version_title(self, version, title):
+    def _ensure_version(self, version):
         if not version in self.versions:
-            self.versions[version] = {}
-        self.versions[version]['title'] = title
+            self.versions[version] = {
+                'text': ''
+            }
 
-    def set_version_text(self, version, text):
-        if not version in self.versions:
-            self.versions[version] = {}
-        self.versions[version]['text'] = text
+    def _update_version(self, version, key, value):
+        self._ensure_version(version)
+        self.versions[version][key] = value
+
+    def set_version_title(self, version, title):
+        self._update_version(version, 'title', title)
+
+    def append_version_text(self, version, text):
+        self._ensure_version(version)
+        new_text = self.versions[version]['text'] + text
+        self._update_version(version, 'text', new_text)
 
 
 class OregonRevisedStatute(Law):

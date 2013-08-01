@@ -72,12 +72,25 @@ class OrLawParser(LawParser):
         return urls
 
     def create_laws_from_url(self, url):
-        soup = self.fetch_soup(url)
-        for elem in soup.find_all('p'):
-            text = self.get_soup_text(elem)
-            section_matches = self.section_re.match(text)
-            if section_matches:
-                section = section_matches.group(1)
+        # soup = self.fetch_soup(url)
+
+        version = 2009  # pass this in
+        soup = None
+        with open('temp_html.html', 'r') as open_f:
+            soup = BeautifulSoup(open_f.read())
+
+        starting_elem = soup.find('b').parent.previous_sibling
+        current_law = None
+
+        for elem in starting_elem.next_siblings:
+            try:
+                text = self.get_soup_text(elem)
+            except AttributeError:
+                text = unicode(elem)
+            subs_matches = self.section_re.match(text)
+            if subs_matches:
+                section = subs_matches.group(1)
+                current_law = models.OregonRevisedStatute(section)
                 title_matches = self.title_re.match(text)
                 if title_matches:
                     title = title_matches.group(1)
@@ -85,14 +98,20 @@ class OrLawParser(LawParser):
                     law_text = law_text.strip()
                 else:
                     title = ''
-                    law_text = text[section_matches.end() - 1:]
+                    law_text = text[subs_matches.end() - 1:]
                     law_text = ' '.join(law_text.splitlines())
 
-                title = ' '.join(title.splitlines())
-                law = models.OregonRevisedStatute(section)
-                law_text += self.get_law_text(elem)
-                law.insert()
-                self.laws.append(law)
+                current_law.set_version_title(version, title)
+                current_law.append_version_text(version, law_text)
+                self.laws.append(current_law)
+            else:
+                if not current_law:
+                    raise Exception('No current law to append to')
+                current_law.append_version_text(version, '\n' + text)
+
+        for law in self.laws:
+            print(law)
+            print(law.versions)
 
     def get_law_text(self, soup_elem):
         text = ''
