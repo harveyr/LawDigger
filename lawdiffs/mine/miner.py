@@ -1,13 +1,12 @@
 import urllib2
 import re
-import bs4
 from bs4 import BeautifulSoup
 import logging
 import pickle
 import md5
 import os
 
-from .data import models
+from ..data import models
 from . import repos
 
 logger = logging.getLogger(__name__)
@@ -94,13 +93,7 @@ class OrLawParser(LawParser):
 
             self.commit(version)
 
-        # self.laws = []
-        # self.create_laws_from_url(
-        #     'http://www.leg.state.or.us/ors_archives/2009/007.html')
-        # self.commit('2009')
-
         # diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
-        # print('diff: {v}'.format(v=diff))
 
     def scrape_urls(self, source_dict):
         urls = []
