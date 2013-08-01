@@ -3,24 +3,60 @@ import re
 import bs4
 from bs4 import BeautifulSoup
 import logging
+import pickle
+import md5
+import os
 
 from .data import models
 from . import repos
 
 logger = logging.getLogger(__name__)
 
+CACHE_PATH = os.path.join(os.path.split(__file__)[0], '.cache')
+CACHE_PICKLE_PATH = os.path.join(CACHE_PATH, 'index.p')
+
 
 class LawParser(object):
+    cache = {
+        'html': {}
+    }
+
+    def __init__(self):
+
+        # self.cleanse_html_re = re.compile(r'{}'.format(u'\xa7'))
+
+        if os.path.exists(CACHE_PICKLE_PATH):
+            with open(CACHE_PICKLE_PATH, 'r') as f:
+                self.cache = pickle.load(f)
 
     def fetch_html(self, url):
+        hashed_filename = md5.new(url).hexdigest()
+        if url in self.cache['html']:
+            with open(os.path.join(CACHE_PATH, hashed_filename), 'r') as f:
+                logger.info('Using cached version of {} ({})'.format(
+                    url, hashed_filename))
+                return f.read()
+
+        logger.info('Fetching fresh version of ' + url)
         response = urllib2.urlopen(url)
-        return response.read()
+        html = response.read()
+        html = html.decode('utf-8', 'ignore')
+        self.cache['html'][url] = hashed_filename
+        with open(os.path.join(CACHE_PATH, hashed_filename), 'w') as f:
+            f.write(html)
+        with open(CACHE_PICKLE_PATH, 'w') as f:
+            pickle.dump(self.cache, f)
+        return html
+
+    # def cleanse_html(self, html):
+    #     return self.cleanse_html_re.sub('', html)
+    #     # return html
 
     def fetch_soup(self, url):
         return BeautifulSoup(self.fetch_html(url))
 
     def get_soup_text(self, soup_elem):
-        text = soup_elem.get_text(' ', strip=True).encode('utf-8')
+        text = soup_elem.get_text(' ', strip=True).decode('utf-8')
         return text
 
     def commit(self, tag_name):
@@ -33,7 +69,7 @@ class OrLawParser(LawParser):
 
     sources = [
         {
-            'tag': 2011,
+            'version': 2011,
             'crawl': [
                 'http://www.leg.state.or.us/ors/vol1.html'
             ],
@@ -42,14 +78,26 @@ class OrLawParser(LawParser):
     ]
 
     def __init__(self):
+        super(OrLawParser, self).__init__()
         self.section_re = re.compile('(\d+\.\d+)\s(\S)')
         self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
         self.laws = []
 
     def run(self):
         repos.wipe_and_init(self.REPO_REL_PATH)
-        self.create_laws_from_url(
-            'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
+
+        for source in self.sources:
+            urls = self.scrape_urls(source)
+            for i in range(min(2, len(urls))):
+                url = urls[i]
+                logger.debug('url: {v}'.format(v=url))
+                self.create_laws_from_url(url, source['version'])
+
+        # self.create_laws_from_url(
+        #     'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
+
+        # for law in self.laws:
+        #     law.save()
         # self.commit('1995')
 
         # self.laws = []
@@ -60,24 +108,18 @@ class OrLawParser(LawParser):
         # diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
         # print('diff: {v}'.format(v=diff))
 
-    def fetch_urls(self):
+    def scrape_urls(self, source_dict):
         urls = []
-        for batch in self.sources:
-            for url in batch['crawl']:
-                soup = BeautifulSoup(self.fetch_html(url))
-                url_base = url[:url.rindex('/')] + '/'
-                for link in soup.find_all(href=batch['crawl_link_pattern']):
-                    full_link = url_base + link.get('href')
-                    urls.append(full_link)
+        for url in source_dict['crawl']:
+            soup = BeautifulSoup(self.fetch_html(url))
+            url_base = url[:url.rindex('/')] + '/'
+            for link in soup.find_all(href=source_dict['crawl_link_pattern']):
+                full_link = url_base + link.get('href')
+                urls.append(full_link)
         return urls
 
-    def create_laws_from_url(self, url):
-        # soup = self.fetch_soup(url)
-
-        version = 2009  # pass this in
-        soup = None
-        with open('temp_html.html', 'r') as open_f:
-            soup = BeautifulSoup(open_f.read())
+    def create_laws_from_url(self, url, version):
+        soup = self.fetch_soup(url)
 
         starting_elem = soup.find('b').parent.previous_sibling
         current_law = None
@@ -91,6 +133,7 @@ class OrLawParser(LawParser):
             if subs_matches:
                 section = subs_matches.group(1)
                 current_law = models.OregonRevisedStatute(section)
+                logger.info('Created law: ' + str(current_law))
                 title_matches = self.title_re.match(text)
                 if title_matches:
                     title = title_matches.group(1)
@@ -105,26 +148,12 @@ class OrLawParser(LawParser):
                 current_law.append_version_text(version, law_text)
                 self.laws.append(current_law)
             else:
+                if text.isupper():
+                    continue
                 if not current_law:
                     raise Exception('No current law to append to')
                 current_law.append_version_text(version, '\n' + text)
 
-        for law in self.laws:
-            print(law)
-            print(law.versions)
-
-    def get_law_text(self, soup_elem):
-        text = ''
-        for next in soup_elem.next_siblings:
-            if not isinstance(next, bs4.element.Tag):
-                continue
-            next_text = self.get_soup_text(next)
-            if self.section_re.match(next_text):
-                break
-            if next_text.isupper():
-                break
-            text += '\n' + next_text.strip()
-        return text
 
 p = OrLawParser()
 p.run()

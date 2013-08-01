@@ -1,16 +1,30 @@
 import inspect
-from . import client
+from .client import client
 import logging
 logger = logging.getLogger(__name__)
 
 
 class MongoDocument(object):
 
-    collection = None
+    collection_name = None
 
     @classmethod
-    def fetch():
-        pass
+    def collection(self):
+        return client.collection(self.collection_name)
+
+    @classmethod
+    def get_or_create(cls, doc_dict):
+        c = cls.collection()
+        for key in cls.unique_keys:
+            result = c.find_one({key: doc_dict[key]})
+            if result:
+                return (result, False)
+        inserted_id = c.insert(doc_dict)
+        inserted_doc = c.find_one({'_id': inserted_id})
+        return (inserted_doc, True)
+
+    def fetch_by_unique_keys(self):
+        return None
 
     def serialize(self):
         d = {}
@@ -24,29 +38,20 @@ class MongoDocument(object):
                 pass
             finally:
                 pass
-            # except Exception, e:
-            #     raise
-            # else:
-            #     pass
-            # finally:
-            #     pass
-            # if hasattr(cls, 'serialize_attrs'):
-            #     attrs += cls.serialize_attrs
-            # else:
-            #     break
-        # if not attrs:
-        #     raise Exception('{} has no serialize_attrs'.format(
-        #         self.__class__.__name__))
-
-        # return {key: getattr(self, key) for key in attrs}
         return d
 
-    def insert(self):
-        client.insert(self)
+    def save(self):
+        serialized = self.serialize()
+        doc, created = self.__class__.get_or_create(self.serialize())
+        if not created:
+            for key, val in serialized.items():
+                doc[key] = val
+                c = self.__class__.collection()
+                c.save(doc)
 
 
 class Law(MongoDocument):
-    collection = 'laws'
+    collection_name = 'or_ors'
     unique_keys = ['subsection']
 
     @classmethod

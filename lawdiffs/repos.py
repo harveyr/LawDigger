@@ -30,7 +30,6 @@ def run_git_command(command, repo_rel_path):
         logger.error(err.decode('utf-8'))
         return None
     else:
-        logger.debug('here')
         return out.decode('utf-8').encode('utf-8')
 
 

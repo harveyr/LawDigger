@@ -18,3 +18,4 @@ repos/
 .DS_Store
 build
 .Python
+.cache
