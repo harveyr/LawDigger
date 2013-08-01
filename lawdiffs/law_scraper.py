@@ -2,24 +2,8 @@ import urllib2
 import re
 import bs4
 from bs4 import BeautifulSoup
-
-
-class Law(object):
-    def __init__(self, id_, title, text):
-        self.id_ = id_
-        self.title = title
-        self.text = text
-
-    def append_text(self, text):
-        self.text += text
-
-
-class OregonRevisedStatute(Law):
-    DIVISION_NAME = 'Chapter'
-
-    def __str__(self):
-        return 'ORS {id}. {title}'.format(
-            id=self.id_, title=self.title)
+from . import models
+from . import repos
 
 
 class LawParser(object):
@@ -35,10 +19,13 @@ class LawParser(object):
         text = soup_elem.get_text(' ', strip=True).encode('utf-8')
         return text
 
+    def commit(self, tag_name):
+        repos.update(self.laws, tag_name, self.REPO_REL_PATH)
+
 
 class OrLawParser(LawParser):
 
-    DIRECTORY = 'or'
+    REPO_REL_PATH = 'or'
 
     sources = [
         {
@@ -56,7 +43,9 @@ class OrLawParser(LawParser):
         self.laws = []
 
     def run(self):
-        self.eval_url('http://www.leg.state.or.us/ors/010.html')
+        self.create_laws_from_url(
+            'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
+        self.commit('1995')
 
     def fetch_urls(self):
         urls = []
@@ -69,7 +58,7 @@ class OrLawParser(LawParser):
                     urls.append(full_link)
         return urls
 
-    def eval_url(self, url):
+    def create_laws_from_url(self, url):
         soup = self.fetch_soup(url)
         for elem in soup.find_all('p'):
             text = self.get_soup_text(elem)
@@ -87,12 +76,9 @@ class OrLawParser(LawParser):
                     law_text = ' '.join(law_text.splitlines())
 
                 title = ' '.join(title.splitlines())
-                law = OregonRevisedStatute(section, title, law_text)
+                law = models.OregonRevisedStatute(section, title, law_text)
                 law.append_text(self.get_law_text(elem))
-                print('--')
-                print(law)
-                print(law.text)
-                print('--')
+                self.laws.append(law)
 
     def get_law_text(self, soup_elem):
         text = ''
@@ -106,7 +92,6 @@ class OrLawParser(LawParser):
                 break
             text += '\n' + next_text.strip()
         return text
-
 
 p = OrLawParser()
 p.run()

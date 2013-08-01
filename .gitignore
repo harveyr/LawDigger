@@ -10,6 +10,7 @@ include/
 local/
 share/
 lib64
+repos/
 *.py[oc]
 *.py~
 *.scssc

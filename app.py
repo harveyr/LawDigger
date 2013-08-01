@@ -1,4 +1,4 @@
 import lawdiffs
-from lawdiffs import repos
+from lawdiffs import law_scraper
 
 
