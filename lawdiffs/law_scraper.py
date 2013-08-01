@@ -41,16 +41,14 @@ class LawParser(object):
         response = urllib2.urlopen(url)
         html = response.read()
         html = html.decode('utf-8', 'ignore')
+
         self.cache['html'][url] = hashed_filename
         with open(os.path.join(CACHE_PATH, hashed_filename), 'w') as f:
             f.write(html)
         with open(CACHE_PICKLE_PATH, 'w') as f:
             pickle.dump(self.cache, f)
-        return html
 
-    # def cleanse_html(self, html):
-    #     return self.cleanse_html_re.sub('', html)
-    #     # return html
+        return html
 
     def fetch_soup(self, url):
         return BeautifulSoup(self.fetch_html(url))
@@ -87,18 +85,14 @@ class OrLawParser(LawParser):
         repos.wipe_and_init(self.REPO_REL_PATH)
 
         for source in self.sources:
+            version = source['version']
             urls = self.scrape_urls(source)
             for i in range(min(2, len(urls))):
                 url = urls[i]
                 logger.debug('url: {v}'.format(v=url))
-                self.create_laws_from_url(url, source['version'])
+                self.create_laws_from_url(url, version)
 
-        # self.create_laws_from_url(
-        #     'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
-
-        # for law in self.laws:
-        #     law.save()
-        # self.commit('1995')
+            self.commit(version)
 
         # self.laws = []
         # self.create_laws_from_url(
@@ -132,6 +126,9 @@ class OrLawParser(LawParser):
             subs_matches = self.section_re.match(text)
             if subs_matches:
                 section = subs_matches.group(1)
+                if current_law:
+                    current_law.save()
+
                 current_law = models.OregonRevisedStatute(section)
                 logger.info('Created law: ' + str(current_law))
                 title_matches = self.title_re.match(text)

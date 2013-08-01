@@ -49,21 +49,20 @@ def ensure_repo(repo_rel_path):
         wipe_and_init(repo_rel_path)
 
 
-def update(laws, tag_name, repo_rel_path):
-    logger.debug('tag_name: {v}'.format(v=tag_name))
+def update(laws, version, repo_rel_path):
     ensure_repo(repo_rel_path)
 
     repo_path = get_repo_path(repo_rel_path)
     for law in laws:
         f_path = os.path.join(repo_path, law.filename)
         with open(f_path, 'w') as open_f:
-            open_f.write(law.full_law)
+            open_f.write(law.get_version(version))
 
     run_git_command('init', repo_rel_path)
     run_git_command('add -A', repo_rel_path)
     run_git_command('commit -m "Testing"', repo_rel_path)
     run_git_command(
-        'tag -a {tag} -m "{tag}"'.format(tag=tag_name), repo_rel_path)
+        'tag -a {tag} -m "{tag}"'.format(tag=version), repo_rel_path)
 
 
 def get_tag_diff(filename, tag1, tag2, repo_rel_path):

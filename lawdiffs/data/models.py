@@ -95,10 +95,9 @@ class OregonRevisedStatute(Law):
     def filename(self):
         return self.subsection
 
-    @property
-    def full_law(self):
+    def get_version(self, version):
+        version = self.versions[version]
         return '{subs}. {title}\n{text}'.format(
             subs=self.subsection,
-            title=self.title,
-            text=self.text)
-
+            title=version['title'],
+            text=version['text'])
