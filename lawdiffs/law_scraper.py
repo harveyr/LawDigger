@@ -2,8 +2,12 @@ import urllib2
 import re
 import bs4
 from bs4 import BeautifulSoup
-from . import models
+import logging
+
+from .data import models
 from . import repos
+
+logger = logging.getLogger(__name__)
 
 
 class LawParser(object):
@@ -43,9 +47,9 @@ class OrLawParser(LawParser):
         self.laws = []
 
     def run(self):
-        # repos.wipe_and_init(self.REPO_REL_PATH)
-        # self.create_laws_from_url(
-        #     'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
+        repos.wipe_and_init(self.REPO_REL_PATH)
+        self.create_laws_from_url(
+            'http://www.leg.state.or.us/ors_archives/1995ORS/007.html')
         # self.commit('1995')
 
         # self.laws = []
@@ -53,8 +57,8 @@ class OrLawParser(LawParser):
         #     'http://www.leg.state.or.us/ors_archives/2009/007.html')
         # self.commit('2009')
 
-        diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
-        print('diff: {v}'.format(v=diff))
+        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
+        # print('diff: {v}'.format(v=diff))
 
     def fetch_urls(self):
         urls = []
@@ -85,8 +89,9 @@ class OrLawParser(LawParser):
                     law_text = ' '.join(law_text.splitlines())
 
                 title = ' '.join(title.splitlines())
-                law = models.OregonRevisedStatute(section, title, law_text)
-                law.append_text(self.get_law_text(elem))
+                law = models.OregonRevisedStatute(section)
+                law_text += self.get_law_text(elem)
+                law.insert()
                 self.laws.append(law)
 
     def get_law_text(self, soup_elem):
