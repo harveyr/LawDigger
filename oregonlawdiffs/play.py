@@ -3,13 +3,6 @@ import re
 import bs4
 from bs4 import BeautifulSoup
 
-# soup = BeautifulSoup(html)
-
-# print('soup.text: {v}'.format(v=soup.text))
-
-
-# count = 0
-
 
 class Law(object):
     def __init__(self, id_, title, text):
@@ -45,6 +38,8 @@ class LawParser(object):
 
 class OrLawParser(LawParser):
 
+    DIRECTORY = 'or'
+
     sources = [
         {
             'tag': 2011,
@@ -61,7 +56,6 @@ class OrLawParser(LawParser):
         self.laws = []
 
     def run(self):
-        # urls = self.fetch_urls()
         self.eval_url('http://www.leg.state.or.us/ors/010.html')
 
     def fetch_urls(self):
@@ -112,17 +106,6 @@ class OrLawParser(LawParser):
                 break
             text += '\n' + next_text.strip()
         return text
-
-            # print('next.get_text(): {v}'.format(v=next.get_text()))
-            # if self.section_re.match(nex)
-        # print('soup_elem: {v}'.format(v=soup_elem))
-        # next_elem = soup_elem.next_sibling
-        # print('next_elem: {v}'.format(v=next_elem))
-        # # text = next_elem.get_text(strip=True)
-        # # print('text: {v}'.format(v=text))
-        # break
-
-
 
 
 p = OrLawParser()
