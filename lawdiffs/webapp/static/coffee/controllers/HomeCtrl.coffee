@@ -1,2 +1,4 @@
 angular.module('myLilApp').controller 'HomeCtrl', ($scope, $http, $rootScope, Laws) ->
-    $scope.laws = Laws.fetch()
+    Laws.fetch().then (data) ->
+        $scope.laws = data
+        console.log '$scope.laws:', $scope.laws

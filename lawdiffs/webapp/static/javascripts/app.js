@@ -85,7 +85,10 @@
   });
 
   angular.module('myLilApp').controller('HomeCtrl', function($scope, $http, $rootScope, Laws) {
-    return $scope.laws = Laws.fetch();
+    return Laws.fetch().then(function(data) {
+      $scope.laws = data;
+      return console.log('$scope.laws:', $scope.laws);
+    });
   });
 
   angular.module('myLilApp').config([
@@ -100,14 +103,19 @@
     }
   ]);
 
-  angular.module(SERVICES_MODULE).factory('Laws', function($http, UrlBuilder) {
+  angular.module(SERVICES_MODULE).factory('Laws', function($http, $q, UrlBuilder) {
     var Laws;
     Laws = (function() {
 
       function Laws() {}
 
       Laws.prototype.fetch = function() {
-        return $http.get(UrlBuilder.apiUrl('/laws/or'));
+        var deferred;
+        deferred = $q.defer();
+        $http.get(UrlBuilder.apiUrl('/laws/or')).success(function(response) {
+          return deferred.resolve(response);
+        });
+        return deferred.promise;
       };
 
       return Laws;

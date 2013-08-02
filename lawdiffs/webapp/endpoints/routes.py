@@ -13,6 +13,4 @@ blueprint = Blueprint(
 def index_route(state_code):
     logger.debug('state_code: {v}'.format(v=state_code))
     laws = models.Law.fetch_by_state_code(state_code)
-    jsonified = jsonify(laws)
-    logger.debug('jsonified: {v}'.format(v=jsonified))
-    return ''
+    return jsonify(laws)
