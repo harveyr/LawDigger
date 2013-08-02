@@ -85,10 +85,15 @@
   });
 
   angular.module('myLilApp').controller('HomeCtrl', function($scope, $http, $rootScope, Laws) {
-    return Laws.fetch().then(function(data) {
+    $scope.m = {};
+    Laws.fetch().then(function(data) {
       $scope.laws = data;
       return console.log('$scope.laws:', $scope.laws);
     });
+    return $scope.chooseLaw = function(id) {
+      $scope.currentLawId = id;
+      return $scope.hideSearchList = true;
+    };
   });
 
   angular.module('myLilApp').config([

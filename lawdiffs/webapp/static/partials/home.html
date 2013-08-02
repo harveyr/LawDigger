@@ -1,5 +1,28 @@
-<div class="row">
-    <div class="small-12" ng-repeat="law in laws">
-        {{law | json}}
+<form>
+    <div class="row collapse">
+        <div class="small-3 columns">
+            <span class="prefix">ORS</span>
+        </div>
+        <div class="small-9 columns">
+            <input type="text" placeholder="1.010"
+                ng-model="m.lawFilter">
+        </div>
+    </div>
+</form>
+
+<div class="row" ng-show="m.lawFilter && !hideSearchList">
+    <div class="small-12 panel">
+        <div ng-repeat="l in laws | filter:m.lawFilter | limitTo: 10">
+            <a ng-click="chooseLaw(l._id)">{{l.subsection}}</a>
+        </div>
+        <div>
+            ...
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="currentLawId">
+    <div class="small-12">
+        <strong>{{currentLawId}}</strong>
     </div>
 </div>

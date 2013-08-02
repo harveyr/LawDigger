@@ -12,7 +12,6 @@ from . import models
 
 class LawDiffSerializer(json.JSONEncoder):
     def default(self, o):
-        logger.debug(type(o))
         if isinstance(o, ObjectId):
             return str(o)
 
