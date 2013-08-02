@@ -19,6 +19,8 @@ def fetch_laws(state_code):
 @blueprint.route('/law/<state_code>/<law_id>/<version>')
 def fetch_law(state_code, law_id, version):
     law = data_laws.fetch_law(state_code=state_code, id_=law_id)
+    logger.debug('law.versions: {v}'.format(v=law.versions))
     data = law.serialize()
     data['html'] = law.get_version_html(version)
+    logger.debug('data[html]: {v}'.format(v=data['html']))
     return jsonify(data)

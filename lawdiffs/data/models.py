@@ -58,7 +58,7 @@ class Law(moe.Document, Serializeable):
     collection_name = 'or_ors'
 
     subsection = moe.StringField(unique=True, required=True)
-    versions = moe.DictField(default={})
+    versions = moe.DictField()
     state_code = moe.StringField()
 
     meta = {'allow_inheritance': True}
@@ -78,11 +78,14 @@ class Law(moe.Document, Serializeable):
         return c.find({'state_code': state_code})
 
     def init_version(self, version):
+        logger.debug('init_version: {v}'.format(v=version))
+        logger.debug('self.versions BEFORE: {v}'.format(v=self.versions))
         version = str(version)
         self.versions[version] = {
             'text': '',
             'title': ''
         }
+        logger.debug('self.versions AFTER: {v}'.format(v=self.versions))
         self.save()
 
     def get_version_value(self, version, key):
@@ -92,14 +95,17 @@ class Law(moe.Document, Serializeable):
     def _update_version(self, version, key, value):
         version = str(version)
         self.versions[version][key] = value
-        self.save()
+        collection = self.__class__._get_collection()
+        collection.update(
+            {'_id': self.id},
+            {'$set': {'versions': self.versions}}
+        )
 
     def set_version_title(self, version, title):
         self._update_version(version, 'title', title)
 
-    def append_version_text(self, version, text):
-        new_text = self.get_version_value(version, 'text') + text
-        self._update_version(version, 'text', new_text)
+    def set_version_text(self, version, text):
+        self._update_version(version, 'text', text)
 
     def has_version(self, version):
         return str(version) in self.versions
@@ -110,7 +116,7 @@ class OregonRevisedStatute(Law):
     serialize_attrs = ['state_code']
 
     def __str__(self):
-        return '<ORS {subs} [{versions}]>'.format(
+        return '<ORS {subs} {versions}>'.format(
             subs=self.subsection,
             versions=self.versions.keys())
 

@@ -5,6 +5,7 @@ import logging
 import pickle
 import md5
 import os
+import bs4
 
 from ..data.client import mongoengine_connect
 from ..data.access import laws as data_laws
@@ -54,10 +55,16 @@ class LawParser(object):
         return BeautifulSoup(self.fetch_html(url))
 
     def get_soup_text(self, soup_elem):
-        text = soup_elem.get_text(',,,', strip=True).decode('utf-8')
-        text = self.newline_re.sub(" ", text)
-        text = re.sub(r',,,', '\n', text)
-        return text
+        try:
+            text = soup_elem.get_text(',,,', strip=True).decode('utf-8')
+            text = self.newline_re.sub(" ", text)
+            text = re.sub(r',,,', '\n', text)
+            return text
+        except AttributeError:
+            if isinstance(soup_elem, bs4.element.NavigableString):
+                return unicode(soup_elem)
+            else:
+                raise Exception('Unhandled type: ' + str(soup_elem))
 
     def commit(self, version):
         logger.info('Committing version {}'.format(version))
@@ -106,12 +113,12 @@ class OrLawParser(LawParser):
         for source in self.sources:
             version = source['version']
             urls = self.scrape_urls(source)
-            for i in range(min(2, len(urls))):
+            for i in range(min(1, len(urls))):
                 url = urls[i]
                 logger.debug('url: {v}'.format(v=url))
                 self.create_laws_from_url(url, version)
 
-            self.commit(version)
+            # self.commit(version)
 
         # diff = repos.get_tag_diff('7.110', '1995', '2009', self.state_code)
 
@@ -131,37 +138,33 @@ class OrLawParser(LawParser):
         starting_elem = soup.find('b').parent.previous_sibling
         current_law = None
 
+        text_buffer = ''
+        laws_created = 0
         for elem in starting_elem.next_siblings:
-            try:
+            for child in elem.children:
                 text = self.get_soup_text(elem)
-            except AttributeError:
-                text = unicode(elem)
-            subs_matches = self.subsection_re.match(text)
-            if subs_matches:
-                section = subs_matches.group(1)
-                current_law = data_laws.get_or_create_law(
-                    subsection=section, state_code='or')
-                current_law.init_version(version)
+                subs_matches = self.subsection_re.match(text)
+                if subs_matches:
+                    section = subs_matches.group(1)
+                    current_law = data_laws.get_or_create_law(
+                        subsection=section, state_code=self.state_code)
+                    laws_created += 1
+                    current_law.init_version(version)
 
-                title_matches = self.title_re.match(text)
-                if title_matches:
-                    title = title_matches.group(1)
-                    law_text = text[title_matches.end():]
-                    law_text = law_text.strip()
+                    title_matches = self.title_re.match(text)
+                    if title_matches:
+                        title = title_matches.group(1)
+                        current_law.set_version_title(version, title)
+                        law_text = text[title_matches.end():]
+                        text_buffer += law_text.strip()
+                    else:
+                        title = ''
+                        law_text = text[subs_matches.end() - 1:]
+                        text_buffer += ' '.join(law_text.splitlines())
                 else:
-                    title = ''
-                    law_text = text[subs_matches.end() - 1:]
-                    law_text = ' '.join(law_text.splitlines())
-
-                current_law.set_version_title(version, title)
-                current_law.append_version_text(version, law_text)
-                current_law.save()
-            else:
-                if text.isupper():
-                    continue
-                if not current_law:
-                    raise Exception('No current law to append to')
-                current_law.append_version_text(version, '\n' + text)
+                    if not text.isupper():
+                        text_buffer += text
+                current_law.set_version_text(version, text_buffer)
 
 
 mongoengine_connect()
