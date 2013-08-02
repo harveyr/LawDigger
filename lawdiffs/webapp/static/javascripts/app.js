@@ -72,8 +72,12 @@
         return $http.get(UrlBuilder.apiUrl('/laws/or'));
       };
 
-      Laws.prototype.fetchLaw = function(id, version) {
-        return $http.get(UrlBuilder.apiUrl("/law/or/" + id + "/" + version));
+      Laws.prototype.fetchLaw = function(version, section) {
+        return $http.get(UrlBuilder.apiUrl("/law/ors/" + version + "/" + section));
+      };
+
+      Laws.prototype.fetchDiff = function(lawCode, section, version1, version2) {
+        return $http.get(UrlBuilder.apiUrl("/diff/" + lawCode + "/" + section + "/" + version1 + "/" + version2));
       };
 
       return Laws;
@@ -105,37 +109,7 @@
   });
 
   angular.module('myLilApp').controller('HomeCtrl', function($scope, $rootScope, $http, $routeParams, Laws) {
-    var fetchAndApplyLaw, fetchLaws;
-    console.log('HomeCtrl');
-    $scope.m = {};
-    fetchLaws = function() {
-      return Laws.fetchAll().then(function(response) {
-        var laws;
-        laws = _.sortBy(response.data, function(law) {
-          return law.subsection;
-        });
-        return $scope.laws = laws;
-      });
-    };
-    fetchAndApplyLaw = function(lawId, version) {
-      return Laws.fetchLaw(lawId, version).then(function(response) {
-        console.log('data:', response.data);
-        return $scope.currentLaw = response.data;
-      });
-    };
-    $scope.chooseLaw = function(law) {
-      console.log('law:', law);
-      $scope.currentLaw = law;
-      $scope.hideSearchList = true;
-      $scope.m.primaryYear = _.max(law.versions);
-      return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
-    };
-    $scope.lawFilterChange = function() {
-      return $scope.hideSearchList = false;
-    };
-    return $scope.choosePrimaryYear = function(year) {
-      return $scope.m.primaryYear = year;
-    };
+    return console.log('HomeCtrl');
   });
 
   angular.module('myLilApp').config([
@@ -147,8 +121,15 @@
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
       }).when('/view/:lawCode', {
+        redirectTo: '/'
+      }).when('/view/:lawCode/:param', {
+        redirectTo: '/'
+      }).when('/view/:lawCode/:version/:section', {
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
+      }).when('/diff/:lawCode/:subsection/:version1/:version2', {
+        controller: 'DiffCtrl',
+        templateUrl: '/static/partials/diff.html'
       }).otherwise({
         redirectTo: '/'
       });
@@ -156,7 +137,7 @@
     }
   ]);
 
-  angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws) {
+  angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws) {
     var fetchAndApplyLaw, fetchLaws;
     console.log('ViewerCtrl');
     $scope.m = {};
@@ -169,10 +150,13 @@
         return $scope.laws = laws;
       });
     };
-    fetchAndApplyLaw = function(lawId, version) {
-      return Laws.fetchLaw(lawId, version).then(function(response) {
-        console.log('data:', response.data);
-        return $scope.currentLaw = response.data;
+    fetchAndApplyLaw = function(version, section) {
+      return Laws.fetchLaw(version, section).then(function(response) {
+        $scope.activeText = response.data.text;
+        $scope.activeTitle = response.data.title;
+        return $scope.availableVersions = response.data.versions.sort(function(a, b) {
+          return parseInt(b) - parseInt(a);
+        });
       });
     };
     $scope.chooseLaw = function(law) {
@@ -188,10 +172,88 @@
     $scope.choosePrimaryYear = function(year) {
       return $scope.m.primaryYear = year;
     };
-    fetchLaws();
-    if ($routeParams.lawCode) {
-      return console.log('$routeParams.lawCode:', $routeParams.lawCode);
+    $scope.selectedVersionChange = function(version) {
+      return $location.path("/view/ors/" + version + "/" + $scope.activeSection);
+    };
+    if ($routeParams.section) {
+      $scope.activeVersion = $routeParams.version;
+      $scope.m.selectedVersion = $routeParams.version;
+      $scope.activeSection = $routeParams.section;
+      return fetchAndApplyLaw($scope.activeVersion, $scope.activeSection);
+    } else {
+      return fetchLaws();
     }
+  });
+
+  angular.module(SERVICES_MODULE).factory('ExternalReferences', function() {
+    var ExternalReferences;
+    ExternalReferences = (function() {
+
+      function ExternalReferences() {}
+
+      ExternalReferences.prototype.orsVersionPaths = {
+        2001: '/ors_archives/2001ORS'
+      };
+
+      ExternalReferences.prototype.sourceLink = function(lawCode, version, subsection) {
+        var url;
+        if (lawCode === 'ors') {
+          return url = 'http://www.leg.state.or.us/ors/';
+        }
+      };
+
+      return ExternalReferences;
+
+    })();
+    return new ExternalReferences;
+  });
+
+  angular.module(DIRECTIVE_MODULE).directive('inlineDiff', function() {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: {
+        lines: '='
+      },
+      template: "<div class=\"row\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n</div>",
+      link: function(scope) {}
+    };
+  });
+
+  angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws) {
+    console.log('DiffCtrl');
+    $scope.m = {};
+    if ($routeParams.version2) {
+      $scope.lawCode = $routeParams.lawCode;
+      $scope.subsection = $routeParams.subsection;
+      $scope.version1 = $routeParams.version1;
+      $scope.version2 = $routeParams.version2;
+      return Laws.fetchDiff($scope.lawCode, $scope.subsection, $scope.version1, $scope.version2).then(function(response) {
+        $scope.diffText = response.data.diff;
+        return $scope.diffLines = response.data.lines;
+      });
+    } else {
+      return fetchLaws();
+    }
+  });
+
+  angular.module(DIRECTIVE_MODULE).directive('inlineDiffLine', function() {
+    var directive;
+    return directive = {
+      scope: {
+        line: '='
+      },
+      template: "<div class=\"small-12 columns\" ng-class=\"diffClass\">\n    {{line}}\n</div>",
+      link: function(scope) {
+        var firstChar;
+        firstChar = scope.line.charAt(0);
+        if (firstChar === '-') {
+          return scope.diffClass = 'diff-subtraction';
+        } else if (firstChar === '+') {
+          return scope.diffClass = 'diff-addition';
+        }
+      }
+    };
   });
 
 }).call(this);

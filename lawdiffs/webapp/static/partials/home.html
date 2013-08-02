@@ -27,14 +27,19 @@
         </div>
     </div>
 
-    <div class="row panel" ng-show="currentLaw">
+    <div class="row panel" ng-show="activeSection">
         <div class="small-8 columns">
-            <strong>{{currentLaw.subsection}}</strong>
+            <strong>
+                {{activeSection}}
+                {{activeTitle}}
+                <span ng-show="!activeTitle">[No Title]</span>
+            </strong>
         </div>
         <div class="small-2 columns">
-            <label>Year</label>
-            <select ng-model="m.primaryYear"
-                ng-options="year for year in currentLaw.versions">
+            <label>Version</label>
+            <select ng-model="m.selectedVersion"
+                ng-options="v for v in availableVersions"
+                ng-change="selectedVersionChange(m.selectedVersion)">
             </select>
         </div>
         <div class="small-2 columns">
@@ -45,9 +50,10 @@
         </div>
     </div>
 
-    <div class="row" ng-show="currentLaw.html">
+    <div class="row" ng-show="activeText">
         <div class="small-12">
-            <span ng-bind-html-unsafe="currentLaw.html"></span>
+            <span ng-bind-html-unsafe="activeText"></span>
         </div>
     </div>
+
 </div>

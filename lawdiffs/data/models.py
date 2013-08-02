@@ -55,11 +55,11 @@ class Serializeable(object):
 
 
 class Law(moe.Document, Serializeable):
-    collection_name = 'or_ors'
-
     subsection = moe.StringField(unique=True, required=True)
-    versions = moe.DictField()
+    titles = moe.DictField()
+    texts = moe.DictField()
     state_code = moe.StringField()
+    file_path = moe.StringField()
 
     meta = {'allow_inheritance': True}
 
@@ -68,72 +68,55 @@ class Law(moe.Document, Serializeable):
         return {
             'id': str(obj.id),
             'subsection': obj.subsection,
-            'versions': obj.versions.keys(),
+            'titles': obj.titles,
             'state_code': obj.state_code
         }
 
     @classmethod
-    def fetch_by_state_code(cls, state_code):
+    def fetch_by_code_code(cls, state_code):
         c = cls.collection()
         return c.find({'state_code': state_code})
 
-    def init_version(self, version):
-        version = str(version)
-        self.versions[version] = {
-            'text': '',
-            'title': ''
-        }
-        self.save()
-
-    def get_version_value(self, version, key):
-        version = str(version)
-        return self.versions[version][key]
-
-    def _update_version(self, version, key, value):
-        version = str(version)
-        self.versions[version][key] = value
+    def save_attr(self, attr):
         collection = self.__class__._get_collection()
         collection.update(
             {'_id': self.id},
-            {'$set': {'versions': self.versions}}
+            {'$set': {attr: getattr(self, attr)}}
         )
 
     def set_version_title(self, version, title):
-        self._update_version(version, 'title', title)
+        self.titles[str(version)] = title
+        self.save_attr('titles')
 
     def set_version_text(self, version, text):
-        self._update_version(version, 'text', text)
+        self.texts[str(version)] = text
+        self.save_attr('texts')
 
-    def has_version(self, version):
-        return str(version) in self.versions
+    def title(self, version):
+        version = str(version)
+        if version in self.titles:
+            return self.titles[version]
+        return ''
+
+    def text(self, version):
+        return self.texts[str(version)]
 
 
 class OregonRevisedStatute(Law):
-    state_code = 'or'
+    law_code = 'ors'
     serialize_attrs = ['state_code']
 
     def __str__(self):
         return '<ORS {subs} {versions}>'.format(
             subs=self.subsection,
-            versions=self.versions.keys())
+            versions=self.texts.keys())
 
     @property
     def filename(self):
         return self.subsection
 
     def get_version(self, version):
-        version = self.versions[str(version)]
         return '{subs}. {title}\n{text}'.format(
             subs=self.subsection,
-            title=version['title'],
-            text=version['text'])
-
-    def get_version_html(self, version):
-        version = self.versions[str(version)]
-        return """
-            <p><strong>{subs}. {title}</strong></p>
-            <p>{text}</p>
-        """.format(
-            subs=self.subsection,
-            title=version['title'],
-            text=version['text'])
+            title=self.title(version),
+            text=self.text(version))

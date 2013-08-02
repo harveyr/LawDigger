@@ -68,13 +68,13 @@ class LawParser(object):
 
     def commit(self, version):
         logger.info('Committing version {}'.format(version))
-        laws = data_laws.fetch_by_state(self.state_code, version)
-        repos.update(laws, self.state_code, version)
+        laws = data_laws.fetch_by_code(self.law_code, version)
+        repos.update(laws, self.law_code, version)
 
 
 class OrLawParser(LawParser):
 
-    state_code = 'or'
+    law_code = 'ors'
 
     sources = [
         {
@@ -106,8 +106,8 @@ class OrLawParser(LawParser):
         self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
 
     def run(self):
-        repos.wipe_and_init(self.state_code)
-        model = data_laws.state_model_map[self.state_code]
+        repos.wipe_and_init(self.law_code)
+        model = data_laws.get_model(self.law_code)
         model.drop_collection()
 
         for source in self.sources:
@@ -120,7 +120,7 @@ class OrLawParser(LawParser):
 
             self.commit(version)
 
-        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.state_code)
+        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.law_code)
 
     def scrape_urls(self, source_dict):
         urls = []
@@ -139,7 +139,6 @@ class OrLawParser(LawParser):
         current_law = None
 
         text_buffer = ''
-        laws_created = 0
         for elem in starting_elem.next_siblings:
             if isinstance(elem, bs4.element.NavigableString):
                 text_buffer += self.get_soup_text(elem)
@@ -151,9 +150,8 @@ class OrLawParser(LawParser):
                 if subs_matches:
                     section = subs_matches.group(1)
                     current_law = data_laws.get_or_create_law(
-                        subsection=section, state_code=self.state_code)
-                    laws_created += 1
-                    current_law.init_version(version)
+                        subsection=section, law_code=self.law_code)
+                    text_buffer = ''
 
                     title_matches = self.title_re.match(text)
                     if title_matches:

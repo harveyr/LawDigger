@@ -12,6 +12,11 @@ blueprint = Blueprint('pages', __name__, template_folder='templates')
 def view_route(path):
     return render_template('index.html')
 
+@blueprint.route('/diff', defaults={'path': ''})
+@blueprint.route('/diff/<path:path>')
+def diff_route(path):
+    return render_template('index.html')
+
 
 @blueprint.route('/')
 def index_route():

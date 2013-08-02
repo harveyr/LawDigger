@@ -65,3 +65,11 @@ nav li.name .subtitle {
     padding-right: 40px;
     padding-bottom: 40px;
 }
+
+.diff-subtraction {
+    background-color: $diff-subtraction-color;
+}
+
+.diff-addition {
+    background-color: $diff-addition-color;
+}

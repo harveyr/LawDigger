@@ -3,6 +3,7 @@ from flask import (Blueprint, request)
 
 from ...data import jsonify, htmlify
 from ...data.access import laws as data_laws
+from ...mine import repos
 
 logger = logging.getLogger(__name__)
 
@@ -10,17 +11,28 @@ blueprint = Blueprint(
     'private_endpoints', __name__, template_folder='templates')
 
 
-@blueprint.route('/laws/<state_code>')
-def fetch_laws(state_code):
-    laws = data_laws.fetch_by_state(state_code)
+@blueprint.route('/laws/<law_code>')
+def fetch_laws(law_code):
+    laws = data_laws.fetch_by_code(law_code)
     return jsonify(laws)
 
 
-@blueprint.route('/law/<state_code>/<law_id>/<version>')
-def fetch_law(state_code, law_id, version):
-    law = data_laws.fetch_law(state_code=state_code, id_=law_id)
-    logger.debug('law.versions: {v}'.format(v=law.versions))
-    data = law.serialize()
-    data['html'] = law.get_version_html(version)
-    logger.debug('data[html]: {v}'.format(v=data['html']))
-    return jsonify(data)
+@blueprint.route('/law/<law_code>/<version>/<subsection>')
+def fetch_law(law_code, version, subsection):
+    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    d = {
+        'title': law.title(version),
+        'text': law.text(version),
+        'versions': law.texts.keys()
+    }
+    return jsonify(d)
+
+
+@blueprint.route('/diff/<law_code>/<subsection>/<version1>/<version2>')
+def fetch_diff(law_code, subsection, version1, version2):
+    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    diff = repos.get_tag_diff(law, version1, version2)
+    return jsonify({
+        'diff': diff,
+        'lines': diff.splitlines()
+    })

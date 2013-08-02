@@ -9,8 +9,18 @@ angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($rout
             templateUrl: '/static/partials/home.html'
         })
         .when('/view/:lawCode', {
+            redirectTo: '/'    
+        })
+        .when('/view/:lawCode/:param', {
+            redirectTo: '/'    
+        })
+        .when('/view/:lawCode/:version/:section', {
             controller: 'ViewerCtrl'
             templateUrl: '/static/partials/home.html'
+        })
+        .when('/diff/:lawCode/:subsection/:version1/:version2', {
+            controller: 'DiffCtrl'
+            templateUrl: '/static/partials/diff.html'
         })
         .otherwise({
             redirectTo: '/'    

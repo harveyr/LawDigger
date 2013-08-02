@@ -49,13 +49,18 @@ def ensure_repo(repo_rel_path):
         wipe_and_init(repo_rel_path)
 
 
-def update(laws, state_code, version):
-    repo_rel_path = state_code
+def update(laws, law_code, version):
+    if len(laws) == 0:
+        raise Exception("no laws passed to update()")
+    repo_rel_path = law_code
     ensure_repo(repo_rel_path)
 
     repo_path = get_repo_path(repo_rel_path)
     for law in laws:
+        logger.debug('law: {v}'.format(v=law))
         f_path = os.path.join(repo_path, law.filename)
+        law.file_path = f_path
+        law.save_attr('file_path')
         with open(f_path, 'w') as open_f:
             open_f.write(law.get_version(version))
 
@@ -66,7 +71,10 @@ def update(laws, state_code, version):
         'tag -a {tag} -m "{tag}"'.format(tag=version), repo_rel_path)
 
 
-def get_tag_diff(filename, tag1, tag2, repo_rel_path):
+def get_tag_diff(law, tag1, tag2):
+    if not law.file_path:
+        raise Exception('{} has no file_path'.format(law))
+
     cmd = 'diff {tag1} {tag2} {file}'.format(
-        tag1=tag1, tag2=tag2, file=filename)
-    return run_git_command(cmd, repo_rel_path)
+        tag1=tag1, tag2=tag2, file=law.file_path)
+    return run_git_command(cmd, law.law_code)
