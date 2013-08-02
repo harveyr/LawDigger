@@ -14,6 +14,11 @@ def fetch_laws_by_state_code(state_code):
     return model.objects
 
 
+def fetch_law(state_code, id_):
+    model = state_model_map[state_code]
+    return model.objects(id=id_).first()
+
+
 def get_or_create_law(subsection, state_code):
     model = state_model_map[state_code]
     obj, created = model.objects.get_or_create(subsection=subsection)

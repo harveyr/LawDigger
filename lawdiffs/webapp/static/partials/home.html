@@ -26,24 +26,26 @@
     </div>
 </div>
 
-<div class="row" ng-show="currentLaw">
-    <div class="small-6 columns">
+<div class="row panel" ng-show="currentLaw">
+    <div class="small-8 columns">
         <strong>{{currentLaw.subsection}}</strong>
     </div>
-    <div class="small-1 columns">
-        <label class="inline right">Year</label>
-    </div>
     <div class="small-2 columns">
+        <label>Year</label>
         <select ng-model="m.primaryYear"
             ng-options="year for year in currentLaw.versions">
         </select>
     </div>
-    <div class="small-1 columns">
-        <label class="inline right">Compare Year</label>
-    </div>
     <div class="small-2 columns">
+        <label>Compare Year</label>
         <select ng-model="m.compareYear"
             ng-options="year for year in currentLaw.versions">
         </select>
+    </div>
+</div>
+
+<div class="row" ng-show="currentLaw.html">
+    <div class="small-12">
+        <span ng-bind-html-unsafe="currentLaw.html"></span>
     </div>
 </div>

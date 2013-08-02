@@ -38,3 +38,9 @@ class LawDiffSerializer(json.JSONEncoder):
 def jsonify(obj):
     return json.dumps(obj, cls=LawDiffSerializer)
 
+
+def htmlify(text):
+    html = ''
+    for p in [p for p in text.split('\n\n') if p]:
+        html += '<p>' + p + '</p>'
+    return html

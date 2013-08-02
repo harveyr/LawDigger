@@ -67,13 +67,17 @@
     Laws = (function() {
       function Laws() {}
 
-      Laws.prototype.fetch = function() {
+      Laws.prototype.fetchAll = function() {
         var deferred;
         deferred = $q.defer();
         $http.get(UrlBuilder.apiUrl('/laws/or')).success(function(response) {
           return deferred.resolve(response);
         });
         return deferred.promise;
+      };
+
+      Laws.prototype.fetchLaw = function(id, version) {
+        return $http.get(UrlBuilder.apiUrl("/law/or/" + id + "/" + version));
       };
 
       return Laws;
@@ -104,22 +108,30 @@
   });
 
   angular.module('myLilApp').controller('HomeCtrl', function($scope, $http, $rootScope, Laws) {
+    var fetchAndApplyLaw;
     $scope.m = {};
-    Laws.fetch().then(function(data) {
-      return $scope.laws = data;
-    });
+    fetchAndApplyLaw = function(lawId, version) {
+      return Laws.fetchLaw(lawId, version).then(function(response) {
+        console.log('data:', response.data);
+        return $scope.currentLaw = response.data;
+      });
+    };
     $scope.chooseLaw = function(law) {
       console.log('law:', law);
       $scope.currentLaw = law;
       $scope.hideSearchList = true;
-      return $scope.m.primaryYear = _.max(law.versions);
+      $scope.m.primaryYear = _.max(law.versions);
+      return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
     };
     $scope.lawFilterChange = function() {
       return $scope.hideSearchList = false;
     };
-    return $scope.choosePrimaryYear = function(year) {
+    $scope.choosePrimaryYear = function(year) {
       return $scope.m.primaryYear = year;
     };
+    return Laws.fetchAll().then(function(data) {
+      return $scope.laws = data;
+    });
   });
 
   angular.module('myLilApp').config([

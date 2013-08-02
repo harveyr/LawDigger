@@ -66,6 +66,7 @@ class Law(moe.Document, Serializeable):
     @classmethod
     def class_serialize(cls, obj):
         return {
+            'id': str(obj.id),
             'subsection': obj.subsection,
             'versions': obj.versions.keys(),
             'state_code': obj.state_code
@@ -117,6 +118,16 @@ class OregonRevisedStatute(Law):
     def get_version(self, version):
         version = self.versions[str(version)]
         return '{subs}. {title}\n{text}'.format(
+            subs=self.subsection,
+            title=version['title'],
+            text=version['text'])
+
+    def get_version_html(self, version):
+        version = self.versions[str(version)]
+        return """
+            <p><strong>{subs}. {title}</strong></p>
+            <p>{text}</p>
+        """.format(
             subs=self.subsection,
             title=version['title'],
             text=version['text'])
