@@ -6,12 +6,15 @@ import json
 import pymongo
 from bson.objectid import ObjectId
 logger = logging.getLogger(__name__)
+import mongoengine as moe
 
 from . import models
 
 
 class LawDiffSerializer(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, models.Serializeable):
+            return o.serialize()
         if isinstance(o, ObjectId):
             return str(o)
 
@@ -28,13 +31,10 @@ class LawDiffSerializer(json.JSONEncoder):
             return obj_date
         elif isinstance(o, pymongo.cursor.Cursor):
             return [obj for obj in o]
+        elif isinstance(o, moe.queryset.QuerySet):
+            return [obj for obj in o]
 
 
 def jsonify(obj):
     return json.dumps(obj, cls=LawDiffSerializer)
-
-
-for name, obj in inspect.getmembers(models, inspect.isclass):
-    if issubclass(obj, models.MongoDocument):
-        pass
 

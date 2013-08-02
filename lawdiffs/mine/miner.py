@@ -6,7 +6,8 @@ import pickle
 import md5
 import os
 
-from ..data import models
+from ..data.client import mongoengine_connect
+from ..data.access import laws as data_laws
 from . import repos
 
 logger = logging.getLogger(__name__)
@@ -56,15 +57,23 @@ class LawParser(object):
         text = soup_elem.get_text(' ', strip=True).decode('utf-8')
         return text
 
-    def commit(self, tag_name):
-        repos.update(self.laws, tag_name, self.REPO_REL_PATH)
+    def commit(self, version):
+        logger.info('Committing version {}'.format(version))
+        repos.update(self.laws, version, self.state_code)
 
 
 class OrLawParser(LawParser):
 
-    REPO_REL_PATH = 'or'
+    state_code = 'or'
 
     sources = [
+        {
+            'version': 2001,
+            'crawl': [
+                'http://www.leg.state.or.us/ors_archives/2001ORS/vol1.html'
+            ],
+            'crawl_link_pattern': re.compile(r'\d+\.html')
+        },
         {
             'version': 2011,
             'crawl': [
@@ -81,7 +90,7 @@ class OrLawParser(LawParser):
         self.laws = []
 
     def run(self):
-        repos.wipe_and_init(self.REPO_REL_PATH)
+        repos.wipe_and_init(self.state_code)
 
         for source in self.sources:
             version = source['version']
@@ -93,7 +102,7 @@ class OrLawParser(LawParser):
 
             self.commit(version)
 
-        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.REPO_REL_PATH)
+        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.state_code)
 
     def scrape_urls(self, source_dict):
         urls = []
@@ -119,11 +128,11 @@ class OrLawParser(LawParser):
             subs_matches = self.section_re.match(text)
             if subs_matches:
                 section = subs_matches.group(1)
-                if current_law:
-                    current_law.save()
 
-                current_law = models.OregonRevisedStatute(section)
-                logger.info('Created law: ' + str(current_law))
+                current_law = data_laws.get_or_create_law(
+                    subsection=section, state_code='or')
+                current_law.init_version(version)
+
                 title_matches = self.title_re.match(text)
                 if title_matches:
                     title = title_matches.group(1)
@@ -136,6 +145,7 @@ class OrLawParser(LawParser):
 
                 current_law.set_version_title(version, title)
                 current_law.append_version_text(version, law_text)
+                current_law.save()
                 self.laws.append(current_law)
             else:
                 if text.isupper():
@@ -145,5 +155,6 @@ class OrLawParser(LawParser):
                 current_law.append_version_text(version, '\n' + text)
 
 
+mongoengine_connect()
 p = OrLawParser()
 p.run()

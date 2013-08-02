@@ -3,10 +3,15 @@ angular.module('myLilApp').controller 'HomeCtrl', ($scope, $http, $rootScope, La
 
     Laws.fetch().then (data) ->
         $scope.laws = data
-        console.log '$scope.laws:', $scope.laws
 
-
-    $scope.chooseLaw = (id) ->
-        $scope.currentLawId = id
+    $scope.chooseLaw = (law) ->
+        console.log 'law:', law
+        $scope.currentLaw = law
         $scope.hideSearchList = true
+        $scope.m.primaryYear = _.max law.versions
 
+    $scope.lawFilterChange = ->
+        $scope.hideSearchList = false
+
+    $scope.choosePrimaryYear = (year) ->
+        $scope.m.primaryYear = year

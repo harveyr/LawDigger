@@ -1,19 +1,24 @@
 <form>
     <div class="row collapse">
-        <div class="small-3 columns">
-            <span class="prefix">ORS</span>
+        <div class="small-2 columns">
+            <span class="prefix">Search ORS</span>
         </div>
-        <div class="small-9 columns">
+        <div class="small-10 columns">
             <input type="text" placeholder="1.010"
-                ng-model="m.lawFilter">
+                ng-change="lawFilterChange()"
+                ng-model="m.lawFilter"
+                autofocus>
         </div>
     </div>
 </form>
 
 <div class="row" ng-show="m.lawFilter && !hideSearchList">
-    <div class="small-12 panel">
+    <div class="small-10 small-offset-2 columns panel">
+        <p>
+            <strong>Click a Law</strong>
+        </p>
         <div ng-repeat="l in laws | filter:m.lawFilter | limitTo: 10">
-            <a ng-click="chooseLaw(l._id)">{{l.subsection}}</a>
+            <a ng-click="chooseLaw(l)">{{l.subsection}}</a> ({{l.versions.length}} versions)
         </div>
         <div>
             ...
@@ -21,8 +26,24 @@
     </div>
 </div>
 
-<div class="row" ng-show="currentLawId">
-    <div class="small-12">
-        <strong>{{currentLawId}}</strong>
+<div class="row" ng-show="currentLaw">
+    <div class="small-6 columns">
+        <strong>{{currentLaw.subsection}}</strong>
+    </div>
+    <div class="small-1 columns">
+        <label class="inline right">Year</label>
+    </div>
+    <div class="small-2 columns">
+        <select ng-model="m.primaryYear"
+            ng-options="year for year in currentLaw.versions">
+        </select>
+    </div>
+    <div class="small-1 columns">
+        <label class="inline right">Compare Year</label>
+    </div>
+    <div class="small-2 columns">
+        <select ng-model="m.compareYear"
+            ng-options="year for year in currentLaw.versions">
+        </select>
     </div>
 </div>

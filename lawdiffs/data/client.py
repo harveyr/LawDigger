@@ -1,5 +1,6 @@
 import pymongo
 from bson.objectid import ObjectId
+import mongoengine as moe
 
 
 class DbClient(object):
@@ -21,5 +22,9 @@ class DbClient(object):
         db = self.db
         return db[collection_name]
 
-client = DbClient()
+pymongo_client = DbClient()
+
+
+def mongoengine_connect():
+    moe.connect(DbClient.DATABASE)
 

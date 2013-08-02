@@ -1,7 +1,8 @@
 import logging
 from flask import (Blueprint, request)
 
-from ...data import models, jsonify
+from ...data import jsonify
+from ...data.access import laws as data_laws
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,5 @@ blueprint = Blueprint(
 
 @blueprint.route('/laws/<state_code>')
 def index_route(state_code):
-    logger.debug('state_code: {v}'.format(v=state_code))
-    laws = models.Law.fetch_by_state_code(state_code)
+    laws = data_laws.fetch_laws_by_state_code(state_code)
     return jsonify(laws)
