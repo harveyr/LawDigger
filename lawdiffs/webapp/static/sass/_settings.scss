@@ -72,8 +72,8 @@ $secondary-color: #e9e9e9;
 $alert-color: #c60f13;
 $success-color: #5da423;
 
-$diff-subtraction-color: #ffdddd;
-$diff-addition-color: #ddffdd;
+$diff-subtraction-color: lighten(#ffdddd, 1%);
+$diff-addition-color: lighten(#ddffdd, 1%);
 
 // Make sure border radius matches unless we want it different.
 

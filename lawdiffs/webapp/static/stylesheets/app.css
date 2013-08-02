@@ -7234,10 +7234,15 @@ nav li.name .subtitle {
 
 /* line 69, ../sass/app.scss */
 .diff-subtraction {
-  background-color: #ffdddd;
+  background-color: #ffe2e2;
 }
 
 /* line 73, ../sass/app.scss */
 .diff-addition {
-  background-color: #ddffdd;
+  background-color: #e2ffe2;
+}
+
+/* line 77, ../sass/app.scss */
+.diff-container {
+  border: 1px solid #333;
 }

@@ -32,7 +32,11 @@ def fetch_law(law_code, version, subsection):
 def fetch_diff(law_code, subsection, version1, version2):
     law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
     diff = repos.get_tag_diff(law, version1, version2)
+    prev, next = data_laws.fetch_previous_and_next_subsections(
+        law_code, subsection)
     return jsonify({
         'diff': diff,
-        'lines': diff.splitlines()
+        'lines': diff.splitlines(),
+        'prev': prev,
+        'next': next
     })

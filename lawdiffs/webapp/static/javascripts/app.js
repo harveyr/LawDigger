@@ -98,6 +98,10 @@
         return this.API_PREFIX + url;
       };
 
+      UrlBuilder.prototype.diffPage = function(lawCode, subsection, version1, version2) {
+        return "/diff/" + lawCode + "/" + subsection + "/" + version1 + "/" + version2;
+      };
+
       return UrlBuilder;
 
     })();
@@ -215,12 +219,12 @@
       scope: {
         lines: '='
       },
-      template: "<div class=\"row\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n</div>",
+      template: "<div class=\"row diff-container\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n</div>",
       link: function(scope) {}
     };
   });
 
-  angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws) {
+  angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
     console.log('DiffCtrl');
     $scope.m = {};
     if ($routeParams.version2) {
@@ -230,7 +234,9 @@
       $scope.version2 = $routeParams.version2;
       return Laws.fetchDiff($scope.lawCode, $scope.subsection, $scope.version1, $scope.version2).then(function(response) {
         $scope.diffText = response.data.diff;
-        return $scope.diffLines = response.data.lines;
+        $scope.diffLines = response.data.lines;
+        $scope.nextSubsection = response.data.next;
+        return $scope.prevSubsection = response.data.prev;
       });
     } else {
       return fetchLaws();

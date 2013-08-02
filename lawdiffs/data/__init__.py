@@ -1,10 +1,10 @@
 import logging
-import inspect
 import datetime
 import calendar
 import json
 import pymongo
 from bson.objectid import ObjectId
+from werkzeug.contrib.cache import SimpleCache
 logger = logging.getLogger(__name__)
 import mongoengine as moe
 
@@ -44,3 +44,6 @@ def htmlify(text):
     for p in [p for p in text.split('\n\n') if p]:
         html += '<p>' + p + '</p>'
     return html
+
+
+cache = SimpleCache()

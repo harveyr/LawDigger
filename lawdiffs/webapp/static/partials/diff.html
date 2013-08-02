@@ -1,3 +1,10 @@
-<div>
-    <div inline-diff lines="diffLines"></div>
+<div class="row">
+    <div class="small-1 columns">
+        <a ng-click="goNext()" class="button secondary tiny">{{prevSubsection}}</a>
+    </div>
+    <div class="small-1 columns">
+        <a ng-click="goPrevious()" class="button secondary tiny">{{nextSubsection}}</a>
+    </div>
 </div>
+
+<div inline-diff lines="diffLines"></div>

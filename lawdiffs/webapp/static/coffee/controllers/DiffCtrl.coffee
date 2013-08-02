@@ -1,4 +1,4 @@
-angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws) ->
+angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
     console.log 'DiffCtrl'
     $scope.m = {}
 
@@ -33,6 +33,9 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
     # $scope.selectedVersionChange = (version) ->
     #     $location.path("/view/ors/#{version}/#{$scope.activeSection}")
 
+    # $scope.goNext = ->
+    #     url = UrlBuilder.diffPage $scope.lawCode, $scope.nextSubsection, $
+
     if $routeParams.version2
         $scope.lawCode = $routeParams.lawCode
         $scope.subsection = $routeParams.subsection
@@ -42,6 +45,8 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
             .then (response) ->
                 $scope.diffText = response.data.diff
                 $scope.diffLines = response.data.lines
+                $scope.nextSubsection = response.data.next
+                $scope.prevSubsection = response.data.prev
     else
         fetchLaws()
 
