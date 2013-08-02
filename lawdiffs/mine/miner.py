@@ -21,10 +21,10 @@ class LawParser(object):
         'html': {}
     }
 
+    newline_re = re.compile(r"(?<=[a-z])\r?\n")
+
     def __init__(self):
-
         # self.cleanse_html_re = re.compile(r'{}'.format(u'\xa7'))
-
         if os.path.exists(CACHE_PICKLE_PATH):
             with open(CACHE_PICKLE_PATH, 'r') as f:
                 self.cache = pickle.load(f)
@@ -33,11 +33,11 @@ class LawParser(object):
         hashed_filename = md5.new(url).hexdigest()
         if url in self.cache['html']:
             with open(os.path.join(CACHE_PATH, hashed_filename), 'r') as f:
-                logger.info('Using cached version of {} ({})'.format(
+                logger.info('Using cached {} ({})'.format(
                     url, hashed_filename))
                 return f.read()
 
-        logger.info('Fetching fresh version of ' + url)
+        logger.info('Fetching ' + url)
         response = urllib2.urlopen(url)
         html = response.read()
         html = html.decode('utf-8', 'ignore')
@@ -54,12 +54,15 @@ class LawParser(object):
         return BeautifulSoup(self.fetch_html(url))
 
     def get_soup_text(self, soup_elem):
-        text = soup_elem.get_text(' ', strip=True).decode('utf-8')
+        text = soup_elem.get_text(',,,', strip=True).decode('utf-8')
+        text = self.newline_re.sub(" ", text)
+        text = re.sub(r',,,', '\n', text)
         return text
 
     def commit(self, version):
         logger.info('Committing version {}'.format(version))
-        repos.update(self.laws, version, self.state_code)
+        laws = data_laws.fetch_by_state(self.state_code, version)
+        repos.update(laws, self.state_code, version)
 
 
 class OrLawParser(LawParser):
@@ -75,6 +78,13 @@ class OrLawParser(LawParser):
             'crawl_link_pattern': re.compile(r'\d+\.html')
         },
         {
+            'version': 2009,
+            'crawl': [
+                'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
+            ],
+            'crawl_link_pattern': re.compile(r'\d+\.html')
+        },
+        {
             'version': 2011,
             'crawl': [
                 'http://www.leg.state.or.us/ors/vol1.html'
@@ -85,12 +95,13 @@ class OrLawParser(LawParser):
 
     def __init__(self):
         super(OrLawParser, self).__init__()
-        self.section_re = re.compile('(\d+\.\d+)\s(\S)')
+        self.subsection_re = re.compile('(\d+\.\d+)')
         self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
-        self.laws = []
 
     def run(self):
         repos.wipe_and_init(self.state_code)
+        model = data_laws.state_model_map[self.state_code]
+        model.drop_collection()
 
         for source in self.sources:
             version = source['version']
@@ -125,10 +136,9 @@ class OrLawParser(LawParser):
                 text = self.get_soup_text(elem)
             except AttributeError:
                 text = unicode(elem)
-            subs_matches = self.section_re.match(text)
+            subs_matches = self.subsection_re.match(text)
             if subs_matches:
                 section = subs_matches.group(1)
-
                 current_law = data_laws.get_or_create_law(
                     subsection=section, state_code='or')
                 current_law.init_version(version)
@@ -146,7 +156,6 @@ class OrLawParser(LawParser):
                 current_law.set_version_title(version, title)
                 current_law.append_version_text(version, law_text)
                 current_law.save()
-                self.laws.append(current_law)
             else:
                 if text.isupper():
                     continue

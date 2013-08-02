@@ -12,7 +12,7 @@ blueprint = Blueprint(
 
 @blueprint.route('/laws/<state_code>')
 def fetch_laws(state_code):
-    laws = data_laws.fetch_laws_by_state_code(state_code)
+    laws = data_laws.fetch_by_state(state_code)
     return jsonify(laws)
 
 

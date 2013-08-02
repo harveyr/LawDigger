@@ -1,6 +1,12 @@
 angular.module('myLilApp').controller 'HomeCtrl', ($scope, $http, $rootScope, Laws) ->
     $scope.m = {}
 
+    fetchLaws = ->
+        Laws.fetchAll().then (response) ->
+            laws = _.sortBy response.data, (law) ->
+                law.subsection
+            $scope.laws = laws
+
     fetchAndApplyLaw = (lawId, version) ->
         Laws.fetchLaw(lawId, version).then (response) ->
             console.log 'data:', response.data
@@ -19,7 +25,4 @@ angular.module('myLilApp').controller 'HomeCtrl', ($scope, $http, $rootScope, La
     $scope.choosePrimaryYear = (year) ->
         $scope.m.primaryYear = year
 
-
-    Laws.fetchAll().then (data) ->
-        $scope.laws = data
-
+    fetchLaws()

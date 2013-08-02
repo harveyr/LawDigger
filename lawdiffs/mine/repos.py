@@ -49,7 +49,8 @@ def ensure_repo(repo_rel_path):
         wipe_and_init(repo_rel_path)
 
 
-def update(laws, version, repo_rel_path):
+def update(laws, state_code, version):
+    repo_rel_path = state_code
     ensure_repo(repo_rel_path)
 
     repo_path = get_repo_path(repo_rel_path)

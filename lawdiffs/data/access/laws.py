@@ -9,9 +9,15 @@ state_model_map = {
 }
 
 
-def fetch_laws_by_state_code(state_code):
+def fetch_by_state(state_code, version=None):
     model = state_model_map[state_code]
-    return model.objects
+    if not version:
+        return model.objects
+    else:
+        version_key = 'versions.' + str(version)
+        return model.objects(__raw__={
+            version_key: {'$exists': True}
+        })
 
 
 def fetch_law(state_code, id_):

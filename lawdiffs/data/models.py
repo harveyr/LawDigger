@@ -79,10 +79,10 @@ class Law(moe.Document, Serializeable):
 
     def init_version(self, version):
         version = str(version)
-        if not version in self.versions:
-            self.versions[version] = {
-                'text': ''
-            }
+        self.versions[version] = {
+            'text': '',
+            'title': ''
+        }
         self.save()
 
     def get_version_value(self, version, key):
@@ -100,6 +100,9 @@ class Law(moe.Document, Serializeable):
     def append_version_text(self, version, text):
         new_text = self.get_version_value(version, 'text') + text
         self._update_version(version, 'text', new_text)
+
+    def has_version(self, version):
+        return str(version) in self.versions
 
 
 class OregonRevisedStatute(Law):
