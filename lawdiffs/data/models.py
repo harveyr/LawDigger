@@ -58,8 +58,14 @@ class Law(MongoDocument):
     def class_serialize(cls, obj):
         return {
             'subsection': obj.subsection,
-            'versions': obj.versions.keys()
+            'versions': obj.versions.keys(),
+            'state_code': obj.state_code
         }
+
+    @classmethod
+    def fetch_by_state_code(cls, state_code):
+        c = cls.collection()
+        return c.find({'state_code': state_code})
 
     def __init__(self, subsection):
         self.subsection = subsection

@@ -1,4 +1,5 @@
 app = angular.module(APP_NAME, [
-    "#{APP_NAME}.directives"
+    DIRECTIVE_MODULE,
+    SERVICES_MODULE,
 ]).run ($rootScope) ->
     $rootScope.appName = "My Lil' App"

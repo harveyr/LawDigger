@@ -2049,7 +2049,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 /* line 191, ../../../../../../.rvm/gems/ruby-2.0.0-p247/gems/zurb-foundation-4.3.1/scss/foundation/components/_type.scss */
 h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
-  font-size: 60%;
+  font-size: 80%;
   color: #6f6f6f;
   line-height: 0;
 }
@@ -2110,7 +2110,7 @@ b {
 
 /* line 228, ../../../../../../.rvm/gems/ruby-2.0.0-p247/gems/zurb-foundation-4.3.1/scss/foundation/components/_type.scss */
 small {
-  font-size: 60%;
+  font-size: 80%;
   line-height: inherit;
 }
 
@@ -7216,4 +7216,11 @@ a.th {
 /* line 148, ../../../../../../.rvm/gems/ruby-2.0.0-p247/gems/zurb-foundation-4.3.1/scss/foundation/components/_dropdown.scss */
 .f-dropdown.large {
   max-width: 800px;
+}
+
+/* line 57, ../sass/app.scss */
+nav li.name .subtitle {
+  font-style: italic;
+  color: #2ba6cb;
+  font-size: 80%;
 }

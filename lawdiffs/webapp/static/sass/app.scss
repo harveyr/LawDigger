@@ -54,3 +54,8 @@
 // @import "foundation/components/tooltips";
 // @import "foundation/components/dropdown";
 
+nav li.name .subtitle {
+    font-style: italic;
+    color: $primary-color;
+    font-size: $small-font-size;
+}
