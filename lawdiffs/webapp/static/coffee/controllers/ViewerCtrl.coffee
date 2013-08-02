@@ -1,7 +1,6 @@
-angular.module('myLilApp').controller 'HomeCtrl', ($scope, $rootScope, $http, $routeParams, Laws) ->
-    console.log 'HomeCtrl'
+angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, Laws) ->
+    console.log 'ViewerCtrl'
     $scope.m = {}
-
     fetchLaws = ->
         Laws.fetchAll().then (response) ->
             laws = _.sortBy response.data, (law) ->
@@ -26,8 +25,8 @@ angular.module('myLilApp').controller 'HomeCtrl', ($scope, $rootScope, $http, $r
     $scope.choosePrimaryYear = (year) ->
         $scope.m.primaryYear = year
 
-    # fetchLaws()
+    fetchLaws()
 
-    # if $routeParams.lawCode
-    #     console.log '$routeParams.lawCode:', $routeParams.lawCode
+    if $routeParams.lawCode
+        console.log '$routeParams.lawCode:', $routeParams.lawCode
 

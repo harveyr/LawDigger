@@ -2,7 +2,15 @@ angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($rout
     $routeProvider
         .when('/', {
             controller: 'HomeCtrl'
-            templateUrl: 'static/partials/home.html',
+            templateUrl: '/static/partials/home.html'
+        })
+        .when('/view', {
+            controller: 'ViewerCtrl'
+            templateUrl: '/static/partials/home.html'
+        })
+        .when('/view/:lawCode', {
+            controller: 'ViewerCtrl'
+            templateUrl: '/static/partials/home.html'
         })
         .otherwise({
             redirectTo: '/'    

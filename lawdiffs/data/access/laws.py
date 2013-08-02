@@ -27,5 +27,4 @@ def fetch_law(state_code, id_):
 def get_or_create_law(subsection, state_code):
     model = state_model_map[state_code]
     obj, created = model.objects.get_or_create(subsection=subsection)
-    logger.debug('created: {v}'.format(v=created))
     return obj

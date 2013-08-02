@@ -1,51 +1,53 @@
-<form>
-    <div class="row collapse">
+<div>
+    <form>
+        <div class="row collapse">
+            <div class="small-2 columns">
+                <span class="prefix">Search ORS</span>
+            </div>
+            <div class="small-10 columns">
+                <input type="text" placeholder="1.010"
+                    ng-change="lawFilterChange()"
+                    ng-model="m.lawFilter"
+                    autofocus>
+            </div>
+        </div>
+    </form>
+
+    <div class="row" ng-show="m.lawFilter && !hideSearchList">
+        <div class="small-10 small-offset-2 columns panel">
+            <p>
+                <strong>Click a Law</strong>
+            </p>
+            <div ng-repeat="l in laws | filter:m.lawFilter | limitTo: 10">
+                <a ng-click="chooseLaw(l)">{{l.subsection}}</a> ({{l.versions.length}} versions)
+            </div>
+            <div>
+                ...
+            </div>
+        </div>
+    </div>
+
+    <div class="row panel" ng-show="currentLaw">
+        <div class="small-8 columns">
+            <strong>{{currentLaw.subsection}}</strong>
+        </div>
         <div class="small-2 columns">
-            <span class="prefix">Search ORS</span>
+            <label>Year</label>
+            <select ng-model="m.primaryYear"
+                ng-options="year for year in currentLaw.versions">
+            </select>
         </div>
-        <div class="small-10 columns">
-            <input type="text" placeholder="1.010"
-                ng-change="lawFilterChange()"
-                ng-model="m.lawFilter"
-                autofocus>
+        <div class="small-2 columns">
+            <label>Compare Year</label>
+            <select ng-model="m.compareYear"
+                ng-options="year for year in currentLaw.versions">
+            </select>
         </div>
     </div>
-</form>
 
-<div class="row" ng-show="m.lawFilter && !hideSearchList">
-    <div class="small-10 small-offset-2 columns panel">
-        <p>
-            <strong>Click a Law</strong>
-        </p>
-        <div ng-repeat="l in laws | filter:m.lawFilter | limitTo: 10">
-            <a ng-click="chooseLaw(l)">{{l.subsection}}</a> ({{l.versions.length}} versions)
+    <div class="row" ng-show="currentLaw.html">
+        <div class="small-12">
+            <span ng-bind-html-unsafe="currentLaw.html"></span>
         </div>
-        <div>
-            ...
-        </div>
-    </div>
-</div>
-
-<div class="row panel" ng-show="currentLaw">
-    <div class="small-8 columns">
-        <strong>{{currentLaw.subsection}}</strong>
-    </div>
-    <div class="small-2 columns">
-        <label>Year</label>
-        <select ng-model="m.primaryYear"
-            ng-options="year for year in currentLaw.versions">
-        </select>
-    </div>
-    <div class="small-2 columns">
-        <label>Compare Year</label>
-        <select ng-model="m.compareYear"
-            ng-options="year for year in currentLaw.versions">
-        </select>
-    </div>
-</div>
-
-<div class="row" ng-show="currentLaw.html">
-    <div class="small-12">
-        <span ng-bind-html-unsafe="currentLaw.html"></span>
     </div>
 </div>

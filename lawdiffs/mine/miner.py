@@ -113,12 +113,12 @@ class OrLawParser(LawParser):
         for source in self.sources:
             version = source['version']
             urls = self.scrape_urls(source)
-            for i in range(min(1, len(urls))):
+            for i in range(min(2, len(urls))):
                 url = urls[i]
                 logger.debug('url: {v}'.format(v=url))
                 self.create_laws_from_url(url, version)
 
-            # self.commit(version)
+            self.commit(version)
 
         # diff = repos.get_tag_diff('7.110', '1995', '2009', self.state_code)
 
@@ -141,6 +141,10 @@ class OrLawParser(LawParser):
         text_buffer = ''
         laws_created = 0
         for elem in starting_elem.next_siblings:
+            if isinstance(elem, bs4.element.NavigableString):
+                text_buffer += self.get_soup_text(elem)
+                continue
+
             for child in elem.children:
                 text = self.get_soup_text(elem)
                 subs_matches = self.subsection_re.match(text)

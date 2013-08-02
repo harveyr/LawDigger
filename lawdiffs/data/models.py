@@ -78,14 +78,11 @@ class Law(moe.Document, Serializeable):
         return c.find({'state_code': state_code})
 
     def init_version(self, version):
-        logger.debug('init_version: {v}'.format(v=version))
-        logger.debug('self.versions BEFORE: {v}'.format(v=self.versions))
         version = str(version)
         self.versions[version] = {
             'text': '',
             'title': ''
         }
-        logger.debug('self.versions AFTER: {v}'.format(v=self.versions))
         self.save()
 
     def get_version_value(self, version, key):

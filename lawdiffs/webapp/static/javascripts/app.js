@@ -100,12 +100,65 @@
     return new UrlBuilder();
   });
 
-  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($rootScope) {
+  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope) {
     return $rootScope.appName = "My Lil' App";
   });
 
-  angular.module('myLilApp').controller('HomeCtrl', function($scope, $http, $rootScope, Laws) {
+  angular.module('myLilApp').controller('HomeCtrl', function($scope, $rootScope, $http, $routeParams, Laws) {
     var fetchAndApplyLaw, fetchLaws;
+    console.log('HomeCtrl');
+    $scope.m = {};
+    fetchLaws = function() {
+      return Laws.fetchAll().then(function(response) {
+        var laws;
+        laws = _.sortBy(response.data, function(law) {
+          return law.subsection;
+        });
+        return $scope.laws = laws;
+      });
+    };
+    fetchAndApplyLaw = function(lawId, version) {
+      return Laws.fetchLaw(lawId, version).then(function(response) {
+        console.log('data:', response.data);
+        return $scope.currentLaw = response.data;
+      });
+    };
+    $scope.chooseLaw = function(law) {
+      console.log('law:', law);
+      $scope.currentLaw = law;
+      $scope.hideSearchList = true;
+      $scope.m.primaryYear = _.max(law.versions);
+      return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
+    };
+    $scope.lawFilterChange = function() {
+      return $scope.hideSearchList = false;
+    };
+    return $scope.choosePrimaryYear = function(year) {
+      return $scope.m.primaryYear = year;
+    };
+  });
+
+  angular.module('myLilApp').config([
+    '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+      $routeProvider.when('/', {
+        controller: 'HomeCtrl',
+        templateUrl: '/static/partials/home.html'
+      }).when('/view', {
+        controller: 'ViewerCtrl',
+        templateUrl: '/static/partials/home.html'
+      }).when('/view/:lawCode', {
+        controller: 'ViewerCtrl',
+        templateUrl: '/static/partials/home.html'
+      }).otherwise({
+        redirectTo: '/'
+      });
+      return $locationProvider.html5Mode(true).hashPrefix('!');
+    }
+  ]);
+
+  angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws) {
+    var fetchAndApplyLaw, fetchLaws;
+    console.log('ViewerCtrl');
     $scope.m = {};
     fetchLaws = function() {
       return Laws.fetchAll().then(function(response) {
@@ -135,19 +188,10 @@
     $scope.choosePrimaryYear = function(year) {
       return $scope.m.primaryYear = year;
     };
-    return fetchLaws();
-  });
-
-  angular.module('myLilApp').config([
-    '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-      $routeProvider.when('/', {
-        controller: 'HomeCtrl',
-        templateUrl: 'static/partials/home.html'
-      }).otherwise({
-        redirectTo: '/'
-      });
-      return $locationProvider.html5Mode(true).hashPrefix('!');
+    fetchLaws();
+    if ($routeParams.lawCode) {
+      return console.log('$routeParams.lawCode:', $routeParams.lawCode);
     }
-  ]);
+  });
 
 }).call(this);
