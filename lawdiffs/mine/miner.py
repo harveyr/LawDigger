@@ -146,24 +146,31 @@ class OrLawParser(LawParser):
             subs_matches = self.subsection_re.match(s)
             if subs_matches:
                 section = subs_matches.group(1)
-                # if section == '1.192':
-                #     logger.setLevel(logging.DEBUG)
-                # else:
-                #     logger.setLevel(logging.INFO)
+                if section == '1.192':
+                    logger.setLevel(logging.DEBUG)
+                else:
+                    logger.setLevel(logging.INFO)
+                logger.debug('section: {v}'.format(v=section))
 
                 remainder = s[len(section):].strip()
-                logger.debug('remainder: {v}'.format(v=remainder))
                 if remainder.isupper():
                     # Should be a heading
                     continue
 
-                current_law = data_laws.get_or_create_law(
-                    subsection=section, law_code=self.law_code)
-                current_law.set_version_title(version, remainder)
-                text_buffer = remainder
+                if remainder and remainder[0].isupper():
+                    current_law = data_laws.get_or_create_law(
+                        subsection=section, law_code=self.law_code)
+                    current_law.set_version_title(version, remainder)
+                    logger.debug('remainder: {v}'.format(v=remainder))
+                    text_buffer = ''
+                else:
+                    # If first char of remainder is not upper, it's part of
+                    # a note or something.
+                    text_buffer += remainder
             else:
                 if not s.isupper():
                     text_buffer += ' ' + s
+            logger.debug('text_buffer: {v}'.format(v=text_buffer))
             if current_law:
                 current_law.set_version_text(version, text_buffer)
 

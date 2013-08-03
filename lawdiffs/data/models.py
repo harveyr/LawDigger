@@ -144,6 +144,7 @@ class OregonRevisedStatute(Law):
 
     def format_text(self, text):
         if not text:
+            logger.error(self)
             logger.error('self.titles: {v}'.format(v=self.titles))
             logger.error('self.texts: {v}'.format(v=self.texts))
             raise Exception(

@@ -57,6 +57,12 @@
 // @import "foundation/components/tooltips";
 // @import "foundation/components/dropdown";
 
+pre {
+    font-family: $pre-font-family;
+    font-size: $pre-font-size;
+    line-height: $pre-line-height;
+}
+
 nav {
     li.name .subtitle {
         font-style: italic;
@@ -133,7 +139,7 @@ nav {
 .diff-container {
     @include grid-row;
     border: 1px solid $panel-border-color;
-    font-family: $inconsolata-family;
+    font-family: $pre-font-family;
     margin-bottom: $paragraph-margin-bottom;
 }
 

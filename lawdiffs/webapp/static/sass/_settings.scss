@@ -175,6 +175,10 @@ $diff-addition-color: lighten(#ddffdd, 1%);
 // $header-text-rendering: optimizeLegibility;
 
 $inconsolata-family: 'Inconsolata', sans-serif;
+$ubunto-mono-family: 'Ubuntu Mono', sans-serif;
+$pre-font-family: $ubunto-mono-family;
+$pre-font-size: 1.1em;
+$pre-line-height: 1.4em;
 
 // Control header font sizes
 
