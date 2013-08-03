@@ -1,15 +1,3 @@
-<div law-header 
-    code="{{lawCode}}"
-    title="{{version2Title}}"
-    subsection="{{subsection}}">
-</div>
-
-<div class="row">
-    <div class="small-6 columns">
-        
-    </div>
-</div>
-
 <div class="viewer-option-panel">
     <div class="prev">
         <a ng-click="goPrevious()">
@@ -45,6 +33,12 @@
 </div>
 
 <div user-feedback></div>
+
+<div law-header 
+    code="{{lawCode}}"
+    title="{{version2Title}}"
+    subsection="{{subsection}}">
+</div>
 
 <div diff-legend v-one="currentVersion1" v-two="currentVersion2"></div>
 <div inline-diff lines="diffLines"></div>

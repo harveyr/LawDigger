@@ -22,6 +22,6 @@ angular.module(DIRECTIVE_MODULE).directive 'diffLegend', () ->
         """
         link: (scope) ->
             scope.lines = [
-                "- Text removed between #{scope.vOne} and #{scope.vTwo}" 
-                "+ Text added between #{scope.vOne} and #{scope.vTwo}" 
+                "- (Text removed between #{scope.vOne} and #{scope.vTwo})"
+                "+ (Text added between #{scope.vOne} and #{scope.vTwo})"
             ]

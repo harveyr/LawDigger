@@ -158,7 +158,7 @@ class OregonRevisedStatute(Law):
             prev_part = parts[i-1]
             if int_li.match(part):
                 if i > 0:
-                    if prev_part.endswith('.'):
+                    if prev_part.endswith(('.', ':')):
                         formatted += '\n\n'
                     else:
                         formatted += ' '

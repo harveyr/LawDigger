@@ -358,7 +358,7 @@
       replace: true,
       template: "<div>\n    <div class=\"diff-legend-header\">\n        <table>\n            <thead>\n                <tr>\n                    <th>Legend</th>\n                </tr>\n            </thead>\n        </table>\n    </div>\n    <div class=\"diff-container\">\n        <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n    </div>\n</div>",
       link: function(scope) {
-        return scope.lines = ["- Text removed between " + scope.vOne + " and " + scope.vTwo, "+ Text added between " + scope.vOne + " and " + scope.vTwo];
+        return scope.lines = ["- (Text removed between " + scope.vOne + " and " + scope.vTwo + ")", "+ (Text added between " + scope.vOne + " and " + scope.vTwo + ")"];
       }
     };
   });
