@@ -166,7 +166,14 @@
   });
 
   angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) {
+    var updateLegendDiffLines;
     $scope.m = {};
+    updateLegendDiffLines = function() {
+      var version1, version2;
+      version1 = $routeParams.version1;
+      version2 = $routeParams.version2;
+      return $scope.legendDiffLines = ["- Text removed between " + version1 + " and " + version2, "+ Text added between " + version1 + " and " + version2];
+    };
     $scope.versionChange = function() {
       $scope.$broadcast('clearFeedback');
       if ($scope.m.version1 === $scope.m.version2) {
@@ -186,13 +193,16 @@
       $scope.subsection = $routeParams.subsection;
       $scope.m.version1 = $routeParams.version1;
       $scope.m.version2 = $routeParams.version2;
+      $scope.currentVersion1 = $routeParams.version1;
+      $scope.currentVersion2 = $routeParams.version2;
       return Laws.fetchDiff($scope.lawCode, $scope.subsection, $scope.m.version1, $scope.m.version2).then(function(response) {
         $scope.diffText = response.data.diff;
         $scope.diffLines = response.data.lines;
         $scope.nextSubsection = response.data.next;
         $scope.prevSubsection = response.data.prev;
         $scope.version2Title = response.data.version2_title;
-        return $scope.availableVersions = Sorter.sortVersions(response.data.versions);
+        $scope.availableVersions = Sorter.sortVersions(response.data.versions);
+        return updateLegendDiffLines();
       });
     } else {
       return fetchLaws();
@@ -260,11 +270,11 @@
   angular.module(DIRECTIVE_MODULE).directive('inlineDiff', function() {
     var directive;
     return directive = {
-      replace: true,
       scope: {
         lines: '='
       },
-      template: "<div class=\"row diff-container\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\" first=\"$first\"></div>\n</div>",
+      replace: true,
+      template: "<div class=\"diff-container\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\" first=\"$first\"></div>\n</div>",
       link: function(scope) {}
     };
   });
@@ -276,7 +286,8 @@
         line: '=',
         first: '='
       },
-      template: "<table class=\"diff-line-table\" ng-class=\"diffClass\">\n    <tr>\n        <td class=\"plus-minus\">{{plusMinus}}</td>\n        <td class=\"diff-text\"><pre>{{text}}</pre></td>\n    </tr>\n</table>",
+      replace: true,
+      template: "<table class=\"diff-line-table\">\n    <tr ng-class=\"diffClass\">\n        <td class=\"plus-minus\">{{plusMinus}}</td>\n        <td class=\"diff-text\"><pre>{{text}}</pre></td>\n    </tr>\n</table>",
       link: function(scope) {
         var diffClass, firstChar;
         firstChar = scope.line.charAt(0);
@@ -335,6 +346,21 @@
 
     })();
     return new Sorter();
+  });
+
+  angular.module(DIRECTIVE_MODULE).directive('diffLegend', function() {
+    var directive;
+    return directive = {
+      scope: {
+        vOne: '=',
+        vTwo: '='
+      },
+      replace: true,
+      template: "<div>\n    <div class=\"diff-legend-header\">\n        <table>\n            <thead>\n                <tr>\n                    <th>Legend</th>\n                </tr>\n            </thead>\n        </table>\n    </div>\n    <div class=\"diff-container\">\n        <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n    </div>\n</div>",
+      link: function(scope) {
+        return scope.lines = ["- Text removed between " + scope.vOne + " and " + scope.vTwo, "+ Text added between " + scope.vOne + " and " + scope.vTwo];
+      }
+    };
   });
 
 }).call(this);

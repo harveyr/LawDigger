@@ -1,6 +1,14 @@
 angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) ->
     $scope.m = {}
 
+    updateLegendDiffLines = ->
+        version1 = $routeParams.version1
+        version2 = $routeParams.version2
+        $scope.legendDiffLines = [
+            "- Text removed between #{version1} and #{version2}" 
+            "+ Text added between #{version1} and #{version2}" 
+        ]
+
     $scope.versionChange = ->
         $scope.$broadcast 'clearFeedback'
         if $scope.m.version1 == $scope.m.version2
@@ -27,6 +35,9 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
         $scope.subsection = $routeParams.subsection
         $scope.m.version1 = $routeParams.version1
         $scope.m.version2 = $routeParams.version2
+        $scope.currentVersion1 = $routeParams.version1
+        $scope.currentVersion2 = $routeParams.version2
+
         Laws.fetchDiff($scope.lawCode,
             $scope.subsection,
             $scope.m.version1,
@@ -38,6 +49,8 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
                     $scope.prevSubsection = response.data.prev
                     $scope.version2Title = response.data.version2_title
                     $scope.availableVersions = Sorter.sortVersions response.data.versions
+
+                    updateLegendDiffLines()
     else
         fetchLaws()
 

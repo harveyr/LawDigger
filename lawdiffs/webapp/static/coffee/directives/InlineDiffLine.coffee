@@ -3,9 +3,10 @@ angular.module(DIRECTIVE_MODULE).directive 'inlineDiffLine', () ->
         scope:
             line: '='
             first: '='
+        replace: true
         template: """
-        <table class="diff-line-table" ng-class="diffClass">
-            <tr>
+        <table class="diff-line-table">
+            <tr ng-class="diffClass">
                 <td class="plus-minus">{{plusMinus}}</td>
                 <td class="diff-text"><pre>{{text}}</pre></td>
             </tr>
