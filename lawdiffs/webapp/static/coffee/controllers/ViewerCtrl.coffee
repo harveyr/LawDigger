@@ -4,7 +4,6 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
     fetchedLaws = false
 
     applyLaw = (law) ->
-        console.log 'law:', law
         $scope.lawText = law.text
         $scope.lawTitle = law.title
         $scope.lawVersions = law.versions.sort (a, b) ->

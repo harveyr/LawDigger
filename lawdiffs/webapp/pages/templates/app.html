@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block htmltag %}
+    ng-app="myLilApp"
+{% endblock %}
+
+{% block title %}LawDiffs{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{url_for('static', filename='stylesheets/app.css')}}">
+  
+    <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>  
+
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700' rel='stylesheet' type='text/css'>
+{% endblock %}
+
+{% block navsections %}
+  <section class="top-bar-section">
+      <ul class="left">
+          <li class="active">
+              <a href="/view">View</a>
+          </li>
+          <li>
+              <a href="/diff">Diff</a>
+          </li>
+      </ul>
+  </section>
+  <section class="top-bar-section">
+      <ul class="right">
+          <li class="current-state">
+              <a href="#">Oregon</a>
+          </li>
+      </ul>
+  </section>
+{% endblock %}
+
+{% block content %}
+    {% raw %}
+        <div ng-view></div>
+    {% endraw %}
+{% endblock %}
+
+{% block js %}
+    {{ super() }}
+      
+        <script src="{{url_for('static', filename='bower_components/angular/angular.js')}}"></script>
+        
+        <script src="{{url_for('static', filename='bower_components/underscore/underscore.js')}}"></script>
+        
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.abide.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.alerts.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.clearing.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.cookie.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.dropdown.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.forms.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.interchange.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.joyride.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.magellan.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.orbit.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.placeholder.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.reveal.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.section.js')}}"></script>
+    	
+    	<script src="{{url_for('static', filename='javascripts/foundation/foundation.tooltips.js')}}"></script>
+    	
+        <script src="{{url_for('static', filename='javascripts/foundation/foundation.topbar.js')}}"></script>
+        
+    	<script src="{{url_for('static', filename='javascripts/app.js')}}"></script>
+      
+{% endblock %}
