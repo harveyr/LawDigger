@@ -34,6 +34,7 @@
     </div>
 
     <div class="viewer-option-panel" ng-show="activeSection">
+        <div prev-next-button="{{previousSection}}" prev></div>
         <div class="version">
             <label>
                 Version
@@ -52,6 +53,8 @@
         <div class="small-1 columns">
             <a ng-click="diffMe()" class="button small">Diff</a>
         </div>
+
+        <div prev-next-button="{{nextSection}}" next></div>
     </div>
 
     <div class="row" ng-show="activeText">

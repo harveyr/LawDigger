@@ -20,10 +20,14 @@ def fetch_laws(law_code):
 @blueprint.route('/law/<law_code>/<version>/<subsection>')
 def fetch_law(law_code, version, subsection):
     law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    prev, next = data_laws.fetch_previous_and_next_subsections(
+        law_code, subsection)
     d = {
         'title': law.title(version),
         'text': law.text(version, formatted=True),
-        'versions': law.versions
+        'versions': law.versions,
+        'prev': prev,
+        'next': next
     }
     return jsonify(d)
 

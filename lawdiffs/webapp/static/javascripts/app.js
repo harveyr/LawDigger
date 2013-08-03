@@ -227,9 +227,11 @@
       return Laws.fetchLaw(version, section).then(function(response) {
         $scope.activeText = response.data.text;
         $scope.activeTitle = response.data.title;
-        return $scope.availableVersions = response.data.versions.sort(function(a, b) {
+        $scope.availableVersions = response.data.versions.sort(function(a, b) {
           return parseInt(b) - parseInt(a);
         });
+        $scope.previousSection = response.data.prev;
+        return $scope.nextSection = response.data.next;
       });
     };
     $scope.chooseLaw = function(law) {
@@ -359,6 +361,38 @@
       template: "<div>\n    <div class=\"diff-legend-header\">\n        <table>\n            <thead>\n                <tr>\n                    <th>Legend</th>\n                </tr>\n            </thead>\n        </table>\n    </div>\n    <div class=\"diff-container\">\n        <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n    </div>\n</div>",
       link: function(scope) {
         return scope.lines = ["- (Text removed between " + scope.vOne + " and " + scope.vTwo + ")", "+ (Text added between " + scope.vOne + " and " + scope.vTwo + ")"];
+      }
+    };
+  });
+
+  angular.module(DIRECTIVE_MODULE).directive('prevNextButton', function() {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: true,
+      template: "<div ng-class=\"parentClass\">\n    <a ng-click=\"click()\">\n        <span ng-show=\"isPrev\" ng-bind-html-unsafe=\"navChar\"></span>\n        {{section}}\n        <span ng-show=\"isNext\" ng-bind-html-unsafe=\"navChar\"></span>\n    </a>\n</div>",
+      link: function(scope, elem, attrs) {
+        attrs.$observe('prevNextButton', function(section) {
+          return scope.section = section;
+        });
+        if (_.has(attrs, 'prev')) {
+          scope.isPrev = true;
+          scope.parentClass = 'prev';
+          scope.navChar = '&laquo;';
+        } else if (_.has(attrs, 'next')) {
+          scope.isNext = true;
+          scope.parentClass = 'next';
+          scope.navChar = '&raquo;';
+        } else {
+          throw "Can't figure out prevNextButton type!";
+        }
+        return scope.click = function() {
+          if (scope.isNext) {
+            return scope.$emit('nextNavClick');
+          } else if (scope.isPrev) {
+            return scope.$emit('prevNavClick');
+          }
+        };
       }
     };
   });

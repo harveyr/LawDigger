@@ -15,6 +15,8 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
             $scope.activeTitle = response.data.title
             $scope.availableVersions = response.data.versions.sort (a, b) ->
                 return parseInt(b) - parseInt(a)
+            $scope.previousSection = response.data.prev
+            $scope.nextSection = response.data.next
 
     $scope.chooseLaw = (law) ->
         $scope.currentLaw = law
