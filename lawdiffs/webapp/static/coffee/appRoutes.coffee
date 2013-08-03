@@ -1,18 +1,14 @@
 angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
     $routeProvider
-        .when('/', {
-            controller: 'ViewerCtrl'
-            templateUrl: '/static/partials/home.html'
-        })
         .when('/view', {
-            controller: 'ViewerCtrl'
-            templateUrl: '/static/partials/home.html'
+            redirectTo: '/view/ors'
         })
         .when('/view/:lawCode', {
-            redirectTo: '/view'
+            controller: 'ViewerCtrl'
+            templateUrl: '/static/partials/home.html'
         })
         .when('/view/:lawCode/:param', {
-            redirectTo: '/view'
+            redirectTo: '/view/ors'
         })
         .when('/view/:lawCode/:version/:section', {
             controller: 'ViewerCtrl'
@@ -23,7 +19,7 @@ angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($rout
             templateUrl: '/static/partials/diff.html'
         })
         .otherwise({
-            redirectTo: '/'    
+            redirectTo: '/view'
         })
 
     $locationProvider

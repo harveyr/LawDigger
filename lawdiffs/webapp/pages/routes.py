@@ -19,6 +19,11 @@ def diff_route(path):
     return render_template('app.html')
 
 
+@blueprint.route('/disclaimer')
+def disclaimer_page():
+    return render_template('disclaimer.html')
+
+
 @blueprint.route('/')
 def index_route():
     return render_template('landing.html')

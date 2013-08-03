@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}LawDiffs: Disclaimer{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{url_for('static', filename='stylesheets/app.css')}}">
+{% endblock %}
+
+{% block content %}
+
+<div class="centered">
+    <h1 class="subheader">Disclaimer</h1>
+</div>
+
+<div class="row">
+    <div class="small-12">
+        <p>
+            <h4 class="subheader">Do not rely on the law you read here.</h4>
+        </p>
+        <p>
+            It has undergone automated conversion to enable the views and comparisons we provide. It is possible these conversions have caused inaccuracies.
+        </p>
+        <p>
+            Always read the official versions from the official sources, and never cite to this website.
+        </p>
+        <p class="centered">
+            <a href="/view" class="button">Got it</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+{{ super() }}
+      <script>
+        $(document).foundation();
+      </script>
+
+{% endblock %}
