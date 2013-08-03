@@ -1,7 +1,27 @@
-angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
-    console.log 'DiffCtrl'
+angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) ->
     $scope.m = {}
 
+    $scope.versionChange = ->
+        $scope.$broadcast 'clearFeedback'
+        if $scope.m.version1 == $scope.m.version2
+            $scope.$broadcast 'warnFeedback',
+                'You must choose different versions to compare.'
+            $scope.showUpdateButton = false
+            return
+
+        $scope.showUpdateButton = (
+            $scope.m.version1 != $routeParams.version1 or
+            $scope.m.version2 != $routeParams.version2
+        )
+                
+    $scope.updatePath = ->
+        path = UrlBuilder.diffPage $scope.lawCode,
+            $scope.subsection,
+            $scope.m.version1,
+            $scope.m.version2
+        $location.path(path)
+
+    # Handle route
     if $routeParams.version2
         $scope.lawCode = $routeParams.lawCode
         $scope.subsection = $routeParams.subsection
@@ -17,8 +37,7 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
                     $scope.nextSubsection = response.data.next
                     $scope.prevSubsection = response.data.prev
                     $scope.version2Title = response.data.version2_title
-                    $scope.availableVersions = response.data.versions
-                    console.log '$scope.version2Title:', $scope.version2Title
+                    $scope.availableVersions = Sorter.sortVersions response.data.versions
     else
         fetchLaws()
 

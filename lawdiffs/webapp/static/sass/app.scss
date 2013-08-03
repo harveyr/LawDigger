@@ -122,6 +122,12 @@ nav {
         @include grid-column(8, false, true);
         text-align: center;
     }
+
+    a.update {
+        @extend .button;
+        @extend .tiny;
+        margin: 0;
+    }
 }
 
 .diff-container {

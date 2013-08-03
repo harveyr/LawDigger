@@ -1,19 +1,23 @@
 angular.module(DIRECTIVE_MODULE).directive 'userFeedback', () ->
     directive =
+        replace: true
+        scope: true
         template: """
-            <div class="row-fluid" ng-show="fbModel.html">
-                <div class="span12 alert {{fbModel.alertClass}}">
-                    <span class="{{fbModel.iconClass}}" ng-show="fbModel.iconClass"></span>
-                    <span ng-bind-html-unsafe="fbModel.html"></span>
-                </div>
+        <div class="row" ng-show="m.html">
+            <div data-alert class="small-12 columns alert-box">
+                {{m.html}}
+                <a href="#" class="close">&times;</a>
             </div>
+        </div>
         """
         link: (scope) ->
-            scope.fbModel = {}
+            scope.m = {}
+            scope.showUserFeedback = false
+
             setFeedback = (html, alertClass, iconClass) ->
-                scope.fbModel.html = html
-                scope.fbModel.alertClass = alertClass
-                scope.fbModel.iconClass = iconClass
+                scope.m.html = html
+                scope.m.alertClass = alertClass
+                scope.m.iconClass = iconClass
 
             scope.$on 'feedback', (html, alertClass, iconClass) ->
                 setFeedback html, alertClass, iconClass
@@ -25,6 +29,7 @@ angular.module(DIRECTIVE_MODULE).directive 'userFeedback', () ->
                 setFeedback html, 'alert-error', 'icon-exclamation-sign'
 
             scope.$on 'warnFeedback', (e, html) ->
+                console.log 'here'
                 setFeedback html, '', 'icon-info-sign'
 
             scope.$on 'clearFeedback', (e) ->

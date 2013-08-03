@@ -34,14 +34,17 @@
   angular.module(DIRECTIVE_MODULE).directive('userFeedback', function() {
     var directive;
     return directive = {
-      template: "<div class=\"row-fluid\" ng-show=\"fbModel.html\">\n    <div class=\"span12 alert {{fbModel.alertClass}}\">\n        <span class=\"{{fbModel.iconClass}}\" ng-show=\"fbModel.iconClass\"></span>\n        <span ng-bind-html-unsafe=\"fbModel.html\"></span>\n    </div>\n</div>",
+      replace: true,
+      scope: true,
+      template: "<div class=\"row\" ng-show=\"m.html\">\n    <div data-alert class=\"small-12 columns alert-box\">\n        {{m.html}}\n        <a href=\"#\" class=\"close\">&times;</a>\n    </div>\n</div>",
       link: function(scope) {
         var setFeedback;
-        scope.fbModel = {};
+        scope.m = {};
+        scope.showUserFeedback = false;
         setFeedback = function(html, alertClass, iconClass) {
-          scope.fbModel.html = html;
-          scope.fbModel.alertClass = alertClass;
-          return scope.fbModel.iconClass = iconClass;
+          scope.m.html = html;
+          scope.m.alertClass = alertClass;
+          return scope.m.iconClass = iconClass;
         };
         scope.$on('feedback', function(html, alertClass, iconClass) {
           return setFeedback(html, alertClass, iconClass);
@@ -53,6 +56,7 @@
           return setFeedback(html, 'alert-error', 'icon-exclamation-sign');
         });
         scope.$on('warnFeedback', function(e, html) {
+          console.log('here');
           return setFeedback(html, '', 'icon-info-sign');
         });
         return scope.$on('clearFeedback', function(e) {
@@ -161,9 +165,22 @@
     return new ExternalReferences;
   });
 
-  angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
-    console.log('DiffCtrl');
+  angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) {
     $scope.m = {};
+    $scope.versionChange = function() {
+      $scope.$broadcast('clearFeedback');
+      if ($scope.m.version1 === $scope.m.version2) {
+        $scope.$broadcast('warnFeedback', 'You must choose different versions to compare.');
+        $scope.showUpdateButton = false;
+        return;
+      }
+      return $scope.showUpdateButton = $scope.m.version1 !== $routeParams.version1 || $scope.m.version2 !== $routeParams.version2;
+    };
+    $scope.updatePath = function() {
+      var path;
+      path = UrlBuilder.diffPage($scope.lawCode, $scope.subsection, $scope.m.version1, $scope.m.version2);
+      return $location.path(path);
+    };
     if ($routeParams.version2) {
       $scope.lawCode = $routeParams.lawCode;
       $scope.subsection = $routeParams.subsection;
@@ -175,8 +192,7 @@
         $scope.nextSubsection = response.data.next;
         $scope.prevSubsection = response.data.prev;
         $scope.version2Title = response.data.version2_title;
-        $scope.availableVersions = response.data.versions;
-        return console.log('$scope.version2Title:', $scope.version2Title);
+        return $scope.availableVersions = Sorter.sortVersions(response.data.versions);
       });
     } else {
       return fetchLaws();
@@ -302,6 +318,23 @@
         });
       }
     };
+  });
+
+  angular.module(SERVICES_MODULE).factory('Sorter', function() {
+    var Sorter;
+    Sorter = (function() {
+      function Sorter() {}
+
+      Sorter.prototype.sortVersions = function(versions) {
+        return versions.sort(function(a, b) {
+          return parseInt(b) - parseInt(a);
+        });
+      };
+
+      return Sorter;
+
+    })();
+    return new Sorter();
   });
 
 }).call(this);

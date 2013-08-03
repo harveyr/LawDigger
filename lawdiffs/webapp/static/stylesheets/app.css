@@ -2398,7 +2398,7 @@ blockquote p {
   }
 }
 /* line 172, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
   border-style: solid;
   border-width: 1px;
   cursor: pointer;
@@ -2420,57 +2420,57 @@ button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a 
   color: white;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button:hover, button:focus, .button:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .button:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus {
+button:hover, button:focus, .button:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .viewer-option-panel a.update:hover, .button:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus, .viewer-option-panel a.update:focus {
   background-color: #2284a1;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button:hover, button:focus, .button:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .button:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus {
+button:hover, button:focus, .button:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .viewer-option-panel a.update:hover, .button:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus, .viewer-option-panel a.update:focus {
   color: white;
 }
 /* line 177, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.secondary, .button.secondary, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+button.secondary, .button.secondary, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.secondary.update {
   background-color: #e9e9e9;
   border-color: #d0d0d0;
   color: #333333;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.secondary:hover, button.secondary:focus, .button.secondary:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .button.secondary:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus {
+button.secondary:hover, button.secondary:focus, .button.secondary:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .viewer-option-panel a.secondary.update:hover, .button.secondary:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus, .viewer-option-panel a.secondary.update:focus {
   background-color: #d0d0d0;
 }
 /* line 129, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.secondary:hover, button.secondary:focus, .button.secondary:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .button.secondary:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus {
+button.secondary:hover, button.secondary:focus, .button.secondary:hover, .viewer-option-panel .next > a:hover, .viewer-option-panel .prev > a:hover, .viewer-option-panel a.secondary.update:hover, .button.secondary:focus, .viewer-option-panel .next > a:focus, .viewer-option-panel .prev > a:focus, .viewer-option-panel a.secondary.update:focus {
   color: #333333;
 }
 /* line 178, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.success, .button.success, .viewer-option-panel .next > a.success, .viewer-option-panel .prev > a.success {
+button.success, .button.success, .viewer-option-panel .next > a.success, .viewer-option-panel .prev > a.success, .viewer-option-panel a.success.update {
   background-color: #5da423;
   border-color: #457a1a;
   color: white;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.success:hover, button.success:focus, .button.success:hover, .viewer-option-panel .next > a.success:hover, .viewer-option-panel .prev > a.success:hover, .button.success:focus, .viewer-option-panel .next > a.success:focus, .viewer-option-panel .prev > a.success:focus {
+button.success:hover, button.success:focus, .button.success:hover, .viewer-option-panel .next > a.success:hover, .viewer-option-panel .prev > a.success:hover, .viewer-option-panel a.success.update:hover, .button.success:focus, .viewer-option-panel .next > a.success:focus, .viewer-option-panel .prev > a.success:focus, .viewer-option-panel a.success.update:focus {
   background-color: #457a1a;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.success:hover, button.success:focus, .button.success:hover, .viewer-option-panel .next > a.success:hover, .viewer-option-panel .prev > a.success:hover, .button.success:focus, .viewer-option-panel .next > a.success:focus, .viewer-option-panel .prev > a.success:focus {
+button.success:hover, button.success:focus, .button.success:hover, .viewer-option-panel .next > a.success:hover, .viewer-option-panel .prev > a.success:hover, .viewer-option-panel a.success.update:hover, .button.success:focus, .viewer-option-panel .next > a.success:focus, .viewer-option-panel .prev > a.success:focus, .viewer-option-panel a.success.update:focus {
   color: white;
 }
 /* line 179, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.alert, .button.alert, .viewer-option-panel .next > a.alert, .viewer-option-panel .prev > a.alert {
+button.alert, .button.alert, .viewer-option-panel .next > a.alert, .viewer-option-panel .prev > a.alert, .viewer-option-panel a.alert.update {
   background-color: #c60f13;
   border-color: #970b0e;
   color: white;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.alert:hover, button.alert:focus, .button.alert:hover, .viewer-option-panel .next > a.alert:hover, .viewer-option-panel .prev > a.alert:hover, .button.alert:focus, .viewer-option-panel .next > a.alert:focus, .viewer-option-panel .prev > a.alert:focus {
+button.alert:hover, button.alert:focus, .button.alert:hover, .viewer-option-panel .next > a.alert:hover, .viewer-option-panel .prev > a.alert:hover, .viewer-option-panel a.alert.update:hover, .button.alert:focus, .viewer-option-panel .next > a.alert:focus, .viewer-option-panel .prev > a.alert:focus, .viewer-option-panel a.alert.update:focus {
   background-color: #970b0e;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.alert:hover, button.alert:focus, .button.alert:hover, .viewer-option-panel .next > a.alert:hover, .viewer-option-panel .prev > a.alert:hover, .button.alert:focus, .viewer-option-panel .next > a.alert:focus, .viewer-option-panel .prev > a.alert:focus {
+button.alert:hover, button.alert:focus, .button.alert:hover, .viewer-option-panel .next > a.alert:hover, .viewer-option-panel .prev > a.alert:hover, .viewer-option-panel a.alert.update:hover, .button.alert:focus, .viewer-option-panel .next > a.alert:focus, .viewer-option-panel .prev > a.alert:focus, .viewer-option-panel a.alert.update:focus {
   color: white;
 }
 /* line 181, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-option-panel .prev > a.large {
+button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-option-panel .prev > a.large, .viewer-option-panel a.large.update {
   padding-top: 1em;
   padding-right: 2em;
   padding-bottom: 1.0625em;
@@ -2478,7 +2478,7 @@ button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-optio
   font-size: 1.25em;
 }
 /* line 182, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.small, .button.small, .viewer-option-panel .next > a.small, .viewer-option-panel .prev > a.small {
+button.small, .button.small, .viewer-option-panel .next > a.small, .viewer-option-panel .prev > a.small, .viewer-option-panel a.small.update {
   padding-top: 0.5625em;
   padding-right: 1.125em;
   padding-bottom: 0.625em;
@@ -2486,7 +2486,7 @@ button.small, .button.small, .viewer-option-panel .next > a.small, .viewer-optio
   font-size: 0.8125em;
 }
 /* line 183, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.tiny, .button.tiny, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+button.tiny, .button.tiny, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
   padding-top: 0.4375em;
   padding-right: 0.875em;
   padding-bottom: 0.5em;
@@ -2494,23 +2494,23 @@ button.tiny, .button.tiny, .viewer-option-panel .next > a, .viewer-option-panel 
   font-size: 0.6875em;
 }
 /* line 184, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.expand, .button.expand, .viewer-option-panel .next > a.expand, .viewer-option-panel .prev > a.expand {
+button.expand, .button.expand, .viewer-option-panel .next > a.expand, .viewer-option-panel .prev > a.expand, .viewer-option-panel a.expand.update {
   padding-right: 0px;
   padding-left: 0px;
   width: 100%;
 }
 /* line 186, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.left-align, .button.left-align, .viewer-option-panel .next > a.left-align, .viewer-option-panel .prev > a.left-align {
+button.left-align, .button.left-align, .viewer-option-panel .next > a.left-align, .viewer-option-panel .prev > a.left-align, .viewer-option-panel a.left-align.update {
   text-align: left;
   text-indent: 0.75em;
 }
 /* line 187, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.right-align, .button.right-align, .viewer-option-panel .next > a.right-align, .viewer-option-panel .prev > a.right-align {
+button.right-align, .button.right-align, .viewer-option-panel .next > a.right-align, .viewer-option-panel .prev > a.right-align, .viewer-option-panel a.right-align.update {
   text-align: right;
   padding-right: 0.75em;
 }
 /* line 189, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled, button[disabled], .button.disabled, .viewer-option-panel .next > a.disabled, .viewer-option-panel .prev > a.disabled, .button[disabled], .viewer-option-panel .next > a[disabled], .viewer-option-panel .prev > a[disabled] {
+button.disabled, button[disabled], .button.disabled, .viewer-option-panel .next > a.disabled, .viewer-option-panel .prev > a.disabled, .viewer-option-panel a.disabled.update, .button[disabled], .viewer-option-panel .next > a[disabled], .viewer-option-panel .prev > a[disabled], .viewer-option-panel a[disabled].update {
   background-color: #2ba6cb;
   border-color: #2284a1;
   color: white;
@@ -2520,19 +2520,19 @@ button.disabled, button[disabled], .button.disabled, .viewer-option-panel .next 
   box-shadow: none;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.update:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.update:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].update:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].update:focus {
   background-color: #2284a1;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.update:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.update:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].update:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].update:focus {
   color: white;
 }
 /* line 147, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled:hover, button.disabled:focus, button[disabled]:hover, button[disabled]:focus, .button.disabled:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.update:hover, .button.disabled:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.update:focus, .button[disabled]:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].update:hover, .button[disabled]:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].update:focus {
   background-color: #2ba6cb;
 }
 /* line 190, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.secondary, button[disabled].secondary, .button.disabled.secondary, .viewer-option-panel .next > a.disabled, .viewer-option-panel .prev > a.disabled, .button[disabled].secondary, .viewer-option-panel .next > a[disabled], .viewer-option-panel .prev > a[disabled] {
+button.disabled.secondary, button[disabled].secondary, .button.disabled.secondary, .viewer-option-panel .next > a.disabled, .viewer-option-panel .prev > a.disabled, .viewer-option-panel a.disabled.secondary.update, .button[disabled].secondary, .viewer-option-panel .next > a[disabled], .viewer-option-panel .prev > a[disabled], .viewer-option-panel a[disabled].secondary.update {
   background-color: #e9e9e9;
   border-color: #d0d0d0;
   color: #333333;
@@ -2542,19 +2542,19 @@ button.disabled.secondary, button[disabled].secondary, .button.disabled.secondar
   box-shadow: none;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.secondary.update:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.secondary.update:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].secondary.update:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].secondary.update:focus {
   background-color: #d0d0d0;
 }
 /* line 129, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.secondary.update:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.secondary.update:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].secondary.update:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].secondary.update:focus {
   color: #333333;
 }
 /* line 147, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus {
+button.disabled.secondary:hover, button.disabled.secondary:focus, button[disabled].secondary:hover, button[disabled].secondary:focus, .button.disabled.secondary:hover, .viewer-option-panel .next > a.disabled:hover, .viewer-option-panel .prev > a.disabled:hover, .viewer-option-panel a.disabled.secondary.update:hover, .button.disabled.secondary:focus, .viewer-option-panel .next > a.disabled:focus, .viewer-option-panel .prev > a.disabled:focus, .viewer-option-panel a.disabled.secondary.update:focus, .button[disabled].secondary:hover, .viewer-option-panel .next > a[disabled]:hover, .viewer-option-panel .prev > a[disabled]:hover, .viewer-option-panel a[disabled].secondary.update:hover, .button[disabled].secondary:focus, .viewer-option-panel .next > a[disabled]:focus, .viewer-option-panel .prev > a[disabled]:focus, .viewer-option-panel a[disabled].secondary.update:focus {
   background-color: #e9e9e9;
 }
 /* line 191, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.success, button[disabled].success, .button.disabled.success, .viewer-option-panel .next > a.disabled.success, .viewer-option-panel .prev > a.disabled.success, .button[disabled].success, .viewer-option-panel .next > a[disabled].success, .viewer-option-panel .prev > a[disabled].success {
+button.disabled.success, button[disabled].success, .button.disabled.success, .viewer-option-panel .next > a.disabled.success, .viewer-option-panel .prev > a.disabled.success, .viewer-option-panel a.disabled.success.update, .button[disabled].success, .viewer-option-panel .next > a[disabled].success, .viewer-option-panel .prev > a[disabled].success, .viewer-option-panel a[disabled].success.update {
   background-color: #5da423;
   border-color: #457a1a;
   color: white;
@@ -2564,19 +2564,19 @@ button.disabled.success, button[disabled].success, .button.disabled.success, .vi
   box-shadow: none;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus {
+button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .viewer-option-panel a.disabled.success.update:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .viewer-option-panel a.disabled.success.update:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .viewer-option-panel a[disabled].success.update:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus, .viewer-option-panel a[disabled].success.update:focus {
   background-color: #457a1a;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus {
+button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .viewer-option-panel a.disabled.success.update:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .viewer-option-panel a.disabled.success.update:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .viewer-option-panel a[disabled].success.update:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus, .viewer-option-panel a[disabled].success.update:focus {
   color: white;
 }
 /* line 147, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus {
+button.disabled.success:hover, button.disabled.success:focus, button[disabled].success:hover, button[disabled].success:focus, .button.disabled.success:hover, .viewer-option-panel .next > a.disabled.success:hover, .viewer-option-panel .prev > a.disabled.success:hover, .viewer-option-panel a.disabled.success.update:hover, .button.disabled.success:focus, .viewer-option-panel .next > a.disabled.success:focus, .viewer-option-panel .prev > a.disabled.success:focus, .viewer-option-panel a.disabled.success.update:focus, .button[disabled].success:hover, .viewer-option-panel .next > a[disabled].success:hover, .viewer-option-panel .prev > a[disabled].success:hover, .viewer-option-panel a[disabled].success.update:hover, .button[disabled].success:focus, .viewer-option-panel .next > a[disabled].success:focus, .viewer-option-panel .prev > a[disabled].success:focus, .viewer-option-panel a[disabled].success.update:focus {
   background-color: #5da423;
 }
 /* line 192, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.alert, button[disabled].alert, .button.disabled.alert, .viewer-option-panel .next > a.disabled.alert, .viewer-option-panel .prev > a.disabled.alert, .button[disabled].alert, .viewer-option-panel .next > a[disabled].alert, .viewer-option-panel .prev > a[disabled].alert {
+button.disabled.alert, button[disabled].alert, .button.disabled.alert, .viewer-option-panel .next > a.disabled.alert, .viewer-option-panel .prev > a.disabled.alert, .viewer-option-panel a.disabled.alert.update, .button[disabled].alert, .viewer-option-panel .next > a[disabled].alert, .viewer-option-panel .prev > a[disabled].alert, .viewer-option-panel a[disabled].alert.update {
   background-color: #c60f13;
   border-color: #970b0e;
   color: white;
@@ -2586,38 +2586,38 @@ button.disabled.alert, button[disabled].alert, .button.disabled.alert, .viewer-o
   box-shadow: none;
 }
 /* line 123, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus {
+button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .viewer-option-panel a.disabled.alert.update:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .viewer-option-panel a.disabled.alert.update:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .viewer-option-panel a[disabled].alert.update:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus, .viewer-option-panel a[disabled].alert.update:focus {
   background-color: #970b0e;
 }
 /* line 134, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus {
+button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .viewer-option-panel a.disabled.alert.update:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .viewer-option-panel a.disabled.alert.update:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .viewer-option-panel a[disabled].alert.update:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus, .viewer-option-panel a[disabled].alert.update:focus {
   color: white;
 }
 /* line 147, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus {
+button.disabled.alert:hover, button.disabled.alert:focus, button[disabled].alert:hover, button[disabled].alert:focus, .button.disabled.alert:hover, .viewer-option-panel .next > a.disabled.alert:hover, .viewer-option-panel .prev > a.disabled.alert:hover, .viewer-option-panel a.disabled.alert.update:hover, .button.disabled.alert:focus, .viewer-option-panel .next > a.disabled.alert:focus, .viewer-option-panel .prev > a.disabled.alert:focus, .viewer-option-panel a.disabled.alert.update:focus, .button[disabled].alert:hover, .viewer-option-panel .next > a[disabled].alert:hover, .viewer-option-panel .prev > a[disabled].alert:hover, .viewer-option-panel a[disabled].alert.update:hover, .button[disabled].alert:focus, .viewer-option-panel .next > a[disabled].alert:focus, .viewer-option-panel .prev > a[disabled].alert:focus, .viewer-option-panel a[disabled].alert.update:focus {
   background-color: #c60f13;
 }
 
 /* line 197, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
   padding-top: 0.8125em;
   padding-bottom: 0.75em;
   -webkit-appearance: none;
 }
 /* line 199, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.tiny, .button.tiny, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+button.tiny, .button.tiny, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
   padding-top: 0.5em;
   padding-bottom: 0.4375em;
   -webkit-appearance: none;
 }
 /* line 200, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.small, .button.small, .viewer-option-panel .next > a.small, .viewer-option-panel .prev > a.small {
+button.small, .button.small, .viewer-option-panel .next > a.small, .viewer-option-panel .prev > a.small, .viewer-option-panel a.small.update {
   padding-top: 0.625em;
   padding-bottom: 0.5625em;
   -webkit-appearance: none;
 }
 /* line 201, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-option-panel .prev > a.large {
+button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-option-panel .prev > a.large, .viewer-option-panel a.large.update {
   padding-top: 1.03125em;
   padding-bottom: 1.03125em;
   -webkit-appearance: none;
@@ -2625,7 +2625,7 @@ button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-optio
 
 @media only screen {
   /* line 207, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-  button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+  button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
     -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
     -webkit-transition: background-color 300ms ease-out;
@@ -2633,24 +2633,24 @@ button.large, .button.large, .viewer-option-panel .next > a.large, .viewer-optio
     transition: background-color 300ms ease-out;
   }
   /* line 68, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_global.scss */
-  button:active, .button:active, .viewer-option-panel .next > a:active, .viewer-option-panel .prev > a:active {
+  button:active, .button:active, .viewer-option-panel .next > a:active, .viewer-option-panel .prev > a:active, .viewer-option-panel a.update:active {
     -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
     box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2) inset;
   }
   /* line 215, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-  button.radius, .button.radius, .viewer-option-panel .next > a.radius, .viewer-option-panel .prev > a.radius {
+  button.radius, .button.radius, .viewer-option-panel .next > a.radius, .viewer-option-panel .prev > a.radius, .viewer-option-panel a.radius.update {
     -webkit-border-radius: 3px;
     border-radius: 3px;
   }
   /* line 216, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-  button.round, .button.round, .viewer-option-panel .next > a.round, .viewer-option-panel .prev > a.round {
+  button.round, .button.round, .viewer-option-panel .next > a.round, .viewer-option-panel .prev > a.round, .viewer-option-panel a.round.update {
     -webkit-border-radius: 1000px;
     border-radius: 1000px;
   }
 }
 @media only screen and (min-width: 768px) {
   /* line 224, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_buttons.scss */
-  button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
+  button, .button, .viewer-option-panel .next > a, .viewer-option-panel .prev > a, .viewer-option-panel a.update {
     display: inline-block;
   }
 }
@@ -2735,7 +2735,7 @@ label small {
 
 /* Adjust padding, alignment and radius if pre/post element is a button */
 /* line 279, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.postfix.button, .viewer-option-panel .next > a.postfix, .viewer-option-panel .prev > a.postfix {
+.postfix.button, .viewer-option-panel .next > a.postfix, .viewer-option-panel .prev > a.postfix, .viewer-option-panel a.postfix.update {
   padding-left: 0;
   padding-right: 0;
   padding-top: 0;
@@ -2745,7 +2745,7 @@ label small {
 }
 
 /* line 280, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.prefix.button, .viewer-option-panel .next > a.prefix, .viewer-option-panel .prev > a.prefix {
+.prefix.button, .viewer-option-panel .next > a.prefix, .viewer-option-panel .prev > a.prefix, .viewer-option-panel a.prefix.update {
   padding-left: 0;
   padding-right: 0;
   padding-top: 0;
@@ -2755,7 +2755,7 @@ label small {
 }
 
 /* line 282, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.prefix.button.radius, .viewer-option-panel .next > a.prefix.radius, .viewer-option-panel .prev > a.prefix.radius {
+.prefix.button.radius, .viewer-option-panel .next > a.prefix.radius, .viewer-option-panel .prev > a.prefix.radius, .viewer-option-panel a.prefix.radius.update {
   -webkit-border-radius: 0;
   border-radius: 0;
   -moz-border-radius-bottomleft: 3px;
@@ -2767,7 +2767,7 @@ label small {
 }
 
 /* line 283, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.postfix.button.radius, .viewer-option-panel .next > a.postfix.radius, .viewer-option-panel .prev > a.postfix.radius {
+.postfix.button.radius, .viewer-option-panel .next > a.postfix.radius, .viewer-option-panel .prev > a.postfix.radius, .viewer-option-panel a.postfix.radius.update {
   -webkit-border-radius: 0;
   border-radius: 0;
   -moz-border-radius-topright: 3px;
@@ -2779,7 +2779,7 @@ label small {
 }
 
 /* line 284, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.prefix.button.round, .viewer-option-panel .next > a.prefix.round, .viewer-option-panel .prev > a.prefix.round {
+.prefix.button.round, .viewer-option-panel .next > a.prefix.round, .viewer-option-panel .prev > a.prefix.round, .viewer-option-panel a.prefix.round.update {
   -webkit-border-radius: 0;
   border-radius: 0;
   -moz-border-radius-bottomleft: 1000px;
@@ -2791,7 +2791,7 @@ label small {
 }
 
 /* line 285, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-.postfix.button.round, .viewer-option-panel .next > a.postfix.round, .viewer-option-panel .prev > a.postfix.round {
+.postfix.button.round, .viewer-option-panel .next > a.postfix.round, .viewer-option-panel .prev > a.postfix.round, .viewer-option-panel a.postfix.round.update {
   -webkit-border-radius: 0;
   border-radius: 0;
   -moz-border-radius-topright: 1000px;
@@ -3107,7 +3107,7 @@ label.error {
   margin-left: 0;
 }
 /* line 53, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.radius > *:first-child, .button-group.radius > *:first-child > a, .button-group.radius > *:first-child > button, .button-group.radius > *:first-child > .button, .viewer-option-panel .button-group.radius > .next:first-child > a, .viewer-option-panel .button-group.radius > .prev:first-child > a {
+.button-group.radius > *:first-child, .button-group.radius > *:first-child > a, .button-group.radius > *:first-child > button, .button-group.radius > *:first-child > .button, .viewer-option-panel .button-group.radius > .next:first-child > a, .viewer-option-panel .button-group.radius > .prev:first-child > a, .viewer-option-panel .button-group.radius > *:first-child > a.update {
   -moz-border-radius-bottomleft: 3px;
   -moz-border-radius-topleft: 3px;
   -webkit-border-bottom-left-radius: 3px;
@@ -3116,7 +3116,7 @@ label.error {
   border-top-left-radius: 3px;
 }
 /* line 57, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.radius > *:last-child, .button-group.radius > *:last-child > a, .button-group.radius > *:last-child > button, .button-group.radius > *:last-child > .button, .viewer-option-panel .button-group.radius > .next:last-child > a, .viewer-option-panel .button-group.radius > .prev:last-child > a {
+.button-group.radius > *:last-child, .button-group.radius > *:last-child > a, .button-group.radius > *:last-child > button, .button-group.radius > *:last-child > .button, .viewer-option-panel .button-group.radius > .next:last-child > a, .viewer-option-panel .button-group.radius > .prev:last-child > a, .viewer-option-panel .button-group.radius > *:last-child > a.update {
   -moz-border-radius-topright: 3px;
   -moz-border-radius-bottomright: 3px;
   -webkit-border-top-right-radius: 3px;
@@ -3125,7 +3125,7 @@ label.error {
   border-bottom-right-radius: 3px;
 }
 /* line 53, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.round > *:first-child, .button-group.round > *:first-child > a, .button-group.round > *:first-child > button, .button-group.round > *:first-child > .button, .viewer-option-panel .button-group.round > .next:first-child > a, .viewer-option-panel .button-group.round > .prev:first-child > a {
+.button-group.round > *:first-child, .button-group.round > *:first-child > a, .button-group.round > *:first-child > button, .button-group.round > *:first-child > .button, .viewer-option-panel .button-group.round > .next:first-child > a, .viewer-option-panel .button-group.round > .prev:first-child > a, .viewer-option-panel .button-group.round > *:first-child > a.update {
   -moz-border-radius-bottomleft: 1000px;
   -moz-border-radius-topleft: 1000px;
   -webkit-border-bottom-left-radius: 1000px;
@@ -3134,7 +3134,7 @@ label.error {
   border-top-left-radius: 1000px;
 }
 /* line 57, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.round > *:last-child, .button-group.round > *:last-child > a, .button-group.round > *:last-child > button, .button-group.round > *:last-child > .button, .viewer-option-panel .button-group.round > .next:last-child > a, .viewer-option-panel .button-group.round > .prev:last-child > a {
+.button-group.round > *:last-child, .button-group.round > *:last-child > a, .button-group.round > *:last-child > button, .button-group.round > *:last-child > .button, .viewer-option-panel .button-group.round > .next:last-child > a, .viewer-option-panel .button-group.round > .prev:last-child > a, .viewer-option-panel .button-group.round > *:last-child > a.update {
   -moz-border-radius-topright: 1000px;
   -moz-border-radius-bottomright: 1000px;
   -webkit-border-top-right-radius: 1000px;
@@ -3147,7 +3147,7 @@ label.error {
   width: 50%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-2 li button, .button-group.even-2 li .button, .button-group.even-2 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-2 li .next > a, .button-group.even-2 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-2 li .prev > a {
+.button-group.even-2 li button, .button-group.even-2 li .button, .button-group.even-2 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-2 li .next > a, .button-group.even-2 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-2 li .prev > a, .button-group.even-2 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-2 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3155,7 +3155,7 @@ label.error {
   width: 33.33333%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-3 li button, .button-group.even-3 li .button, .button-group.even-3 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-3 li .next > a, .button-group.even-3 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-3 li .prev > a {
+.button-group.even-3 li button, .button-group.even-3 li .button, .button-group.even-3 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-3 li .next > a, .button-group.even-3 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-3 li .prev > a, .button-group.even-3 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-3 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3163,7 +3163,7 @@ label.error {
   width: 25%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-4 li button, .button-group.even-4 li .button, .button-group.even-4 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-4 li .next > a, .button-group.even-4 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-4 li .prev > a {
+.button-group.even-4 li button, .button-group.even-4 li .button, .button-group.even-4 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-4 li .next > a, .button-group.even-4 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-4 li .prev > a, .button-group.even-4 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-4 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3171,7 +3171,7 @@ label.error {
   width: 20%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-5 li button, .button-group.even-5 li .button, .button-group.even-5 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-5 li .next > a, .button-group.even-5 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-5 li .prev > a {
+.button-group.even-5 li button, .button-group.even-5 li .button, .button-group.even-5 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-5 li .next > a, .button-group.even-5 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-5 li .prev > a, .button-group.even-5 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-5 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3179,7 +3179,7 @@ label.error {
   width: 16.66667%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-6 li button, .button-group.even-6 li .button, .button-group.even-6 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-6 li .next > a, .button-group.even-6 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-6 li .prev > a {
+.button-group.even-6 li button, .button-group.even-6 li .button, .button-group.even-6 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-6 li .next > a, .button-group.even-6 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-6 li .prev > a, .button-group.even-6 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-6 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3187,7 +3187,7 @@ label.error {
   width: 14.28571%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-7 li button, .button-group.even-7 li .button, .button-group.even-7 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-7 li .next > a, .button-group.even-7 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-7 li .prev > a {
+.button-group.even-7 li button, .button-group.even-7 li .button, .button-group.even-7 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-7 li .next > a, .button-group.even-7 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-7 li .prev > a, .button-group.even-7 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-7 li a.update {
   width: 100%;
 }
 /* line 80, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
@@ -3195,7 +3195,7 @@ label.error {
   width: 12.5%;
 }
 /* line 63, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_button-groups.scss */
-.button-group.even-8 li button, .button-group.even-8 li .button, .button-group.even-8 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-8 li .next > a, .button-group.even-8 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-8 li .prev > a {
+.button-group.even-8 li button, .button-group.even-8 li .button, .button-group.even-8 li .viewer-option-panel .next > a, .viewer-option-panel .button-group.even-8 li .next > a, .button-group.even-8 li .viewer-option-panel .prev > a, .viewer-option-panel .button-group.even-8 li .prev > a, .button-group.even-8 li .viewer-option-panel a.update, .viewer-option-panel .button-group.even-8 li a.update {
   width: 100%;
 }
 
@@ -3224,12 +3224,12 @@ label.error {
 
 /* Dropdown Button */
 /* line 108, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button, .viewer-option-panel .next > a.dropdown, .viewer-option-panel .prev > a.dropdown {
+.dropdown.button, .viewer-option-panel .next > a.dropdown, .viewer-option-panel .prev > a.dropdown, .viewer-option-panel a.dropdown.update {
   position: relative;
   padding-right: 3.1875em;
 }
 /* line 46, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.update:before {
   position: absolute;
   content: "";
   width: 0;
@@ -3240,70 +3240,70 @@ label.error {
   top: 50%;
 }
 /* line 81, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.update:before {
   border-width: 0.5625em;
   right: 1.5em;
   margin-top: -0.25em;
 }
 /* line 100, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.update:before {
   border-color: white transparent transparent transparent;
 }
 /* line 109, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.tiny, .viewer-option-panel .next > a.dropdown, .viewer-option-panel .prev > a.dropdown {
+.dropdown.button.tiny, .viewer-option-panel .next > a.dropdown, .viewer-option-panel .prev > a.dropdown, .viewer-option-panel a.dropdown.update {
   padding-right: 2.1875em;
 }
 /* line 61, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.tiny:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button.tiny:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.update:before {
   border-width: 0.4375em;
   right: 0.875em;
   margin-top: -0.15625em;
 }
 /* line 100, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.tiny:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button.tiny:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.update:before {
   border-color: white transparent transparent transparent;
 }
 /* line 110, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.small, .viewer-option-panel .next > a.dropdown.small, .viewer-option-panel .prev > a.dropdown.small {
+.dropdown.button.small, .viewer-option-panel .next > a.dropdown.small, .viewer-option-panel .prev > a.dropdown.small, .viewer-option-panel a.dropdown.small.update {
   padding-right: 2.8125em;
 }
 /* line 71, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.small:before, .viewer-option-panel .next > a.dropdown.small:before, .viewer-option-panel .prev > a.dropdown.small:before {
+.dropdown.button.small:before, .viewer-option-panel .next > a.dropdown.small:before, .viewer-option-panel .prev > a.dropdown.small:before, .viewer-option-panel a.dropdown.small.update:before {
   border-width: 0.5625em;
   right: 1.125em;
   margin-top: -0.21875em;
 }
 /* line 100, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.small:before, .viewer-option-panel .next > a.dropdown.small:before, .viewer-option-panel .prev > a.dropdown.small:before {
+.dropdown.button.small:before, .viewer-option-panel .next > a.dropdown.small:before, .viewer-option-panel .prev > a.dropdown.small:before, .viewer-option-panel a.dropdown.small.update:before {
   border-color: white transparent transparent transparent;
 }
 /* line 111, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.large, .viewer-option-panel .next > a.dropdown.large, .viewer-option-panel .prev > a.dropdown.large {
+.dropdown.button.large, .viewer-option-panel .next > a.dropdown.large, .viewer-option-panel .prev > a.dropdown.large, .viewer-option-panel a.dropdown.large.update {
   padding-right: 4em;
 }
 /* line 91, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.large:before, .viewer-option-panel .next > a.dropdown.large:before, .viewer-option-panel .prev > a.dropdown.large:before {
+.dropdown.button.large:before, .viewer-option-panel .next > a.dropdown.large:before, .viewer-option-panel .prev > a.dropdown.large:before, .viewer-option-panel a.dropdown.large.update:before {
   border-width: 0.625em;
   right: 1.75em;
   margin-top: -0.3125em;
 }
 /* line 100, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.large:before, .viewer-option-panel .next > a.dropdown.large:before, .viewer-option-panel .prev > a.dropdown.large:before {
+.dropdown.button.large:before, .viewer-option-panel .next > a.dropdown.large:before, .viewer-option-panel .prev > a.dropdown.large:before, .viewer-option-panel a.dropdown.large.update:before {
   border-color: white transparent transparent transparent;
 }
 /* line 112, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown-buttons.scss */
-.dropdown.button.secondary:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before {
+.dropdown.button.secondary:before, .viewer-option-panel .next > a.dropdown:before, .viewer-option-panel .prev > a.dropdown:before, .viewer-option-panel a.dropdown.secondary.update:before {
   border-color: #333333 transparent transparent transparent;
 }
 
 /* Split Buttons */
 /* line 150, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button, .viewer-option-panel .next > a.split, .viewer-option-panel .prev > a.split {
+.split.button, .viewer-option-panel .next > a.split, .viewer-option-panel .prev > a.split, .viewer-option-panel a.split.update {
   position: relative;
   padding-right: 4.8em;
 }
 /* line 53, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span {
+.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span, .viewer-option-panel a.split.update span {
   display: block;
   height: 100%;
   position: absolute;
@@ -3312,7 +3312,7 @@ label.error {
   border-left: solid 1px;
 }
 /* line 62, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.update span:before {
   position: absolute;
   content: "";
   width: 0;
@@ -3322,99 +3322,99 @@ label.error {
   left: 50%;
 }
 /* line 73, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span:active, .viewer-option-panel .next > a.split span:active, .viewer-option-panel .prev > a.split span:active {
+.split.button span:active, .viewer-option-panel .next > a.split span:active, .viewer-option-panel .prev > a.split span:active, .viewer-option-panel a.split.update span:active {
   background-color: rgba(0, 0, 0, 0.1);
 }
 /* line 79, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span {
+.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span, .viewer-option-panel a.split.update span {
   border-left-color: #1e728c;
 }
 /* line 116, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span {
+.split.button span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span, .viewer-option-panel a.split.update span {
   width: 3em;
 }
 /* line 117, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.update span:before {
   border-top-style: solid;
   border-width: 0.5625em;
   top: 1.125em;
   margin-left: -0.5625em;
 }
 /* line 142, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.update span:before {
   border-color: white transparent transparent transparent;
 }
 /* line 79, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.secondary span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span {
+.split.button.secondary span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span, .viewer-option-panel a.split.secondary.update span {
   border-left-color: #c3c3c3;
 }
 /* line 142, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.secondary span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button.secondary span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.secondary.update span:before {
   border-color: white transparent transparent transparent;
 }
 /* line 79, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.alert span, .viewer-option-panel .next > a.split.alert span, .viewer-option-panel .prev > a.split.alert span {
+.split.button.alert span, .viewer-option-panel .next > a.split.alert span, .viewer-option-panel .prev > a.split.alert span, .viewer-option-panel a.split.alert.update span {
   border-left-color: #7f0a0c;
 }
 /* line 79, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.success span, .viewer-option-panel .next > a.split.success span, .viewer-option-panel .prev > a.split.success span {
+.split.button.success span, .viewer-option-panel .next > a.split.success span, .viewer-option-panel .prev > a.split.success span, .viewer-option-panel a.split.success.update span {
   border-left-color: #396516;
 }
 /* line 156, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.tiny, .viewer-option-panel .next > a.split, .viewer-option-panel .prev > a.split {
+.split.button.tiny, .viewer-option-panel .next > a.split, .viewer-option-panel .prev > a.split, .viewer-option-panel a.split.update {
   padding-right: 3.9375em;
 }
 /* line 88, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.tiny span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span {
+.split.button.tiny span, .viewer-option-panel .next > a.split span, .viewer-option-panel .prev > a.split span, .viewer-option-panel a.split.update span {
   width: 2.84375em;
 }
 /* line 89, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.tiny span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button.tiny span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.update span:before {
   border-top-style: solid;
   border-width: 0.4375em;
   top: 0.875em;
   margin-left: -0.3125em;
 }
 /* line 157, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.small, .viewer-option-panel .next > a.split.small, .viewer-option-panel .prev > a.split.small {
+.split.button.small, .viewer-option-panel .next > a.split.small, .viewer-option-panel .prev > a.split.small, .viewer-option-panel a.split.small.update {
   padding-right: 3.9375em;
 }
 /* line 102, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.small span, .viewer-option-panel .next > a.split.small span, .viewer-option-panel .prev > a.split.small span {
+.split.button.small span, .viewer-option-panel .next > a.split.small span, .viewer-option-panel .prev > a.split.small span, .viewer-option-panel a.split.small.update span {
   width: 2.8125em;
 }
 /* line 103, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.small span:before, .viewer-option-panel .next > a.split.small span:before, .viewer-option-panel .prev > a.split.small span:before {
+.split.button.small span:before, .viewer-option-panel .next > a.split.small span:before, .viewer-option-panel .prev > a.split.small span:before, .viewer-option-panel a.split.small.update span:before {
   border-top-style: solid;
   border-width: 0.5625em;
   top: 0.84375em;
   margin-left: -0.5625em;
 }
 /* line 158, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.large, .viewer-option-panel .next > a.split.large, .viewer-option-panel .prev > a.split.large {
+.split.button.large, .viewer-option-panel .next > a.split.large, .viewer-option-panel .prev > a.split.large, .viewer-option-panel a.split.large.update {
   padding-right: 6em;
 }
 /* line 130, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.large span, .viewer-option-panel .next > a.split.large span, .viewer-option-panel .prev > a.split.large span {
+.split.button.large span, .viewer-option-panel .next > a.split.large span, .viewer-option-panel .prev > a.split.large span, .viewer-option-panel a.split.large.update span {
   width: 3.75em;
 }
 /* line 131, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.large span:before, .viewer-option-panel .next > a.split.large span:before, .viewer-option-panel .prev > a.split.large span:before {
+.split.button.large span:before, .viewer-option-panel .next > a.split.large span:before, .viewer-option-panel .prev > a.split.large span:before, .viewer-option-panel a.split.large.update span:before {
   border-top-style: solid;
   border-width: 0.625em;
   top: 1.3125em;
   margin-left: -0.5625em;
 }
 /* line 159, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.expand, .viewer-option-panel .next > a.split.expand, .viewer-option-panel .prev > a.split.expand {
+.split.button.expand, .viewer-option-panel .next > a.split.expand, .viewer-option-panel .prev > a.split.expand, .viewer-option-panel a.split.expand.update {
   padding-left: 2em;
 }
 /* line 142, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.secondary span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before {
+.split.button.secondary span:before, .viewer-option-panel .next > a.split span:before, .viewer-option-panel .prev > a.split span:before, .viewer-option-panel a.split.secondary.update span:before {
   border-color: #333333 transparent transparent transparent;
 }
 /* line 163, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.radius span, .viewer-option-panel .next > a.split.radius span, .viewer-option-panel .prev > a.split.radius span {
+.split.button.radius span, .viewer-option-panel .next > a.split.radius span, .viewer-option-panel .prev > a.split.radius span, .viewer-option-panel a.split.radius.update span {
   -moz-border-radius-topright: 3px;
   -moz-border-radius-bottomright: 3px;
   -webkit-border-top-right-radius: 3px;
@@ -3423,7 +3423,7 @@ label.error {
   border-bottom-right-radius: 3px;
 }
 /* line 164, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_split-buttons.scss */
-.split.button.round span, .viewer-option-panel .next > a.split.round span, .viewer-option-panel .prev > a.split.round span {
+.split.button.round span, .viewer-option-panel .next > a.split.round span, .viewer-option-panel .prev > a.split.round span, .viewer-option-panel a.split.round.update span {
   -moz-border-radius-topright: 1000px;
   -moz-border-radius-bottomright: 1000px;
   -webkit-border-top-right-radius: 1000px;
@@ -4565,7 +4565,7 @@ label.error {
   height: 2.45em;
 }
 /* line 104, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar .button, .top-bar .viewer-option-panel .next > a, .viewer-option-panel .top-bar .next > a, .top-bar .viewer-option-panel .prev > a, .viewer-option-panel .top-bar .prev > a {
+.top-bar .button, .top-bar .viewer-option-panel .next > a, .viewer-option-panel .top-bar .next > a, .top-bar .viewer-option-panel .prev > a, .viewer-option-panel .top-bar .prev > a, .top-bar .viewer-option-panel a.update, .viewer-option-panel .top-bar a.update {
   padding-top: .5em;
   padding-bottom: .5em;
   margin-bottom: 0;
@@ -4697,36 +4697,36 @@ label.error {
   background: #222222;
 }
 /* line 246, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button, .top-bar-section ul .viewer-option-panel li.next > a, .viewer-option-panel .top-bar-section ul li.next > a, .top-bar-section ul .viewer-option-panel li.prev > a, .viewer-option-panel .top-bar-section ul li.prev > a {
+.top-bar-section ul li > a.button, .top-bar-section ul .viewer-option-panel li.next > a, .viewer-option-panel .top-bar-section ul li.next > a, .top-bar-section ul .viewer-option-panel li.prev > a, .viewer-option-panel .top-bar-section ul li.prev > a, .top-bar-section ul .viewer-option-panel li > a.update, .viewer-option-panel .top-bar-section ul li > a.update {
   background: #2ba6cb;
   font-size: 0.8125em;
 }
 /* line 249, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.hover, .top-bar-section ul .viewer-option-panel li.next > a.hover, .viewer-option-panel .top-bar-section ul li.next > a.hover, .top-bar-section ul .viewer-option-panel li.prev > a.hover, .viewer-option-panel .top-bar-section ul li.prev > a.hover {
+.top-bar-section ul li > a.button.hover, .top-bar-section ul .viewer-option-panel li.next > a.hover, .viewer-option-panel .top-bar-section ul li.next > a.hover, .top-bar-section ul .viewer-option-panel li.prev > a.hover, .viewer-option-panel .top-bar-section ul li.prev > a.hover, .top-bar-section ul .viewer-option-panel li > a.hover.update, .viewer-option-panel .top-bar-section ul li > a.hover.update {
   background: #2284a1;
 }
 /* line 253, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.secondary, .top-bar-section ul .viewer-option-panel li.next > a, .viewer-option-panel .top-bar-section ul li.next > a, .top-bar-section ul .viewer-option-panel li.prev > a, .viewer-option-panel .top-bar-section ul li.prev > a {
+.top-bar-section ul li > a.button.secondary, .top-bar-section ul .viewer-option-panel li.next > a, .viewer-option-panel .top-bar-section ul li.next > a, .top-bar-section ul .viewer-option-panel li.prev > a, .viewer-option-panel .top-bar-section ul li.prev > a, .top-bar-section ul .viewer-option-panel li > a.secondary.update, .viewer-option-panel .top-bar-section ul li > a.secondary.update {
   background: #e9e9e9;
 }
 /* line 255, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.secondary.hover, .top-bar-section ul .viewer-option-panel li.next > a.hover, .viewer-option-panel .top-bar-section ul li.next > a.hover, .top-bar-section ul .viewer-option-panel li.prev > a.hover, .viewer-option-panel .top-bar-section ul li.prev > a.hover {
+.top-bar-section ul li > a.button.secondary.hover, .top-bar-section ul .viewer-option-panel li.next > a.hover, .viewer-option-panel .top-bar-section ul li.next > a.hover, .top-bar-section ul .viewer-option-panel li.prev > a.hover, .viewer-option-panel .top-bar-section ul li.prev > a.hover, .top-bar-section ul .viewer-option-panel li > a.secondary.hover.update, .viewer-option-panel .top-bar-section ul li > a.secondary.hover.update {
   background: #d0d0d0;
 }
 /* line 259, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.success, .top-bar-section ul .viewer-option-panel li.next > a.success, .viewer-option-panel .top-bar-section ul li.next > a.success, .top-bar-section ul .viewer-option-panel li.prev > a.success, .viewer-option-panel .top-bar-section ul li.prev > a.success {
+.top-bar-section ul li > a.button.success, .top-bar-section ul .viewer-option-panel li.next > a.success, .viewer-option-panel .top-bar-section ul li.next > a.success, .top-bar-section ul .viewer-option-panel li.prev > a.success, .viewer-option-panel .top-bar-section ul li.prev > a.success, .top-bar-section ul .viewer-option-panel li > a.success.update, .viewer-option-panel .top-bar-section ul li > a.success.update {
   background: #5da423;
 }
 /* line 261, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.success.hover, .top-bar-section ul .viewer-option-panel li.next > a.success.hover, .viewer-option-panel .top-bar-section ul li.next > a.success.hover, .top-bar-section ul .viewer-option-panel li.prev > a.success.hover, .viewer-option-panel .top-bar-section ul li.prev > a.success.hover {
+.top-bar-section ul li > a.button.success.hover, .top-bar-section ul .viewer-option-panel li.next > a.success.hover, .viewer-option-panel .top-bar-section ul li.next > a.success.hover, .top-bar-section ul .viewer-option-panel li.prev > a.success.hover, .viewer-option-panel .top-bar-section ul li.prev > a.success.hover, .top-bar-section ul .viewer-option-panel li > a.success.hover.update, .viewer-option-panel .top-bar-section ul li > a.success.hover.update {
   background: #457a1a;
 }
 /* line 265, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.alert, .top-bar-section ul .viewer-option-panel li.next > a.alert, .viewer-option-panel .top-bar-section ul li.next > a.alert, .top-bar-section ul .viewer-option-panel li.prev > a.alert, .viewer-option-panel .top-bar-section ul li.prev > a.alert {
+.top-bar-section ul li > a.button.alert, .top-bar-section ul .viewer-option-panel li.next > a.alert, .viewer-option-panel .top-bar-section ul li.next > a.alert, .top-bar-section ul .viewer-option-panel li.prev > a.alert, .viewer-option-panel .top-bar-section ul li.prev > a.alert, .top-bar-section ul .viewer-option-panel li > a.alert.update, .viewer-option-panel .top-bar-section ul li > a.alert.update {
   background: #c60f13;
 }
 /* line 267, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
-.top-bar-section ul li > a.button.alert.hover, .top-bar-section ul .viewer-option-panel li.next > a.alert.hover, .viewer-option-panel .top-bar-section ul li.next > a.alert.hover, .top-bar-section ul .viewer-option-panel li.prev > a.alert.hover, .viewer-option-panel .top-bar-section ul li.prev > a.alert.hover {
+.top-bar-section ul li > a.button.alert.hover, .top-bar-section ul .viewer-option-panel li.next > a.alert.hover, .viewer-option-panel .top-bar-section ul li.next > a.alert.hover, .top-bar-section ul .viewer-option-panel li.prev > a.alert.hover, .viewer-option-panel .top-bar-section ul li.prev > a.alert.hover, .top-bar-section ul .viewer-option-panel li > a.alert.hover.update, .viewer-option-panel .top-bar-section ul li > a.alert.hover.update {
   background: #970b0e;
 }
 /* line 275, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
@@ -4857,7 +4857,9 @@ label.error {
   .top-bar .viewer-option-panel .next > a,
   .viewer-option-panel .top-bar .next > a,
   .top-bar .viewer-option-panel .prev > a,
-  .viewer-option-panel .top-bar .prev > a {
+  .viewer-option-panel .top-bar .prev > a,
+  .top-bar .viewer-option-panel a.update,
+  .viewer-option-panel .top-bar a.update {
     line-height: 2em;
     font-size: 0.875em;
     height: 2em;
@@ -5406,7 +5408,7 @@ label.error {
     top: 6.25em;
   }
   /* line 124, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_reveal.scss */
-  .reveal-modal.tiny, .viewer-option-panel .next > a.reveal-modal, .viewer-option-panel .prev > a.reveal-modal {
+  .reveal-modal.tiny, .viewer-option-panel .next > a.reveal-modal, .viewer-option-panel .prev > a.reveal-modal, .viewer-option-panel a.reveal-modal.update {
     margin-left: -15%;
     width: 30%;
   }
@@ -5471,7 +5473,7 @@ label.error {
   padding: 1.125em 1.25em 1.5em;
 }
 /* line 68, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_joyride.scss */
-.joyride-content-wrapper .button, .joyride-content-wrapper .viewer-option-panel .next > a, .viewer-option-panel .joyride-content-wrapper .next > a, .joyride-content-wrapper .viewer-option-panel .prev > a, .viewer-option-panel .joyride-content-wrapper .prev > a {
+.joyride-content-wrapper .button, .joyride-content-wrapper .viewer-option-panel .next > a, .viewer-option-panel .joyride-content-wrapper .next > a, .joyride-content-wrapper .viewer-option-panel .prev > a, .viewer-option-panel .joyride-content-wrapper .prev > a, .joyride-content-wrapper .viewer-option-panel a.update, .viewer-option-panel .joyride-content-wrapper a.update {
   margin-bottom: 0 !important;
 }
 
@@ -7190,7 +7192,7 @@ a.th {
   margin-bottom: 0;
 }
 /* line 145, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown.scss */
-.f-dropdown.tiny, .viewer-option-panel .next > a.f-dropdown, .viewer-option-panel .prev > a.f-dropdown {
+.f-dropdown.tiny, .viewer-option-panel .next > a.f-dropdown, .viewer-option-panel .prev > a.f-dropdown, .viewer-option-panel a.f-dropdown.update {
   max-width: 200px;
 }
 /* line 146, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown.scss */
@@ -7345,31 +7347,35 @@ nav li.current-state a {
   float: left;
   text-align: center;
 }
+/* line 126, ../sass/app.scss */
+.viewer-option-panel a.update {
+  margin: 0;
+}
 
-/* line 127, ../sass/app.scss */
+/* line 133, ../sass/app.scss */
 .diff-container {
   border: 1px solid #d9d9d9;
   font-family: "Inconsolata", sans-serif;
 }
 
-/* line 132, ../sass/app.scss */
+/* line 138, ../sass/app.scss */
 .diff-line-table {
   border: 0;
   margin: 0;
 }
-/* line 136, ../sass/app.scss */
+/* line 142, ../sass/app.scss */
 .diff-line-table .plus-minus {
   text-align: center;
   width: 25px !important;
   border-right: 1px solid #d9d9d9;
 }
 
-/* line 143, ../sass/app.scss */
+/* line 149, ../sass/app.scss */
 .diff-subtraction {
   background-color: #ffe2e2;
 }
 
-/* line 147, ../sass/app.scss */
+/* line 153, ../sass/app.scss */
 .diff-addition {
   background-color: #e2ffe2;
 }
