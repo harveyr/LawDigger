@@ -69,7 +69,7 @@
       function Laws() {}
 
       Laws.prototype.fetchAll = function() {
-        return $http.get(UrlBuilder.apiUrl('/laws/or'));
+        return $http.get(UrlBuilder.apiUrl('/laws/ors'));
       };
 
       Laws.prototype.fetchLaw = function(version, section) {
@@ -119,7 +119,7 @@
   angular.module('myLilApp').config([
     '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
       $routeProvider.when('/', {
-        controller: 'HomeCtrl',
+        controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
       }).when('/view', {
         controller: 'ViewerCtrl',
@@ -141,17 +141,18 @@
     }
   ]);
 
-  angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws) {
-    var fetchAndApplyLaw, fetchLaws;
+  angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
+    var fetchAllLaws, fetchAndApplyLaw, fetchedLaws;
     console.log('ViewerCtrl');
     $scope.m = {};
-    fetchLaws = function() {
+    fetchedLaws = false;
+    fetchAllLaws = function() {
       return Laws.fetchAll().then(function(response) {
         var laws;
         laws = _.sortBy(response.data, function(law) {
           return law.subsection;
         });
-        return $scope.laws = laws;
+        return $scope.allLaws = laws;
       });
     };
     fetchAndApplyLaw = function(version, section) {
@@ -164,14 +165,22 @@
       });
     };
     $scope.chooseLaw = function(law) {
-      console.log('law:', law);
       $scope.currentLaw = law;
       $scope.hideSearchList = true;
       $scope.m.primaryYear = _.max(law.versions);
       return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
     };
     $scope.lawFilterChange = function() {
-      return $scope.hideSearchList = false;
+      $scope.hideSearchList = false;
+      if (!fetchedLaws) {
+        fetchAllLaws();
+        return fetchedLaws = true;
+      }
+    };
+    $scope.diffMe = function() {
+      var url;
+      url = UrlBuilder.diffPage('ors', $scope.activeSection, $scope.availableVersions[$scope.availableVersions.length - 1], $scope.availableVersions[0]);
+      return $location.path(url);
     };
     $scope.choosePrimaryYear = function(year) {
       return $scope.m.primaryYear = year;
@@ -185,7 +194,8 @@
       $scope.activeSection = $routeParams.section;
       return fetchAndApplyLaw($scope.activeVersion, $scope.activeSection);
     } else {
-      return fetchLaws();
+      $scope.m.selectedVersion = 2011;
+      return fetchAllLaws();
     }
   });
 
@@ -219,7 +229,7 @@
       scope: {
         lines: '='
       },
-      template: "<div class=\"row diff-container\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\"></div>\n</div>",
+      template: "<div class=\"row diff-container\">\n    <div ng-repeat=\"line in lines\" inline-diff-line line=\"line\" first=\"$first\"></div>\n</div>",
       link: function(scope) {}
     };
   });
@@ -247,17 +257,24 @@
     var directive;
     return directive = {
       scope: {
-        line: '='
+        line: '=',
+        first: '='
       },
-      template: "<div class=\"small-12 columns\" ng-class=\"diffClass\">\n    {{line}}\n</div>",
+      template: "<div class=\"diff-line-inline\" ng-class=\"diffClass\">\n    {{line}}\n</div>",
       link: function(scope) {
-        var firstChar;
+        var diffClass, firstChar;
         firstChar = scope.line.charAt(0);
+        diffClass = '';
         if (firstChar === '-') {
-          return scope.diffClass = 'diff-subtraction';
+          diffClass = 'diff-subtraction';
         } else if (firstChar === '+') {
-          return scope.diffClass = 'diff-addition';
+          diffClass = 'diff-addition';
         }
+        if (scope.first) {
+          diffClass += ' first-line';
+        }
+        scope.diffClass = diffClass;
+        return console.log('scope.diffClass:', scope.diffClass);
       }
     };
   });

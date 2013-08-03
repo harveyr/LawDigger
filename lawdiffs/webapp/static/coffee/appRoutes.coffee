@@ -1,7 +1,7 @@
 angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
     $routeProvider
         .when('/', {
-            controller: 'HomeCtrl'
+            controller: 'ViewerCtrl'
             templateUrl: '/static/partials/home.html'
         })
         .when('/view', {

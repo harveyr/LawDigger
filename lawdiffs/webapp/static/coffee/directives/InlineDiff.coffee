@@ -5,7 +5,7 @@ angular.module(DIRECTIVE_MODULE).directive 'inlineDiff', () ->
             lines: '='
         template: """
         <div class="row diff-container">
-            <div ng-repeat="line in lines" inline-diff-line line="line"></div>
+            <div ng-repeat="line in lines" inline-diff-line line="line" first="$first"></div>
         </div>
         """
         link: (scope) ->

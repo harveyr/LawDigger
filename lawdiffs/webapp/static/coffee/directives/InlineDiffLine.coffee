@@ -2,15 +2,22 @@ angular.module(DIRECTIVE_MODULE).directive 'inlineDiffLine', () ->
     directive =
         scope:
             line: '='
+            first: '='
         template: """
-        <div class="small-12 columns" ng-class="diffClass">
+        <div class="diff-line-inline" ng-class="diffClass">
             {{line}}
         </div>
         """
         link: (scope) ->
             firstChar = scope.line.charAt(0)
+            diffClass = ''
             if firstChar == '-'
-                scope.diffClass = 'diff-subtraction'
+                diffClass = 'diff-subtraction'
             else if firstChar == '+'
-                scope.diffClass = 'diff-addition'
+                diffClass = 'diff-addition'
+
+            if scope.first
+                diffClass += ' first-line'
+            scope.diffClass = diffClass
+            console.log 'scope.diffClass:', scope.diffClass
 

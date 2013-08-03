@@ -1,12 +1,13 @@
-angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws) ->
+angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
     console.log 'ViewerCtrl'
     $scope.m = {}
+    fetchedLaws = false
 
-    fetchLaws = ->
+    fetchAllLaws = ->
         Laws.fetchAll().then (response) ->
             laws = _.sortBy response.data, (law) ->
                 law.subsection
-            $scope.laws = laws
+            $scope.allLaws = laws
 
     fetchAndApplyLaw = (version, section) ->
         Laws.fetchLaw(version, section).then (response) ->
@@ -16,7 +17,6 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
                 return parseInt(b) - parseInt(a)
 
     $scope.chooseLaw = (law) ->
-        console.log 'law:', law
         $scope.currentLaw = law
         $scope.hideSearchList = true
         $scope.m.primaryYear = _.max law.versions
@@ -24,11 +24,20 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
 
     $scope.lawFilterChange = ->
         $scope.hideSearchList = false
+        if not fetchedLaws
+            fetchAllLaws()
+            fetchedLaws = true
+
+    $scope.diffMe = ->
+        url = UrlBuilder.diffPage 'ors', $scope.activeSection,
+            $scope.availableVersions[$scope.availableVersions.length - 1],
+            $scope.availableVersions[0]
+        $location.path(url)
 
     $scope.choosePrimaryYear = (year) ->
         $scope.m.primaryYear = year
 
-    # fetchLaws()
+    # fetchAllLaws()
 
     $scope.selectedVersionChange = (version) ->
         $location.path("/view/ors/#{version}/#{$scope.activeSection}")
@@ -39,5 +48,6 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
         $scope.activeSection = $routeParams.section
         fetchAndApplyLaw $scope.activeVersion, $scope.activeSection
     else
-        fetchLaws()
+        $scope.m.selectedVersion = 2011
+        fetchAllLaws()
 

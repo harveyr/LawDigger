@@ -18,8 +18,8 @@
             <p>
                 <strong>Click a Law</strong>
             </p>
-            <div ng-repeat="l in laws | filter:m.lawFilter | limitTo: 10">
-                <a ng-click="chooseLaw(l)">{{l.subsection}}</a> ({{l.versions.length}} versions)
+            <div ng-repeat="l in allLaws | filter:m.lawFilter | limitTo: 10">
+                <a ng-href="/view/ors/{{m.selectedVersion}}/{{l.subsection}}">{{l.subsection}}</a>
             </div>
             <div>
                 ...
@@ -28,7 +28,7 @@
     </div>
 
     <div class="row panel" ng-show="activeSection">
-        <div class="small-8 columns">
+        <div class="small-7 columns">
             <strong>
                 {{activeSection}}
                 {{activeTitle}}
@@ -47,6 +47,9 @@
             <select ng-model="m.compareYear"
                 ng-options="year for year in currentLaw.versions">
             </select>
+        </div>
+        <div class="small-1 columns">
+            <a ng-click="diffMe()" class="button tiny secondary">Diff</a>
         </div>
     </div>
 

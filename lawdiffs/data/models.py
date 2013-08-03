@@ -2,6 +2,8 @@ import inspect
 # from .client import client
 import logging
 import mongoengine as moe
+import re
+
 logger = logging.getLogger(__name__)
 
 
@@ -111,6 +113,10 @@ class OregonRevisedStatute(Law):
             subs=self.subsection,
             versions=self.texts.keys())
 
+    @classmethod
+    def subsection_float_to_string(cls, subsection):
+        return '{0:.3f}'.format(subsection)
+
     @property
     def filename(self):
         return self.subsection
@@ -119,4 +125,44 @@ class OregonRevisedStatute(Law):
         return '{subs}. {title}\n{text}'.format(
             subs=self.subsection,
             title=self.title(version),
-            text=self.text(version))
+            text=self.formatted_text(version))
+
+    def formatted_text(self, version):
+        text = self.text(version)
+        formatted = ''
+        int_li = re.compile(r'(\(\d+\))')
+        parts = [p.strip() for p in int_li.split(text)]
+
+        for i in range(len(parts)):
+            part = parts[i]
+            prev_part = parts[i-1]
+            if int_li.match(part):
+                if i > 0:
+                    if prev_part.endswith('.'):
+                        formatted += '\n'
+                    else:
+                        formatted += ' '
+                formatted += part
+            else:
+                formatted += self._format_char_list_items(part)
+            formatted = formatted.strip()
+            if formatted.endswith(']'):
+                idx = formatted.rfind('[')
+                formatted = formatted[:idx] + '\n\n' + formatted[idx:]
+        return formatted.strip()
+
+    def _format_char_list_items(self, text):
+        char_li = re.compile(r'(\([a-z+]\))')
+        parts = [p.strip() for p in char_li.split(text)]
+        if len(parts) == 1:
+            return ' ' + parts[0]
+
+        formatted = ''
+        for p in parts:
+            if char_li.match(p):
+                formatted += '\n\t' + p
+            else:
+                formatted += ' ' + p
+        return formatted
+
+

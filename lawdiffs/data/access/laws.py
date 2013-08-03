@@ -23,6 +23,11 @@ def get_model(law_code):
     return law_code_to_model_map[law_code]
 
 
+def fetch_law(law_code, subsection):
+    model = get_model(law_code)
+    return model.objects(subsection=subsection).first()
+
+
 def fetch_by_code(law_code, version=None):
     model = get_model(law_code)
     if not version:
@@ -74,11 +79,6 @@ def fetch_previous_and_next_subsections(law_code, subsection):
         next = None
 
     return (prev, next)
-
-
-def fetch_law(law_code, subsection):
-    model = get_model(law_code)
-    return model.objects(subsection=subsection).first()
 
 
 def get_or_create_law(subsection, law_code):

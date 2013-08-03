@@ -84,13 +84,13 @@ class OrLawParser(LawParser):
             ],
             'crawl_link_pattern': re.compile(r'\d+\.html')
         },
-        {
-            'version': 2009,
-            'crawl': [
-                'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
-            ],
-            'crawl_link_pattern': re.compile(r'\d+\.html')
-        },
+        # {
+        #     'version': 2009,
+        #     'crawl': [
+        #         'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
+        #     ],
+        #     'crawl_link_pattern': re.compile(r'\d+\.html')
+        # },
         {
             'version': 2011,
             'crawl': [
@@ -113,14 +113,19 @@ class OrLawParser(LawParser):
         for source in self.sources:
             version = source['version']
             urls = self.scrape_urls(source)
-            for i in range(min(2, len(urls))):
+            for i in range(min(1, len(urls))):
                 url = urls[i]
                 logger.debug('url: {v}'.format(v=url))
                 self.create_laws_from_url(url, version)
 
             self.commit(version)
 
-        # diff = repos.get_tag_diff('7.110', '1995', '2009', self.law_code)
+        # law = data_laws.fetch_law(self.law_code, '1.060')
+        # print(law.formatted_text(2011))
+
+        # law = data_laws.fetch_law(self.law_code, '1.195')
+        # diff = repos.get_tag_diff(law, '2001', '2011')
+        # print('diff: {v}'.format(v=diff))
 
     def scrape_urls(self, source_dict):
         urls = []
@@ -134,40 +139,27 @@ class OrLawParser(LawParser):
 
     def create_laws_from_url(self, url, version):
         soup = self.fetch_soup(url)
-
-        starting_elem = soup.find('b').parent.previous_sibling
         current_law = None
-
         text_buffer = ''
-        for elem in starting_elem.next_siblings:
-            if isinstance(elem, bs4.element.NavigableString):
-                text_buffer += self.get_soup_text(elem)
-                continue
+        for s in soup.stripped_strings:
+            s = ' '.join(s.splitlines())
+            subs_matches = self.subsection_re.match(s)
+            if subs_matches:
+                section = subs_matches.group(1)
+                remainder = s[len(section):].strip()
+                if remainder.isupper():
+                    # Should be a heading
+                    continue
 
-            for child in elem.children:
-                text = self.get_soup_text(elem)
-                subs_matches = self.subsection_re.match(text)
-                if subs_matches:
-                    section = subs_matches.group(1)
-                    current_law = data_laws.get_or_create_law(
-                        subsection=section, law_code=self.law_code)
-                    text_buffer = ''
-
-                    title_matches = self.title_re.match(text)
-                    if title_matches:
-                        title = title_matches.group(1)
-                        current_law.set_version_title(version, title)
-                        law_text = text[title_matches.end():]
-                        text_buffer += law_text.strip()
-                    else:
-                        title = ''
-                        law_text = text[subs_matches.end() - 1:]
-                        text_buffer += ' '.join(law_text.splitlines())
-                else:
-                    if not text.isupper():
-                        text_buffer += text
+                current_law = data_laws.get_or_create_law(
+                    subsection=section, law_code=self.law_code)
+                current_law.set_version_title(version, remainder)
+                text_buffer = ''
+            else:
+                if not s.isupper():
+                    text_buffer += ' ' + s
+            if current_law:
                 current_law.set_version_text(version, text_buffer)
-
 
 mongoengine_connect()
 p = OrLawParser()

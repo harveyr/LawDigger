@@ -66,6 +66,19 @@ nav li.name .subtitle {
     padding-bottom: 40px;
 }
 
+
+.diff-line-inline {
+    @include grid-column(12);
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    &.first-line {
+        font-size: $h6-font-size;
+        font-weight: bold;
+        padding-bottom: 10px;
+    }
+}
+
 .diff-subtraction {
     background-color: $diff-subtraction-color;
 }
@@ -75,5 +88,10 @@ nav li.name .subtitle {
 }
 
 .diff-container {
-    border: 1px solid #333;
+    border: 1px solid #999;
+    font-family: $inconsolata-family;
+    padding: {
+        top: 10px;
+        bottom: 10px;
+    }
 }

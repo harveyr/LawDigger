@@ -3,6 +3,7 @@ import subprocess
 import shlex
 import logging
 import shutil
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -57,12 +58,12 @@ def update(laws, law_code, version):
 
     repo_path = get_repo_path(repo_rel_path)
     for law in laws:
-        logger.debug('law: {v}'.format(v=law))
         f_path = os.path.join(repo_path, law.filename)
         law.file_path = f_path
         law.save_attr('file_path')
         with open(f_path, 'w') as open_f:
-            open_f.write(law.get_version(version))
+            text = law.get_version(version)
+            open_f.write(text)
 
     run_git_command('init', repo_rel_path)
     run_git_command('add -A', repo_rel_path)
@@ -75,6 +76,12 @@ def get_tag_diff(law, tag1, tag2):
     if not law.file_path:
         raise Exception('{} has no file_path'.format(law))
 
-    cmd = 'diff {tag1} {tag2} {file}'.format(
+    header_re = re.compile(
+        r'diff.*@@|\\ No newline at end of file',
+        re.DOTALL)
+    cmd = 'diff --no-color -b -U500 {tag1} {tag2} {file}'.format(
         tag1=tag1, tag2=tag2, file=law.file_path)
-    return run_git_command(cmd, law.law_code)
+    logger.debug('cmd: {v}'.format(v=cmd))
+    diff = run_git_command(cmd, law.law_code)
+    diff = header_re.sub('', diff)
+    return diff.strip()

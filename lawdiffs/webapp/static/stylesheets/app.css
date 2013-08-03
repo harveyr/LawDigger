@@ -7232,17 +7232,37 @@ nav li.name .subtitle {
   padding-bottom: 40px;
 }
 
-/* line 69, ../sass/app.scss */
+/* line 70, ../sass/app.scss */
+.diff-line-inline {
+  position: relative;
+  padding-left: 0.9375em;
+  padding-right: 0.9375em;
+  width: 100%;
+  float: left;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+/* line 75, ../sass/app.scss */
+.diff-line-inline.first-line {
+  font-size: 1em;
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+
+/* line 82, ../sass/app.scss */
 .diff-subtraction {
   background-color: #ffe2e2;
 }
 
-/* line 73, ../sass/app.scss */
+/* line 86, ../sass/app.scss */
 .diff-addition {
   background-color: #e2ffe2;
 }
 
-/* line 77, ../sass/app.scss */
+/* line 90, ../sass/app.scss */
 .diff-container {
-  border: 1px solid #333;
+  border: 1px solid #999;
+  font-family: "Inconsolata", sans-serif;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
