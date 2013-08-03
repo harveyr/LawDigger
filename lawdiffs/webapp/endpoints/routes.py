@@ -1,7 +1,7 @@
 import logging
 from flask import (Blueprint, request)
 
-from ...data import jsonify, htmlify
+from ...data import jsonify
 from ...data.access import laws as data_laws
 from ...mine import repos
 
@@ -22,8 +22,8 @@ def fetch_law(law_code, version, subsection):
     law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
     d = {
         'title': law.title(version),
-        'text': law.text(version),
-        'versions': law.texts.keys()
+        'text': law.text(version, formatted=True),
+        'versions': law.versions
     }
     return jsonify(d)
 
@@ -36,7 +36,9 @@ def fetch_diff(law_code, subsection, version1, version2):
         law_code, subsection)
     return jsonify({
         'diff': diff,
+        'version2_title': law.title(version2),
         'lines': diff.splitlines(),
         'prev': prev,
-        'next': next
+        'next': next,
+        'versions': law.versions
     })

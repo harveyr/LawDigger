@@ -1,9 +1,39 @@
+<div law-header 
+    code="{{lawCode}}"
+    title="{{version2Title}}"
+    subsection="{{subsection}}">
+</div>
+
 <div class="row">
-    <div class="small-1 columns">
-        <a ng-click="goNext()" class="button secondary tiny">{{prevSubsection}}</a>
+    <div class="small-6 columns">
+        
     </div>
-    <div class="small-1 columns">
-        <a ng-click="goPrevious()" class="button secondary tiny">{{nextSubsection}}</a>
+</div>
+
+<div class="viewer-option-panel">
+    <div class="prev">
+        <a ng-click="goPrevious()">
+            &laquo;
+            {{prevSubsection}}
+        </a>
+    </div>
+    <div class="next">
+        <a ng-click="goNext()">
+            {{nextSubsection}}
+            &raquo;
+        </a>
+    </div>
+    <div class="compare-text">
+        Comparing
+        <select ng-model="m.version1"
+            class="inline"
+            ng-options="v for v in availableVersions">
+        </select>
+        to
+        <select ng-model="m.version2"
+            class="inline"
+            ng-options="v for v in availableVersions">
+        </select>
     </div>
 </div>
 

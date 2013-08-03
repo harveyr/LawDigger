@@ -4,20 +4,28 @@ angular.module(DIRECTIVE_MODULE).directive 'inlineDiffLine', () ->
             line: '='
             first: '='
         template: """
-        <div class="diff-line-inline" ng-class="diffClass">
-            {{line}}
-        </div>
+        <table class="diff-line-table" ng-class="diffClass">
+            <tr>
+                <td class="plus-minus">{{plusMinus}}</td>
+                <td class="diff-text"><pre>{{text}}</pre></td>
+            </tr>
+        </table>
         """
         link: (scope) ->
             firstChar = scope.line.charAt(0)
             diffClass = ''
             if firstChar == '-'
                 diffClass = 'diff-subtraction'
+                scope.plusMinus = '-'
+                scope.text = scope.line.substring(1)
             else if firstChar == '+'
                 diffClass = 'diff-addition'
+                scope.plusMinus = '+'
+                scope.text = scope.line.substring(1)
+            else
+                scope.text = scope.line
 
             if scope.first
                 diffClass += ' first-line'
             scope.diffClass = diffClass
-            console.log 'scope.diffClass:', scope.diffClass
 

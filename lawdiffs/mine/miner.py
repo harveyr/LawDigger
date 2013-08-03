@@ -121,7 +121,7 @@ class OrLawParser(LawParser):
             self.commit(version)
 
         # law = data_laws.fetch_law(self.law_code, '1.060')
-        # print(law.formatted_text(2011))
+        # print(law.text(2011, formatted=True))
 
         # law = data_laws.fetch_law(self.law_code, '1.195')
         # diff = repos.get_tag_diff(law, '2001', '2011')

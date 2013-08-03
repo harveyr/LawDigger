@@ -94,14 +94,29 @@ class Law(moe.Document, Serializeable):
         self.texts[str(version)] = text
         self.save_attr('texts')
 
+    @property
+    def versions(self):
+        return self.texts.keys()
+
     def title(self, version):
         version = str(version)
         if version in self.titles:
             return self.titles[version]
         return ''
 
-    def text(self, version):
-        return self.texts[str(version)]
+    def text(self, version, formatted=False):
+        text = self.texts[str(version)]
+        if formatted:
+            return self.format_text(text)
+        return text
+
+    def htmlify(self, text):
+        """Not using this."""
+        logger.debug('text: {v}'.format(v=text))
+        html = ''
+        for p in [p for p in text.split('\n\n') if p]:
+            html += '<p>' + p + '</p>'
+        return html
 
 
 class OregonRevisedStatute(Law):
@@ -125,10 +140,13 @@ class OregonRevisedStatute(Law):
         return '{subs}. {title}\n{text}'.format(
             subs=self.subsection,
             title=self.title(version),
-            text=self.formatted_text(version))
+            text=self.text(version, formatted=True))
 
-    def formatted_text(self, version):
-        text = self.text(version)
+    def format_text(self, text):
+        if not text:
+            raise Exception(
+                '{} did not supply any text to format_text()'.format(self))
+
         formatted = ''
         int_li = re.compile(r'(\(\d+\))')
         parts = [p.strip() for p in int_li.split(text)]
@@ -139,7 +157,7 @@ class OregonRevisedStatute(Law):
             if int_li.match(part):
                 if i > 0:
                     if prev_part.endswith('.'):
-                        formatted += '\n'
+                        formatted += '\n\n'
                     else:
                         formatted += ' '
                 formatted += part

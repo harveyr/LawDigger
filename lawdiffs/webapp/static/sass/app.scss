@@ -1,3 +1,6 @@
+// Compass
+@import "compass/css3/inline-block";
+
 // Global Foundation Settings
 @import "settings";
 
@@ -66,16 +69,88 @@ nav li.name .subtitle {
     padding-bottom: 40px;
 }
 
+.law-title {
+    @include grid-row;
+    margin-bottom: 10px;
+
+    & > div {
+        @include grid-column(12);
+    }
+}
+
+.viewer-option-panel {
+    @include grid-row;
+    @include panel;
+
+    select {
+        margin: 0;
+
+        &.inline {
+            width: 70px;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+    }
+
+    .version {
+        @include grid-column(2);
+    }
+    
+    .next, .prev {
+        @include grid-column(2);
+
+        & > a {
+            @extend .button;
+            @extend .secondary;
+            @extend .tiny;
+            margin: 0;
+        }
+    }
+
+    .next {
+        @extend .right;
+        text-align: right;
+    }
+
+    .compare-text {
+        @include grid-column(8, false, true);
+        text-align: center;
+    }
+}
 
 .diff-line-inline {
     @include grid-column(12);
-    padding-top: 2px;
-    padding-bottom: 2px;
 
     &.first-line {
         font-size: $h6-font-size;
         font-weight: bold;
-        padding-bottom: 10px;
+    }
+
+    .inner {
+        @include grid-row;
+    }
+
+    .left-col {
+        float: left;
+        min-width: 15px;
+        margin-right: 10px;
+        border-right: 1px solid #999;
+        height: 100%;
+    }
+
+    .text {
+        overflow: hidden;
+    }
+}
+
+.diff-line-table {
+    border: 0;
+    margin: 0;
+
+    .plus-minus {
+        text-align: center;
+        width: 25px !important;
+        border-right: 1px solid #999;
     }
 }
 

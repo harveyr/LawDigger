@@ -5,7 +5,8 @@
                 <span class="prefix">Search ORS</span>
             </div>
             <div class="small-10 columns">
-                <input type="text" placeholder="1.010"
+                <input type="text"
+                    placeholder="Enter subsection, title, or both"
                     ng-change="lawFilterChange()"
                     ng-model="m.lawFilter"
                     autofocus>
@@ -16,46 +17,46 @@
     <div class="row" ng-show="m.lawFilter && !hideSearchList">
         <div class="small-10 small-offset-2 columns panel">
             <p>
-                <strong>Click a Law</strong>
+                <strong>Best Matches</strong>
             </p>
-            <div ng-repeat="l in allLaws | filter:m.lawFilter | limitTo: 10">
-                <a ng-href="/view/ors/{{m.selectedVersion}}/{{l.subsection}}">{{l.subsection}}</a>
-            </div>
-            <div>
-                ...
+            <div class="row" ng-repeat="l in allLaws | filter:m.lawFilter | limitTo: 10">
+                <div class="small-12 columns">
+                    <a ng-href="/view/ors/{{m.selectedVersion}}/{{l.subsection}}">ORS {{l.subsection}} {{l.titles[m.selectedVersion]}}</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row panel" ng-show="activeSection">
-        <div class="small-7 columns">
-            <strong>
-                {{activeSection}}
-                {{activeTitle}}
-                <span ng-show="!activeTitle">[No Title]</span>
-            </strong>
-        </div>
-        <div class="small-2 columns">
-            <label>Version</label>
+    <div law-header 
+        title="{{activeTitle}}"
+        subsection="{{activeSection}}"
+        ng-show="activeSection">
+    </div>
+
+    <div class="viewer-option-panel" ng-show="activeSection">
+        <div class="version">
+            <label>
+                Version
+            </label>
             <select ng-model="m.selectedVersion"
                 ng-options="v for v in availableVersions"
                 ng-change="selectedVersionChange(m.selectedVersion)">
             </select>
         </div>
-        <div class="small-2 columns">
+        <div class="version">
             <label>Compare Year</label>
             <select ng-model="m.compareYear"
                 ng-options="year for year in currentLaw.versions">
             </select>
         </div>
         <div class="small-1 columns">
-            <a ng-click="diffMe()" class="button tiny secondary">Diff</a>
+            <a ng-click="diffMe()" class="button small">Diff</a>
         </div>
     </div>
 
     <div class="row" ng-show="activeText">
         <div class="small-12">
-            <span ng-bind-html-unsafe="activeText"></span>
+            <pre>{{activeText}}</pre>
         </div>
     </div>
 
