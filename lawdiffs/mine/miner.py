@@ -84,13 +84,13 @@ class OrLawParser(LawParser):
             ],
             'crawl_link_pattern': re.compile(r'\d+\.html')
         },
-        # {
-        #     'version': 2009,
-        #     'crawl': [
-        #         'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
-        #     ],
-        #     'crawl_link_pattern': re.compile(r'\d+\.html')
-        # },
+        {
+            'version': 2009,
+            'crawl': [
+                'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
+            ],
+            'crawl_link_pattern': re.compile(r'\d+\.html')
+        },
         {
             'version': 2011,
             'crawl': [
@@ -146,7 +146,13 @@ class OrLawParser(LawParser):
             subs_matches = self.subsection_re.match(s)
             if subs_matches:
                 section = subs_matches.group(1)
+                # if section == '1.192':
+                #     logger.setLevel(logging.DEBUG)
+                # else:
+                #     logger.setLevel(logging.INFO)
+
                 remainder = s[len(section):].strip()
+                logger.debug('remainder: {v}'.format(v=remainder))
                 if remainder.isupper():
                     # Should be a heading
                     continue
@@ -154,7 +160,7 @@ class OrLawParser(LawParser):
                 current_law = data_laws.get_or_create_law(
                     subsection=section, law_code=self.law_code)
                 current_law.set_version_title(version, remainder)
-                text_buffer = ''
+                text_buffer = remainder
             else:
                 if not s.isupper():
                     text_buffer += ' ' + s

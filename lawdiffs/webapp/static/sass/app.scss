@@ -57,10 +57,16 @@
 // @import "foundation/components/tooltips";
 // @import "foundation/components/dropdown";
 
-nav li.name .subtitle {
-    font-style: italic;
-    color: $primary-color;
-    font-size: $small-font-size;
+nav {
+    li.name .subtitle {
+        font-style: italic;
+        color: $primary-color;
+        font-size: $small-font-size;
+    }
+
+    li.current-state a {
+        color: $nav-state-color;
+    }
 }
 
 .content-wrapper {
@@ -118,29 +124,9 @@ nav li.name .subtitle {
     }
 }
 
-.diff-line-inline {
-    @include grid-column(12);
-
-    &.first-line {
-        font-size: $h6-font-size;
-        font-weight: bold;
-    }
-
-    .inner {
-        @include grid-row;
-    }
-
-    .left-col {
-        float: left;
-        min-width: 15px;
-        margin-right: 10px;
-        border-right: 1px solid #999;
-        height: 100%;
-    }
-
-    .text {
-        overflow: hidden;
-    }
+.diff-container {
+    border: 1px solid $panel-border-color;
+    font-family: $inconsolata-family;
 }
 
 .diff-line-table {
@@ -150,7 +136,7 @@ nav li.name .subtitle {
     .plus-minus {
         text-align: center;
         width: 25px !important;
-        border-right: 1px solid #999;
+        border-right: 1px solid $panel-border-color;
     }
 }
 
@@ -160,13 +146,4 @@ nav li.name .subtitle {
 
 .diff-addition {
     background-color: $diff-addition-color;
-}
-
-.diff-container {
-    border: 1px solid #999;
-    font-family: $inconsolata-family;
-    padding: {
-        top: 10px;
-        bottom: 10px;
-    }
 }

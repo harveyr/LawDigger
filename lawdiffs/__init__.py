@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 LOGHANDLER = logging.StreamHandler()
 LOGFORMATTER = logging.Formatter(
     '[%(name)s:%(lineno)d] - %(levelname)s - %(message)s')
