@@ -487,7 +487,7 @@ img {
 }
 
 /* line 309, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_global.scss */
-.right, .viewer-option-panel .next {
+.right, .version-select .vs-label label, .viewer-option-panel .next {
   float: right !important;
 }
 
@@ -2699,7 +2699,7 @@ label {
   /* Styles for required inputs */
 }
 /* line 265, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_forms.scss */
-label.right, .viewer-option-panel label.next {
+label.right, .version-select .vs-label label, .viewer-option-panel label.next {
   float: none;
   text-align: right;
 }
@@ -5506,7 +5506,7 @@ label.error {
   bottom: -28px;
 }
 /* line 98, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_joyride.scss */
-.joyride-tip-guide .joyride-nub.right, .joyride-tip-guide .viewer-option-panel .joyride-nub.next, .viewer-option-panel .joyride-tip-guide .joyride-nub.next {
+.joyride-tip-guide .joyride-nub.right, .joyride-tip-guide .version-select .vs-label label.joyride-nub, .version-select .vs-label .joyride-tip-guide label.joyride-nub, .joyride-tip-guide .viewer-option-panel .joyride-nub.next, .viewer-option-panel .joyride-tip-guide .joyride-nub.next {
   right: -28px;
 }
 /* line 99, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_joyride.scss */
@@ -5620,7 +5620,7 @@ label.error {
     bottom: -28px;
   }
   /* line 196, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_joyride.scss */
-  .joyride-tip-guide .joyride-nub.right, .joyride-tip-guide .viewer-option-panel .joyride-nub.next, .viewer-option-panel .joyride-tip-guide .joyride-nub.next {
+  .joyride-tip-guide .joyride-nub.right, .joyride-tip-guide .version-select .vs-label label.joyride-nub, .version-select .vs-label .joyride-tip-guide label.joyride-nub, .joyride-tip-guide .viewer-option-panel .joyride-nub.next, .viewer-option-panel .joyride-tip-guide .joyride-nub.next {
     border-color: black !important;
     border-top-color: transparent !important;
     border-right-color: transparent !important;
@@ -7141,12 +7141,12 @@ a.th {
   z-index: 98;
 }
 /* line 91, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown.scss */
-.f-dropdown.right:before, .viewer-option-panel .f-dropdown.next:before {
+.f-dropdown.right:before, .version-select .vs-label label.f-dropdown:before, .viewer-option-panel .f-dropdown.next:before {
   left: auto;
   right: 10px;
 }
 /* line 95, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_dropdown.scss */
-.f-dropdown.right:after, .viewer-option-panel .f-dropdown.next:after {
+.f-dropdown.right:after, .version-select .vs-label label.f-dropdown:after, .viewer-option-panel .f-dropdown.next:after {
   left: auto;
   right: 9px;
 }
@@ -7262,7 +7262,43 @@ nav li.current-state a {
   float: left;
 }
 
-/* line 93, ../sass/app.scss */
+/* line 94, ../sass/app.scss */
+.version-select .inner {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0;
+  margin-bottom: 0;
+  max-width: 62.5em;
+  *zoom: 1;
+}
+/* line 121, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_global.scss */
+.version-select .inner:before, .version-select .inner:after {
+  content: " ";
+  display: table;
+}
+/* line 122, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_global.scss */
+.version-select .inner:after {
+  clear: both;
+}
+/* line 97, ../sass/app.scss */
+.version-select .vs-label {
+  position: relative;
+  padding-left: 0.9375em;
+  padding-right: 0.9375em;
+  width: 16.66667%;
+  float: left;
+}
+/* line 103, ../sass/app.scss */
+.version-select .select {
+  position: relative;
+  padding-left: 0.9375em;
+  padding-right: 0.9375em;
+  width: 16.66667%;
+  float: left;
+}
+
+/* line 109, ../sass/app.scss */
 .viewer-option-panel {
   width: 100%;
   margin-left: auto;
@@ -7271,12 +7307,6 @@ nav li.current-state a {
   margin-bottom: 0;
   max-width: 62.5em;
   *zoom: 1;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #d9d9d9;
-  margin-bottom: 1.25em;
-  padding: 1.25em;
-  background: #f2f2f2;
 }
 /* line 121, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_global.scss */
 .viewer-option-panel:before, .viewer-option-panel:after {
@@ -7287,46 +7317,33 @@ nav li.current-state a {
 .viewer-option-panel:after {
   clear: both;
 }
-/* line 44, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_panels.scss */
-.viewer-option-panel > :first-child {
-  margin-top: 0;
-}
-/* line 45, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_panels.scss */
-.viewer-option-panel > :last-child {
-  margin-bottom: 0;
-}
-/* line 50, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_panels.scss */
-.viewer-option-panel h1, .viewer-option-panel h2, .viewer-option-panel h3, .viewer-option-panel h4, .viewer-option-panel h5, .viewer-option-panel h6, .viewer-option-panel p {
-  color: #333333;
-}
-/* line 54, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_panels.scss */
-.viewer-option-panel h1, .viewer-option-panel h2, .viewer-option-panel h3, .viewer-option-panel h4, .viewer-option-panel h5, .viewer-option-panel h6 {
-  line-height: 1;
-  margin-bottom: 0.625em;
-}
-/* line 56, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_panels.scss */
-.viewer-option-panel h1.subheader, .viewer-option-panel h2.subheader, .viewer-option-panel h3.subheader, .viewer-option-panel h4.subheader, .viewer-option-panel h5.subheader, .viewer-option-panel h6.subheader {
-  line-height: 1.4;
-}
-/* line 97, ../sass/app.scss */
+/* line 112, ../sass/app.scss */
 .viewer-option-panel select {
   margin: 0;
 }
-/* line 100, ../sass/app.scss */
+/* line 115, ../sass/app.scss */
 .viewer-option-panel select.inline {
   width: 70px;
   margin-left: 5px;
   margin-right: 5px;
 }
-/* line 107, ../sass/app.scss */
-.viewer-option-panel .version {
+/* line 122, ../sass/app.scss */
+.viewer-option-panel .label-wrapper {
   position: relative;
   padding-left: 0.9375em;
   padding-right: 0.9375em;
   width: 16.66667%;
   float: left;
 }
-/* line 111, ../sass/app.scss */
+/* line 128, ../sass/app.scss */
+.viewer-option-panel .version-select-wrapper {
+  position: relative;
+  padding-left: 0.9375em;
+  padding-right: 0.9375em;
+  width: 16.66667%;
+  float: left;
+}
+/* line 132, ../sass/app.scss */
 .viewer-option-panel .next, .viewer-option-panel .prev {
   position: relative;
   padding-left: 0.9375em;
@@ -7334,15 +7351,15 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 114, ../sass/app.scss */
+/* line 135, ../sass/app.scss */
 .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
   margin: 0;
 }
-/* line 122, ../sass/app.scss */
+/* line 143, ../sass/app.scss */
 .viewer-option-panel .next {
   text-align: right;
 }
-/* line 127, ../sass/app.scss */
+/* line 148, ../sass/app.scss */
 .viewer-option-panel .compare-text {
   position: relative;
   padding-left: 0.9375em;
@@ -7354,12 +7371,12 @@ nav li.current-state a {
   float: left;
   text-align: center;
 }
-/* line 132, ../sass/app.scss */
+/* line 153, ../sass/app.scss */
 .viewer-option-panel a.update {
   margin: 0;
 }
 
-/* line 139, ../sass/app.scss */
+/* line 160, ../sass/app.scss */
 .diff-container {
   width: 100%;
   margin-left: auto;
@@ -7382,7 +7399,7 @@ nav li.current-state a {
   clear: both;
 }
 
-/* line 146, ../sass/app.scss */
+/* line 167, ../sass/app.scss */
 .diff-legend-header {
   width: 100%;
   margin-left: auto;
@@ -7403,7 +7420,7 @@ nav li.current-state a {
 .diff-legend-header:after {
   clear: both;
 }
-/* line 150, ../sass/app.scss */
+/* line 171, ../sass/app.scss */
 .diff-legend-header table {
   position: relative;
   padding-left: 0.9375em;
@@ -7413,25 +7430,25 @@ nav li.current-state a {
   margin: 0;
 }
 
-/* line 156, ../sass/app.scss */
+/* line 177, ../sass/app.scss */
 .diff-line-table {
   border: 0;
   margin: 0;
   width: 100%;
 }
-/* line 161, ../sass/app.scss */
+/* line 182, ../sass/app.scss */
 .diff-line-table .plus-minus {
   text-align: center;
   width: 25px !important;
   border-right: 1px solid #d9d9d9;
 }
 
-/* line 168, ../sass/app.scss */
+/* line 189, ../sass/app.scss */
 .diff-subtraction {
   background-color: #ffe2e2;
 }
 
-/* line 172, ../sass/app.scss */
+/* line 193, ../sass/app.scss */
 .diff-addition {
   background-color: #e2ffe2;
 }
