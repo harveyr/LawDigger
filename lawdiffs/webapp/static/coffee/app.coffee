@@ -11,3 +11,8 @@ app = angular.module(APP_NAME, [
     # $rootScope.$on '$routeChangeSuccess', ->
     #     path = $location.path
     #     $rootScope.partialUrl = partials[$location.path()]
+
+    _.mixin({
+        in: (arr, value) ->
+            arr.indexOf(value) != -1
+    })

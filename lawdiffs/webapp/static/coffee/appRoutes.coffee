@@ -9,10 +9,10 @@ angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($rout
             templateUrl: '/static/partials/home.html'
         })
         .when('/view/:lawCode', {
-            redirectTo: '/'    
+            redirectTo: '/'
         })
         .when('/view/:lawCode/:param', {
-            redirectTo: '/'    
+            redirectTo: '/'
         })
         .when('/view/:lawCode/:version/:section', {
             controller: 'ViewerCtrl'

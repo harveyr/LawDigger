@@ -54,3 +54,9 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
     else
         fetchLaws()
 
+    $scope.$on 'navClick', (e, section) ->
+        url = UrlBuilder.diffPage $scope.lawCode,
+            section,
+            $scope.currentVersion1
+            $scope.currentVersion2
+        $location.path(url)

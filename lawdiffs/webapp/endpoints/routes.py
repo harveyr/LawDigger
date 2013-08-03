@@ -32,6 +32,15 @@ def fetch_law(law_code, version, subsection):
     return jsonify(d)
 
 
+@blueprint.route('/versions/<law_code>/<subsection>')
+def fetch_versions(law_code, subsection):
+    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    d = {
+        'versions': law.versions
+    }
+    return jsonify(d)
+
+
 @blueprint.route('/diff/<law_code>/<subsection>/<version1>/<version2>')
 def fetch_diff(law_code, subsection, version1, version2):
     law = data_laws.fetch_law(law_code=law_code, subsection=subsection)

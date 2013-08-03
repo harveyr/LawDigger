@@ -3,6 +3,14 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
     $scope.m = {}
     fetchedLaws = false
 
+    applyLaw = (law) ->
+        $scope.activeText = law.text
+        $scope.activeTitle = law.title
+        $scope.availableVersions = law.versions.sort (a, b) ->
+            return parseInt(b) - parseInt(a)
+        $scope.previousSection = law.prev
+        $scope.nextSection = law.next
+
     fetchAllLaws = ->
         Laws.fetchAll().then (response) ->
             laws = _.sortBy response.data, (law) ->
@@ -11,12 +19,7 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
 
     fetchAndApplyLaw = (version, section) ->
         Laws.fetchLaw(version, section).then (response) ->
-            $scope.activeText = response.data.text
-            $scope.activeTitle = response.data.title
-            $scope.availableVersions = response.data.versions.sort (a, b) ->
-                return parseInt(b) - parseInt(a)
-            $scope.previousSection = response.data.prev
-            $scope.nextSection = response.data.next
+            applyLaw response.data
 
     $scope.chooseLaw = (law) ->
         $scope.currentLaw = law
@@ -44,6 +47,7 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
     $scope.selectedVersionChange = (version) ->
         $location.path("/view/ors/#{version}/#{$scope.activeSection}")
 
+    # Handle route
     if $routeParams.section
         $scope.activeVersion = $routeParams.version
         $scope.m.selectedVersion = $routeParams.version
@@ -53,3 +57,9 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
         $scope.m.selectedVersion = 2011
         fetchAllLaws()
 
+    $scope.$on 'navClick', (e, section) ->
+        promise = Laws.nearestVersion $routeParams.lawCode,
+            section, $routeParams.version
+        promise.then (version) ->
+            url = UrlBuilder.viewPage $routeParams.lawCode, version, section
+            $location.path(url)

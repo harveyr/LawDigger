@@ -68,13 +68,14 @@ def fetch_previous_and_next_subsections(law_code, subsection):
     max_index = len(subsections) - 1
     idx = subsections.index(subsection)
 
+    model = get_model(law_code)
     if idx > 0:
-        prev = subsections[idx - 1]
+        prev = model.subsection_float_to_string(subsections[idx - 1])
     else:
         prev = None
 
     if idx < max_index:
-        next = subsections[idx + 1]
+        next = model.subsection_float_to_string(subsections[idx + 1])
     else:
         next = None
 

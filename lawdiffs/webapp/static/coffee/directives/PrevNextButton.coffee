@@ -3,7 +3,7 @@ angular.module(DIRECTIVE_MODULE).directive 'prevNextButton', () ->
         replace: true
         scope: true
         template: """
-        <div ng-class="parentClass">
+        <div ng-class="parentClass" ng-show="section">
             <a ng-click="click()">
                 <span ng-show="isPrev" ng-bind-html-unsafe="navChar"></span>
                 {{section}}
@@ -28,6 +28,6 @@ angular.module(DIRECTIVE_MODULE).directive 'prevNextButton', () ->
 
             scope.click = ->
                 if scope.isNext
-                    scope.$emit 'nextNavClick'
+                    scope.$emit 'navClick', scope.section
                 else if scope.isPrev
-                    scope.$emit 'prevNavClick'
+                    scope.$emit 'navClick', scope.section

@@ -5,6 +5,9 @@ angular.module(SERVICES_MODULE).factory 'UrlBuilder', () ->
         apiUrl: (url) ->
             return @API_PREFIX + url
 
+        viewPage: (lawCode, version, subsection) ->
+            "/view/#{lawCode}/#{version}/#{subsection}"
+
         diffPage: (lawCode, subsection, version1, version2) ->
             "/diff/#{lawCode}/#{subsection}/#{version1}/#{version2}"
 

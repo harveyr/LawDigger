@@ -1,16 +1,7 @@
 <div class="viewer-option-panel">
-    <div class="prev">
-        <a ng-click="goPrevious()">
-            &laquo;
-            {{prevSubsection}}
-        </a>
-    </div>
-    <div class="next">
-        <a ng-click="goNext()">
-            {{nextSubsection}}
-            &raquo;
-        </a>
-    </div>
+    <div prev-next-button="{{prevSubsection}}" prev></div>
+    <div prev-next-button="{{nextSubsection}}" next></div>
+
     <div class="compare-text">
         Compare
         <select ng-model="m.version1"
@@ -40,5 +31,14 @@
     subsection="{{subsection}}">
 </div>
 
-<div diff-legend v-one="currentVersion1" v-two="currentVersion2"></div>
-<div inline-diff lines="diffLines"></div>
+<div class="row" ng-show="diffLines.length == 0">
+    <div class="panel">
+        Nothing changed between {{currentVersion1}} and {{currentVersion2}}.
+    </div>
+    
+</div>
+
+<div ng-show="diffLines">
+    <div diff-legend v-one="currentVersion1" v-two="currentVersion2"></div>
+    <div inline-diff lines="diffLines"></div>
+</div>

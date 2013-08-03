@@ -66,7 +66,7 @@
     };
   });
 
-  angular.module(SERVICES_MODULE).factory('Laws', function($http, $q, UrlBuilder) {
+  angular.module(SERVICES_MODULE).factory('Laws', function($http, $q, UrlBuilder, Sorter) {
     var Laws;
     Laws = (function() {
       function Laws() {}
@@ -77,6 +77,42 @@
 
       Laws.prototype.fetchLaw = function(version, section) {
         return $http.get(UrlBuilder.apiUrl("/law/ors/" + version + "/" + section));
+      };
+
+      Laws.prototype.fetchVersions = function(lawCode, section) {
+        var deferred;
+        deferred = $q.defer();
+        $http.get(UrlBuilder.apiUrl("/versions/" + lawCode + "/" + section)).success(function(data) {
+          return deferred.resolve(Sorter.sortVersions(data.versions));
+        });
+        return deferred.promise;
+      };
+
+      Laws.prototype.nearestVersion = function(lawCode, section, version) {
+        var deferred;
+        deferred = $q.defer();
+        this.fetchVersions(lawCode, section, version).then(function(versions) {
+          var minDifference, nearestVersion;
+          if (_["in"](versions, version)) {
+            deferred.resolve(version);
+            return;
+          }
+          nearestVersion = null;
+          minDifference = 10000;
+          _.each(versions, function(candidateVersion) {
+            var diff;
+            diff = Math.abs(version - candidateVersion);
+            if (diff < minDifference) {
+              nearestVersion = candidateVersion;
+              return minDifference = diff;
+            }
+          });
+          if (!nearestVersion) {
+            throw "Failed to find nearest version: " + lawCode + ", " + section + ", " + version;
+          }
+          return deferred.resolve(nearestVersion);
+        });
+        return deferred.promise;
       };
 
       Laws.prototype.fetchDiff = function(lawCode, section, version1, version2) {
@@ -100,6 +136,10 @@
         return this.API_PREFIX + url;
       };
 
+      UrlBuilder.prototype.viewPage = function(lawCode, version, subsection) {
+        return "/view/" + lawCode + "/" + version + "/" + subsection;
+      };
+
       UrlBuilder.prototype.diffPage = function(lawCode, subsection, version1, version2) {
         return "/diff/" + lawCode + "/" + subsection + "/" + version1 + "/" + version2;
       };
@@ -111,7 +151,12 @@
   });
 
   app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope) {
-    return $rootScope.appName = "My Lil' App";
+    $rootScope.appName = "My Lil' App";
+    return _.mixin({
+      "in": function(arr, value) {
+        return arr.indexOf(value) !== -1;
+      }
+    });
   });
 
   angular.module('myLilApp').controller('HomeCtrl', function($scope, $rootScope, $http, $routeParams, Laws) {
@@ -195,7 +240,7 @@
       $scope.m.version2 = $routeParams.version2;
       $scope.currentVersion1 = $routeParams.version1;
       $scope.currentVersion2 = $routeParams.version2;
-      return Laws.fetchDiff($scope.lawCode, $scope.subsection, $scope.m.version1, $scope.m.version2).then(function(response) {
+      Laws.fetchDiff($scope.lawCode, $scope.subsection, $scope.m.version1, $scope.m.version2).then(function(response) {
         $scope.diffText = response.data.diff;
         $scope.diffLines = response.data.lines;
         $scope.nextSubsection = response.data.next;
@@ -205,15 +250,29 @@
         return updateLegendDiffLines();
       });
     } else {
-      return fetchLaws();
+      fetchLaws();
     }
+    return $scope.$on('navClick', function(e, section) {
+      var url;
+      url = UrlBuilder.diffPage($scope.lawCode, section, $scope.currentVersion1, $scope.currentVersion2);
+      return $location.path(url);
+    });
   });
 
   angular.module('myLilApp').controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
-    var fetchAllLaws, fetchAndApplyLaw, fetchedLaws;
+    var applyLaw, fetchAllLaws, fetchAndApplyLaw, fetchedLaws;
     console.log('ViewerCtrl');
     $scope.m = {};
     fetchedLaws = false;
+    applyLaw = function(law) {
+      $scope.activeText = law.text;
+      $scope.activeTitle = law.title;
+      $scope.availableVersions = law.versions.sort(function(a, b) {
+        return parseInt(b) - parseInt(a);
+      });
+      $scope.previousSection = law.prev;
+      return $scope.nextSection = law.next;
+    };
     fetchAllLaws = function() {
       return Laws.fetchAll().then(function(response) {
         var laws;
@@ -225,13 +284,7 @@
     };
     fetchAndApplyLaw = function(version, section) {
       return Laws.fetchLaw(version, section).then(function(response) {
-        $scope.activeText = response.data.text;
-        $scope.activeTitle = response.data.title;
-        $scope.availableVersions = response.data.versions.sort(function(a, b) {
-          return parseInt(b) - parseInt(a);
-        });
-        $scope.previousSection = response.data.prev;
-        return $scope.nextSection = response.data.next;
+        return applyLaw(response.data);
       });
     };
     $scope.chooseLaw = function(law) {
@@ -262,11 +315,20 @@
       $scope.activeVersion = $routeParams.version;
       $scope.m.selectedVersion = $routeParams.version;
       $scope.activeSection = $routeParams.section;
-      return fetchAndApplyLaw($scope.activeVersion, $scope.activeSection);
+      fetchAndApplyLaw($scope.activeVersion, $scope.activeSection);
     } else {
       $scope.m.selectedVersion = 2011;
-      return fetchAllLaws();
+      fetchAllLaws();
     }
+    return $scope.$on('navClick', function(e, section) {
+      var promise;
+      promise = Laws.nearestVersion($routeParams.lawCode, section, $routeParams.version);
+      return promise.then(function(version) {
+        var url;
+        url = UrlBuilder.viewPage($routeParams.lawCode, version, section);
+        return $location.path(url);
+      });
+    });
   });
 
   angular.module(DIRECTIVE_MODULE).directive('inlineDiff', function() {
@@ -370,7 +432,7 @@
     return directive = {
       replace: true,
       scope: true,
-      template: "<div ng-class=\"parentClass\">\n    <a ng-click=\"click()\">\n        <span ng-show=\"isPrev\" ng-bind-html-unsafe=\"navChar\"></span>\n        {{section}}\n        <span ng-show=\"isNext\" ng-bind-html-unsafe=\"navChar\"></span>\n    </a>\n</div>",
+      template: "<div ng-class=\"parentClass\" ng-show=\"section\">\n    <a ng-click=\"click()\">\n        <span ng-show=\"isPrev\" ng-bind-html-unsafe=\"navChar\"></span>\n        {{section}}\n        <span ng-show=\"isNext\" ng-bind-html-unsafe=\"navChar\"></span>\n    </a>\n</div>",
       link: function(scope, elem, attrs) {
         attrs.$observe('prevNextButton', function(section) {
           return scope.section = section;
@@ -388,9 +450,9 @@
         }
         return scope.click = function() {
           if (scope.isNext) {
-            return scope.$emit('nextNavClick');
+            return scope.$emit('navClick', scope.section);
           } else if (scope.isPrev) {
-            return scope.$emit('prevNavClick');
+            return scope.$emit('navClick', scope.section);
           }
         };
       }
