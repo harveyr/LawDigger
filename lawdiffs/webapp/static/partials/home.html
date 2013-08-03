@@ -27,24 +27,18 @@
         </div>
     </div>
 
-    <div law-header 
-        title="{{activeTitle}}"
-        subsection="{{activeSection}}"
-        ng-show="activeSection">
-    </div>
-
-    <div class="viewer-option-panel" ng-show="activeSection">
-        <div prev-next-button="{{previousSection}}" prev></div>
+    <div class="viewer-option-panel" ng-show="currentSection">
+        <div prev-next-button="{{prevSection}}" prev></div>
         <div class="version">
             <label>
                 Version
             </label>
             <select ng-model="m.selectedVersion"
-                ng-options="v for v in availableVersions"
+                ng-options="v for v in lawVersions"
                 ng-change="selectedVersionChange(m.selectedVersion)">
             </select>
         </div>
-        <div class="version">
+        <div class="version" ng-show="false">
             <label>Compare Year</label>
             <select ng-model="m.compareYear"
                 ng-options="year for year in currentLaw.versions">
@@ -57,9 +51,15 @@
         <div prev-next-button="{{nextSection}}" next></div>
     </div>
 
-    <div class="row" ng-show="activeText">
+    <div law-header 
+        title="{{lawTitle}}"
+        subsection="{{currentSection}}"
+        ng-show="currentSection">
+    </div>
+
+    <div class="row" ng-show="lawText">
         <div class="small-12">
-            <pre>{{activeText}}</pre>
+            <pre>{{lawText}}</pre>
         </div>
     </div>
 

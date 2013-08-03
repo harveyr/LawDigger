@@ -4,11 +4,12 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
     fetchedLaws = false
 
     applyLaw = (law) ->
-        $scope.activeText = law.text
-        $scope.activeTitle = law.title
-        $scope.availableVersions = law.versions.sort (a, b) ->
+        console.log 'law:', law
+        $scope.lawText = law.text
+        $scope.lawTitle = law.title
+        $scope.lawVersions = law.versions.sort (a, b) ->
             return parseInt(b) - parseInt(a)
-        $scope.previousSection = law.prev
+        $scope.prevSection = law.prev
         $scope.nextSection = law.next
 
     fetchAllLaws = ->
@@ -49,17 +50,14 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
 
     # Handle route
     if $routeParams.section
-        $scope.activeVersion = $routeParams.version
-        $scope.m.selectedVersion = $routeParams.version
-        $scope.activeSection = $routeParams.section
-        fetchAndApplyLaw $scope.activeVersion, $scope.activeSection
+        $rootScope.currentLawCode = $routeParams.lawCode
+        $rootScope.currentVersion = $scope.m.selectedVersion = $routeParams.version
+        $rootScope.currentSection = $routeParams.section
+        fetchAndApplyLaw $rootScope.currentVersion, $scope.currentSection
     else
-        $scope.m.selectedVersion = 2011
+        $rootScope.currentVersion = $scope.m.selectedVersion = 2011
         fetchAllLaws()
 
     $scope.$on 'navClick', (e, section) ->
-        promise = Laws.nearestVersion $routeParams.lawCode,
-            section, $routeParams.version
-        promise.then (version) ->
-            url = UrlBuilder.viewPage $routeParams.lawCode, version, section
-            $location.path(url)
+        url = UrlBuilder.viewPage section
+        $location.path(url)

@@ -125,7 +125,7 @@
     return new Laws();
   });
 
-  angular.module(SERVICES_MODULE).factory('UrlBuilder', function() {
+  angular.module(SERVICES_MODULE).factory('UrlBuilder', function($rootScope) {
     var UrlBuilder;
     UrlBuilder = (function() {
       function UrlBuilder() {}
@@ -136,7 +136,25 @@
         return this.API_PREFIX + url;
       };
 
-      UrlBuilder.prototype.viewPage = function(lawCode, version, subsection) {
+      UrlBuilder.prototype.viewPage = function(subsection, lawCode, version) {
+        if (lawCode == null) {
+          lawCode = null;
+        }
+        if (version == null) {
+          version = null;
+        }
+        if (!lawCode) {
+          if (!$rootScope.currentLawCode) {
+            throw 'No code found in args or rootScope';
+          }
+          lawCode = $rootScope.currentLawCode;
+        }
+        if (!version) {
+          if (!$rootScope.currentVersion) {
+            throw 'No version in args or rootScope';
+          }
+          version = $rootScope.currentVersion;
+        }
         return "/view/" + lawCode + "/" + version + "/" + subsection;
       };
 
@@ -172,9 +190,9 @@
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
       }).when('/view/:lawCode', {
-        redirectTo: '/'
+        redirectTo: '/view'
       }).when('/view/:lawCode/:param', {
-        redirectTo: '/'
+        redirectTo: '/view'
       }).when('/view/:lawCode/:version/:section', {
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
@@ -265,12 +283,13 @@
     $scope.m = {};
     fetchedLaws = false;
     applyLaw = function(law) {
-      $scope.activeText = law.text;
-      $scope.activeTitle = law.title;
-      $scope.availableVersions = law.versions.sort(function(a, b) {
+      console.log('law:', law);
+      $scope.lawText = law.text;
+      $scope.lawTitle = law.title;
+      $scope.lawVersions = law.versions.sort(function(a, b) {
         return parseInt(b) - parseInt(a);
       });
-      $scope.previousSection = law.prev;
+      $scope.prevSection = law.prev;
       return $scope.nextSection = law.next;
     };
     fetchAllLaws = function() {
@@ -312,22 +331,18 @@
       return $location.path("/view/ors/" + version + "/" + $scope.activeSection);
     };
     if ($routeParams.section) {
-      $scope.activeVersion = $routeParams.version;
-      $scope.m.selectedVersion = $routeParams.version;
-      $scope.activeSection = $routeParams.section;
-      fetchAndApplyLaw($scope.activeVersion, $scope.activeSection);
+      $rootScope.currentLawCode = $routeParams.lawCode;
+      $rootScope.currentVersion = $scope.m.selectedVersion = $routeParams.version;
+      $rootScope.currentSection = $routeParams.section;
+      fetchAndApplyLaw($rootScope.currentVersion, $scope.currentSection);
     } else {
-      $scope.m.selectedVersion = 2011;
+      $rootScope.currentVersion = $scope.m.selectedVersion = 2011;
       fetchAllLaws();
     }
     return $scope.$on('navClick', function(e, section) {
-      var promise;
-      promise = Laws.nearestVersion($routeParams.lawCode, section, $routeParams.version);
-      return promise.then(function(version) {
-        var url;
-        url = UrlBuilder.viewPage($routeParams.lawCode, version, section);
-        return $location.path(url);
-      });
+      var url;
+      url = UrlBuilder.viewPage(section);
+      return $location.path(url);
     });
   });
 
