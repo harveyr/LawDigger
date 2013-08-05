@@ -30,6 +30,12 @@ class LawParser(object):
             with open(CACHE_PICKLE_PATH, 'r') as f:
                 self.cache = pickle.load(f)
 
+    def url_base(self, url):
+        try:
+            return url[:url.rindex('/')] + '/'
+        except ValueError, e:
+            raise ValueError('Could not find right slash in url ' + str(url))
+
     def fetch_html(self, url):
         hashed_filename = md5.new(url).hexdigest()
         if url in self.cache['html']:
@@ -76,29 +82,43 @@ class OrLawParser(LawParser):
 
     law_code = 'ors'
 
+    volume_pat_html = re.compile(r'ORS Volume (\d+),')
+    chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
+
     sources = [
         {
-            'version': 2001,
-            'crawl': [
-                'http://www.leg.state.or.us/ors_archives/2001ORS/vol1.html'
-            ],
-            'crawl_link_pattern': re.compile(r'\d+\.html')
-        },
-        {
-            'version': 2009,
-            'crawl': [
-                'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
-            ],
-            'crawl_link_pattern': re.compile(r'\d+\.html')
-        },
-        {
             'version': 2011,
-            'crawl': [
-                'http://www.leg.state.or.us/ors/vol1.html'
-            ],
-            'crawl_link_pattern': re.compile(r'\d+\.html')
+            'url': 'http://www.leg.state.or.us/ors/ors_info.html',
+            'crawl_func': 'begin_crawl_html',
+            'link_patterns': [
+                re.compile(r'vol\d+.html'),
+                re.compile(r'\d+\.html')
+            ]
         }
     ]
+    # sources = [
+    #     {
+    #         'version': 2001,
+    #         'crawl': [
+    #             'http://www.leg.state.or.us/ors_archives/2001ORS/vol1.html'
+    #         ],
+    #         'crawl_link_pattern': re.compile(r'\d+\.html')
+    #     },
+    #     {
+    #         'version': 2009,
+    #         'crawl': [
+    #             'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
+    #         ],
+    #         'crawl_link_pattern': re.compile(r'\d+\.html')
+    #     },
+    #     {
+    #         'version': 2011,
+    #         'crawl': [
+    #             'http://www.leg.state.or.us/ors/vol1.html'
+    #         ],
+    #         'crawl_link_pattern': re.compile(r'\d+\.html')
+    #     }
+    # ]
 
     def __init__(self):
         super(OrLawParser, self).__init__()
@@ -107,18 +127,25 @@ class OrLawParser(LawParser):
 
     def run(self):
         repos.wipe_and_init(self.law_code)
-        model = data_laws.get_model(self.law_code)
+        model = data_laws.get_statute_model(self.law_code)
+        model.drop_collection()
+        model = data_laws.get_volume_model(self.law_code)
+        model.drop_collection()
+        model = data_laws.get_chapter_model(self.law_code)
         model.drop_collection()
 
-        for source in self.sources:
-            version = source['version']
-            urls = self.scrape_urls(source)
-            for i in range(min(1, len(urls))):
-                url = urls[i]
-                logger.debug('url: {v}'.format(v=url))
-                self.create_laws_from_url(url, version)
+        logger.setLevel(logging.DEBUG)
 
-            self.commit(version)
+        for source in self.sources:
+            func = getattr(self, source['crawl_func'])
+            func(source)
+            # urls = self.scrape_urls(source)
+            # for i in range(min(1, len(urls))):
+            #     url = urls[i]
+            #     logger.debug('url: {v}'.format(v=url))
+            #     self.create_laws_from_url(url, version)
+
+            # self.commit(version)
 
         # law = data_laws.fetch_law(self.law_code, '1.060')
         # print(law.text(2011, formatted=True))
@@ -127,18 +154,39 @@ class OrLawParser(LawParser):
         # diff = repos.get_tag_diff(law, '2001', '2011')
         # print('diff: {v}'.format(v=diff))
 
-    def scrape_urls(self, source_dict):
-        urls = []
-        for url in source_dict['crawl']:
-            soup = BeautifulSoup(self.fetch_html(url))
-            url_base = url[:url.rindex('/')] + '/'
-            for link in soup.find_all(href=source_dict['crawl_link_pattern']):
-                full_link = url_base + link.get('href')
-                urls.append(full_link)
-        return urls
+    def begin_crawl_html(self, source_dict):
+        """Begin crawling html statutes"""
+        url = source_dict['url']
+        self.current_url_base = self.url_base(url)
+        soup = BeautifulSoup(self.fetch_html(url))
+        for link in soup.find_all(href=source_dict['link_patterns'][0]):
+            text = self.get_soup_text(link)
+            volume = self.volume_pat_html.search(text).group(1)
+            self.current_volume = data_laws.get_or_create_volume(
+                volume, self.law_code)
+            link_url = self.current_url_base + link.get('href')
+            html = self.fetch_html(link_url)
+            self.crawl_vol_page_html(html, source_dict)
+            break
 
-    def create_laws_from_url(self, url, version):
-        soup = self.fetch_soup(url)
+    def crawl_vol_page_html(self, html, source_dict):
+        soup = BeautifulSoup(html)
+        link_pattern = source_dict['link_patterns'][1]
+        for link in soup.find_all(href=link_pattern):
+            text = self.get_soup_text(link)
+            chapter = self.chapter_pat_html.search(text).group(1)
+            self.current_chapter = data_laws.get_or_create_chapter(
+                chapter, self.current_volume, self.law_code)
+            self.current_volume.add_chapter(self.current_chapter)
+
+            link_url = self.current_url_base + link.get('href')
+            html = self.fetch_html(link_url)
+            self.create_laws_from_html(html, source_dict)
+            break
+
+    def create_laws_from_html(self, html, source_dict):
+        version = source_dict['version']
+        soup = BeautifulSoup(html)
         current_law = None
         text_buffer = ''
         for s in soup.stripped_strings:
@@ -146,22 +194,17 @@ class OrLawParser(LawParser):
             subs_matches = self.subsection_re.match(s)
             if subs_matches:
                 section = subs_matches.group(1)
-                if section == '1.192':
-                    logger.setLevel(logging.DEBUG)
-                else:
-                    logger.setLevel(logging.INFO)
-                logger.debug('section: {v}'.format(v=section))
-
                 remainder = s[len(section):].strip()
                 if remainder.isupper():
                     # Should be a heading
                     continue
 
                 if remainder and remainder[0].isupper():
-                    current_law = data_laws.get_or_create_law(
+                    current_law = data_laws.get_or_create_statute(
                         subsection=section, law_code=self.law_code)
                     current_law.set_version_title(version, remainder)
-                    logger.debug('remainder: {v}'.format(v=remainder))
+                    logger.debug('current_law: {v}'.format(v=current_law))
+                    self.current_chapter.add_statute
                     text_buffer = ''
                 else:
                     # If first char of remainder is not upper, it's part of
@@ -170,7 +213,6 @@ class OrLawParser(LawParser):
             else:
                 if not s.isupper():
                     text_buffer += ' ' + s
-            logger.debug('text_buffer: {v}'.format(v=text_buffer))
             if current_law:
                 current_law.set_version_text(version, text_buffer)
 

@@ -6,7 +6,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 law_code_to_model_map = {
-    'ors': models.OregonRevisedStatute
+    'ors': {
+        'statute': models.OregonRevisedStatute,
+        'volume': models.ORSVolume,
+        'chapter': models.ORSChapter
+    }
+}
+
+law_code_to_volume_model_map = {
+    'ors': models.ORSVolume
 }
 
 float_subsections = ['ors']
@@ -19,17 +27,25 @@ def formatted_subsection(law_code, subsection):
         return subsection
 
 
-def get_model(law_code):
-    return law_code_to_model_map[law_code]
+def get_statute_model(law_code):
+    return law_code_to_model_map[law_code]['statute']
+
+
+def get_volume_model(law_code):
+    return law_code_to_model_map[law_code]['volume']
+
+
+def get_chapter_model(law_code):
+    return law_code_to_model_map[law_code]['chapter']
 
 
 def fetch_law(law_code, subsection):
-    model = get_model(law_code)
+    model = get_statute_model(law_code)
     return model.objects(subsection=subsection).first()
 
 
 def fetch_by_code(law_code, version=None):
-    model = get_model(law_code)
+    model = get_statute_model(law_code)
     if not version:
         return model.objects
     else:
@@ -49,7 +65,7 @@ def fetch_code_subsections(law_code):
     if law_code in ['ors']:
         as_float = True
 
-    model = get_model(law_code)
+    model = get_statute_model(law_code)
     subsections = []
     laws = model.objects.only('subsection').order_by('subsection')
     for law in laws:
@@ -68,7 +84,7 @@ def fetch_previous_and_next_subsections(law_code, subsection):
     max_index = len(subsections) - 1
     idx = subsections.index(subsection)
 
-    model = get_model(law_code)
+    model = get_statute_model(law_code)
     if idx > 0:
         prev = model.subsection_float_to_string(subsections[idx - 1])
     else:
@@ -82,7 +98,28 @@ def fetch_previous_and_next_subsections(law_code, subsection):
     return (prev, next)
 
 
-def get_or_create_law(subsection, law_code):
-    model = get_model(law_code)
+def fetch_volumes(law_code):
+    model = get_volume_model(law_code)
+    return model.objects().order_by('volume')
+
+
+def get_or_create_volume(volume, law_code):
+    model = get_volume_model(law_code)
+    obj, created = model.objects.get_or_create(volume=volume)
+    return obj
+
+
+def get_or_create_chapter(chapter, volume, law_code):
+    logger.setLevel(logging.DEBUG)
+    model = get_chapter_model(law_code)
+    obj, created = model.objects.get_or_create(
+        chapter=chapter,
+        volume_id=volume.id)
+    return obj
+
+
+def get_or_create_statute(subsection, law_code):
+    model = get_statute_model(law_code)
     obj, created = model.objects.get_or_create(subsection=subsection)
     return obj
+

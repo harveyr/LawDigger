@@ -11,10 +11,27 @@ blueprint = Blueprint(
     'private_endpoints', __name__, template_folder='templates')
 
 
-@blueprint.route('/laws/<law_code>')
-def fetch_laws(law_code):
-    laws = data_laws.fetch_by_code(law_code)
-    return jsonify(laws)
+@blueprint.route('/laws/<law_code>/toc')
+def fetch_toc(law_code):
+    serialized = {}
+    if law_code == 'ors':
+        serialized['volumes'] = []
+        volumes = data_laws.fetch_volumes(law_code)
+        for v in volumes:
+            chapters = v.fetch_chapters()
+            d = v.serialize()
+            d['chapters'] = [c.serialize() for c in chapters]
+            serialized['volumes'].append(d)
+
+    if not serialized:
+        raise Exception('No TOC serialized for code' + str(law_code))
+    return jsonify(serialized)
+
+
+# @blueprint.route('/laws/<law_code>')
+# def fetch_laws(law_code):
+#     laws = data_laws.fetch_by_code(law_code)
+#     return jsonify(laws)
 
 
 @blueprint.route('/law/<law_code>/<version>/<subsection>')

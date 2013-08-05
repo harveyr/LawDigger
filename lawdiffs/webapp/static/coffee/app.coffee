@@ -1,7 +1,9 @@
 app = angular.module(APP_NAME, [
     DIRECTIVE_MODULE,
     SERVICES_MODULE,
-]).run ($route, $location, $rootScope) ->
+]).run ($route, $location, $rootScope, UrlBuilder) ->
+
+    $rootScope.appPrefix = UrlBuilder.APP_PREFIX
 
     $rootScope.$on '$routeChangeSuccess', (e, current, previous) ->
         path = $location.path()

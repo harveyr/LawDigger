@@ -13,6 +13,8 @@ angular.module(SERVICES_MODULE).factory 'Laws', ($http, $q, UrlBuilder, Sorter) 
                     laws = _.sortBy response.data, (law) =>
                         law.subsection
                     @allLawsCache[lawCode] = laws
+                    count = laws.length
+                    console.log "Fetched #{count} laws"
                     deferred.resolve laws
             deferred.promise
 

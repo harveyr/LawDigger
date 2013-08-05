@@ -1,9 +1,20 @@
 angular.module(SERVICES_MODULE).factory 'UrlBuilder', ($rootScope) ->
     class UrlBuilder
+        APP_PREFIX: APP_PREFIX
+        TEMPLATE_PREFIX: PARTIALS_PREFIX
         API_PREFIX: '/api'
 
+        api: (url) ->
+            @API_PREFIX + url
+            
         apiUrl: (url) ->
-            return @API_PREFIX + url
+            @api url
+
+        appUrl: (url) ->
+            @APP_PREFIX + url
+
+        template: (url) ->
+            @TEMPLATE_PREFIX + "/#{url}"
 
         viewPage: (subsection, lawCode = null, version = null) ->
             if not lawCode

@@ -1,4 +1,4 @@
-angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
+angular.module(APP_NAME).controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
     console.log 'ViewerCtrl'
     $scope.m = {}
     fetchedLaws = false

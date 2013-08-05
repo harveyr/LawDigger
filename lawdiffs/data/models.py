@@ -42,7 +42,9 @@ logger = logging.getLogger(__name__)
 
 class Serializeable(object):
     def serialize(self):
-        d = {}
+        d = {
+            'id': str(self.id)
+        }
         for cls in inspect.getmro(self.__class__):
             try:
                 class_dict = cls.class_serialize(self)
@@ -54,6 +56,28 @@ class Serializeable(object):
             finally:
                 pass
         return d
+
+
+class Volume(moe.Document, Serializeable):
+    volume = moe.IntField(required=True)
+    meta = {'allow_inheritance': True}
+
+    @classmethod
+    def class_serialize(cls, obj):
+        return {
+            'volume': obj.volume
+        }
+
+
+class Chapter(moe.Document, Serializeable):
+    chapter = moe.IntField(required=True)
+    meta = {'allow_inheritance': True}
+
+    @classmethod
+    def class_serialize(cls, obj):
+        return {
+            'chapter': obj.chapter
+        }
 
 
 class Law(moe.Document, Serializeable):
@@ -68,7 +92,6 @@ class Law(moe.Document, Serializeable):
     @classmethod
     def class_serialize(cls, obj):
         return {
-            'id': str(obj.id),
             'subsection': obj.subsection,
             'titles': obj.titles,
             'state_code': obj.state_code
@@ -119,8 +142,11 @@ class Law(moe.Document, Serializeable):
         return html
 
 
-class OregonRevisedStatute(Law):
+class ORSMixin(object):
     law_code = 'ors'
+
+
+class OregonRevisedStatute(Law, ORSMixin):
     serialize_attrs = ['state_code']
 
     def __str__(self):
@@ -187,3 +213,32 @@ class OregonRevisedStatute(Law):
         return formatted
 
 
+class ORSChapter(Chapter, ORSMixin):
+    volume_id = moe.ObjectIdField(required=True)
+    statute_ids = moe.ListField(moe.ObjectIdField())
+
+    def add_statute(self, statute):
+        if not isinstance(statute, OregonRevisedStatute):
+            raise Exception('ORSChapter accepts only ORS. Got {}'.format(
+                statute))
+        self.statute_ids.append(statute.id)
+        self.save()
+
+    def fetch_statutes(self):
+        return OregonRevisedStatute.objects(id__in=self.statute_ids)
+
+
+class ORSVolume(Volume, ORSMixin):
+    chapter_ids = moe.ListField(moe.ObjectIdField())
+
+    def add_chapter(self, chapter):
+        if not isinstance(chapter, ORSChapter):
+            raise Exception(
+                'ORSVolume accepts only ORSChapter. Got {}'.format(
+                    chapter))
+
+        self.chapter_ids.append(chapter.id)
+        self.save()
+
+    def fetch_chapters(self):
+        return ORSChapter.objects(id__in=self.chapter_ids)

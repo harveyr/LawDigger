@@ -1,4 +1,4 @@
-angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) ->
+angular.module(APP_NAME).controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) ->
     $scope.m = {}
 
     console.log '$rootScope.currentLawCode:', $rootScope.currentLawCode
