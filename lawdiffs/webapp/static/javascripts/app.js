@@ -467,6 +467,77 @@
     return console.log('HomeCtrl');
   });
 
+  angular.module(APP_NAME).controller('LawViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
+    var applyLaw, fetchAndApplyLaw, fetchedLaws;
+    console.log('ViewerCtrl');
+    $scope.m = {};
+    fetchedLaws = false;
+    applyLaw = function(law) {
+      $scope.lawText = law.text;
+      $scope.lawTitle = law.title;
+      $scope.lawVersions = law.versions.sort(function(a, b) {
+        return parseInt(b) - parseInt(a);
+      });
+      $scope.prevSection = law.prev;
+      $scope.nextSection = law.next;
+      return $scope.source = law.source;
+    };
+    fetchAndApplyLaw = function(version, section) {
+      return Laws.fetchLaw(version, section).then(function(response) {
+        return applyLaw(response.data);
+      });
+    };
+    $scope.chooseLaw = function(law) {
+      $scope.currentLaw = law;
+      $scope.hideSearchList = true;
+      $scope.m.primaryYear = _.max(law.versions);
+      return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
+    };
+    $scope.lawFilterChange = function() {
+      $scope.hideSearchList = false;
+      if (!fetchedLaws) {
+        fetchAllLaws();
+        return fetchedLaws = true;
+      }
+    };
+    $scope.diffMe = function() {
+      var url;
+      url = UrlBuilder.diffPage('ors', $scope.activeSection, $scope.availableVersions[$scope.availableVersions.length - 1], $scope.availableVersions[0]);
+      return $location.path(url);
+    };
+    $scope.choosePrimaryYear = function(year) {
+      return $scope.m.primaryYear = year;
+    };
+    $scope.selectedVersionChange = function(version) {
+      return $location.path("/view/ors/" + version + "/" + $scope.activeSection);
+    };
+    if (!$rootScope.currentSubsection) {
+      throw 'No currentSubsection in rootScope';
+    }
+    fetchAndApplyLaw($rootScope.currentVersion, $scope.currentSubsection);
+    return $scope.$on('lawNavClick', function(e, section) {
+      var url;
+      url = UrlBuilder.viewPage(section);
+      return $location.path(url);
+    });
+  });
+
+  angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
+    var chapter, lawCode, promise, version;
+    lawCode = $rootScope.currentLawCode;
+    version = $rootScope.currentVersion;
+    $scope.chapterLinkBase = UrlBuilder.app("/toc/" + lawCode + "/" + version);
+    $scope.statuteLinkBase = UrlBuilder.app("/view/" + lawCode + "/" + version);
+    if ($routeParams.division) {
+      chapter = $routeParams.division;
+      promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
+      return promise.then(function(data) {
+        $scope.currentChapter = data.chapter;
+        return $scope.chapterStatutes = data.statutes;
+      });
+    }
+  });
+
   angular.module(APP_NAME).controller('TocParentCtrl', function($route, $scope, $rootScope, $http, $routeParams, UrlBuilder) {
     var url;
     $scope.m = {};
@@ -515,79 +586,5 @@
       return $locationProvider.html5Mode(true).hashPrefix('!');
     }
   ]);
-
-  angular.module(APP_NAME).controller('DivisionViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, UrlBuilder) {
-    return $scope.m = {};
-  });
-
-  angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
-    var chapter, lawCode, promise, version;
-    lawCode = $rootScope.currentLawCode;
-    version = $rootScope.currentVersion;
-    $scope.chapterLinkBase = UrlBuilder.app("/toc/" + lawCode + "/" + version);
-    $scope.statuteLinkBase = UrlBuilder.app("/view/" + lawCode + "/" + version);
-    if ($routeParams.division) {
-      chapter = $routeParams.division;
-      promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
-      return promise.then(function(data) {
-        $scope.currentChapter = data.chapter;
-        return $scope.chapterStatutes = data.statutes;
-      });
-    }
-  });
-
-  angular.module(APP_NAME).controller('LawViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
-    var applyLaw, fetchAndApplyLaw, fetchedLaws;
-    console.log('ViewerCtrl');
-    $scope.m = {};
-    fetchedLaws = false;
-    applyLaw = function(law) {
-      $scope.lawText = law.text;
-      $scope.lawTitle = law.title;
-      $scope.lawVersions = law.versions.sort(function(a, b) {
-        return parseInt(b) - parseInt(a);
-      });
-      $scope.prevSection = law.prev;
-      return $scope.nextSection = law.next;
-    };
-    fetchAndApplyLaw = function(version, section) {
-      return Laws.fetchLaw(version, section).then(function(response) {
-        return applyLaw(response.data);
-      });
-    };
-    $scope.chooseLaw = function(law) {
-      $scope.currentLaw = law;
-      $scope.hideSearchList = true;
-      $scope.m.primaryYear = _.max(law.versions);
-      return fetchAndApplyLaw(law.id, $scope.m.primaryYear);
-    };
-    $scope.lawFilterChange = function() {
-      $scope.hideSearchList = false;
-      if (!fetchedLaws) {
-        fetchAllLaws();
-        return fetchedLaws = true;
-      }
-    };
-    $scope.diffMe = function() {
-      var url;
-      url = UrlBuilder.diffPage('ors', $scope.activeSection, $scope.availableVersions[$scope.availableVersions.length - 1], $scope.availableVersions[0]);
-      return $location.path(url);
-    };
-    $scope.choosePrimaryYear = function(year) {
-      return $scope.m.primaryYear = year;
-    };
-    $scope.selectedVersionChange = function(version) {
-      return $location.path("/view/ors/" + version + "/" + $scope.activeSection);
-    };
-    if (!$rootScope.currentSubsection) {
-      throw 'No currentSubsection in rootScope';
-    }
-    fetchAndApplyLaw($rootScope.currentVersion, $scope.currentSubsection);
-    return $scope.$on('lawNavClick', function(e, section) {
-      var url;
-      url = UrlBuilder.viewPage(section);
-      return $location.path(url);
-    });
-  });
 
 }).call(this);

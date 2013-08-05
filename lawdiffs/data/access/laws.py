@@ -35,6 +35,15 @@ def get_chapter_model(law_code):
     return law_code_to_model_map[law_code]['chapter']
 
 
+def fetch_code_version(law_code, version):
+    """Fetch all statutes in code."""
+    model = get_statute_model(law_code)
+    version_key = 'texts.' + str(version)
+    return model.objects(__raw__={
+        version_key: {'$exists': True}
+    })
+
+
 def fetch_code_subsections(law_code):
     cache_key = 'fetch_code_subsections_{}'.format(law_code)
     cached = cache.get(cache_key)
@@ -117,6 +126,9 @@ def get_or_create_statute(subsection, law_code):
     return obj
 
 
+def get_or_create_web_source(url):
+    obj, created = models.LawWebSource.objects.get_or_create(url=url)
+    return obj
 
 # def fetch_by_code(law_code, version=None):
 #     model = get_statute_model(law_code)

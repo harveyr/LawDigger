@@ -6,6 +6,12 @@ import pickle
 import md5
 import os
 import bs4
+import tempfile
+
+from pdfminer.pdfparser import PDFParser, PDFDocument, PDFNoOutlines
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import PDFPageAggregator
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 
 from ..data.client import mongoengine_connect
 from ..data.access import laws as data_laws
@@ -18,17 +24,8 @@ CACHE_PICKLE_PATH = os.path.join(CACHE_PATH, 'index.p')
 
 
 class LawParser(object):
-    cache = {
-        'html': {}
-    }
 
     newline_re = re.compile(r"(?<=[a-z])\r?\n")
-
-    def __init__(self):
-        # self.cleanse_html_re = re.compile(r'{}'.format(u'\xa7'))
-        if os.path.exists(CACHE_PICKLE_PATH):
-            with open(CACHE_PICKLE_PATH, 'r') as f:
-                self.cache = pickle.load(f)
 
     def url_base(self, url):
         try:
@@ -36,29 +33,107 @@ class LawParser(object):
         except ValueError, e:
             raise ValueError('Could not find right slash in url ' + str(url))
 
-    def fetch_html(self, url):
-        hashed_filename = md5.new(url).hexdigest()
-        if url in self.cache['html']:
-            with open(os.path.join(CACHE_PATH, hashed_filename), 'r') as f:
+    def get_url_file_extension(self, url):
+        filename, extension = os.path.splitext(url.split('/')[-1])
+        if not extension:
+            raise Exception("No file extension for url {}".format(url))
+        return extension.lower()
+
+    def hashed_filename(self, url):
+        hash_ = md5.new(url).hexdigest()
+        extension = self.get_url_file_extension(url)
+        return hash_ + extension
+
+    def cache_file_path_for_url(self, url):
+        return os.path.join(CACHE_PATH, self.hashed_filename(url))
+
+    def fetch_cached_url(self, url):
+        hashed_filename = self.hashed_filename(url)
+        path = os.path.join(CACHE_PATH, hashed_filename)
+        if os.path.exists(path) and os.path.isfile(path):
+            with open(path, 'r') as f:
                 logger.info('Using cached {} ({})'.format(
                     url, hashed_filename))
                 return f.read()
+        else:
+            return None
+
+    def fetch_cached_pdf(self, url):
+        hashed_filename = self.hashed_filename(url)
+        path = os.path.join(CACHE_PATH, hashed_filename)
+        if os.path.exists(path) and os.path.isfile(path):
+            logger.info('Using cached {} ({})'.format(
+                url, hashed_filename))
+            with open(path, 'rb') as f:
+                return f.read()
+
+    def cache_url_contents(self, url, contents):
+        hashed_filename = self.hashed_filename(url)
+        path = os.path.join(CACHE_PATH, hashed_filename)
+        with open(path, 'w') as f:
+            f.write(contents)
+
+    def cache_pdf_contents(self, url, contents):
+        hashed_filename = self.hashed_filename(url)
+        path = os.path.join(CACHE_PATH, hashed_filename)
+        with open(path, 'wb') as f:
+            f.write(contents)
+
+    def fetch_html(self, url):
+        cached = self.fetch_cached_url(url)
+        if cached:
+            return cached
 
         logger.info('Fetching ' + url)
         response = urllib2.urlopen(url)
         html = response.read()
         html = html.decode('utf-8', 'ignore')
-
-        self.cache['html'][url] = hashed_filename
-        with open(os.path.join(CACHE_PATH, hashed_filename), 'w') as f:
-            f.write(html)
-        with open(CACHE_PICKLE_PATH, 'w') as f:
-            pickle.dump(self.cache, f)
+        self.cache_url_contents(url, html)
 
         return html
 
     def fetch_soup(self, url):
         return BeautifulSoup(self.fetch_html(url))
+
+    def with_open_pdf(self, url, callback):
+        if self.get_url_file_extension(url) != '.pdf':
+            raise Exception('Not a pdf: {}'.format(url))
+        logger.setLevel(logging.DEBUG)
+        path = self.cache_file_path_for_url(url)
+        if os.path.exists(path) and os.path.isfile(path):
+            logger.debug('using cached ' + url)
+            with open(path, 'rb') as f:
+                callback(f)
+        else:
+            logger.debug('fetching fresh ' + url)
+            path = self.cache_file_path_for_url(url)
+            response = urllib2.urlopen(url)
+            with open(path, 'wb') as f:
+                f.write(response.read())
+            with open(path, 'rb') as f:
+                callback(f)
+
+    def extract_pdf_text(self, open_file):
+        parser = PDFParser(open_file)
+        doc = PDFDocument()
+        parser.set_document(doc)
+        doc.set_parser(parser)
+        doc.initialize()
+        if not doc.is_extractable:
+            raise Exception('Doc not extractable')
+        rsrcmgr = PDFResourceManager()
+        laparams = LAParams()
+        device = PDFPageAggregator(rsrcmgr, laparams=laparams)
+        interpreter = PDFPageInterpreter(rsrcmgr, device)
+        text_content = []
+        for i, page in enumerate(doc.get_pages()):
+            interpreter.process_page(page)
+            layout = device.get_result()
+            logger.debug('dir(layout): {v}'.format(v=dir(layout)))
+            break
+
+    def fetch_pdf_text(self, url):
+            self.with_open_pdf(url, self.extract_pdf_text)
 
     def get_soup_text(self, soup_elem):
         try:
@@ -73,9 +148,12 @@ class LawParser(object):
                 raise Exception('Unhandled type: ' + str(soup_elem))
 
     def commit(self, version):
-        logger.info('Committing version {}'.format(version))
-        laws = data_laws.fetch_by_code(self.law_code, version)
-        repos.update(laws, self.law_code, version)
+        laws = data_laws.fetch_code_version(self.law_code, version)
+        logger.info('Writing version {}...'.format(version))
+        for l in laws:
+            repos.write_file(l, version)
+        logger.info('Committing version {}...'.format(version))
+        repos.commit(self.law_code, version)
 
 
 class OrLawParser(LawParser):
@@ -87,6 +165,14 @@ class OrLawParser(LawParser):
 
     sources = [
         {
+            'version': 2007,
+            'url': 'http://www.leg.state.or.us/ors_archives/2007/2007ORS.html',
+            'crawl_func': 'begin_crawl_pdf',
+            'link_patterns': [
+                re.compile(r'\d+\.pdf')
+            ]
+        },
+        {
             'version': 2011,
             'url': 'http://www.leg.state.or.us/ors/ors_info.html',
             'crawl_func': 'begin_crawl_html',
@@ -96,29 +182,6 @@ class OrLawParser(LawParser):
             ]
         }
     ]
-    # sources = [
-    #     {
-    #         'version': 2001,
-    #         'crawl': [
-    #             'http://www.leg.state.or.us/ors_archives/2001ORS/vol1.html'
-    #         ],
-    #         'crawl_link_pattern': re.compile(r'\d+\.html')
-    #     },
-    #     {
-    #         'version': 2009,
-    #         'crawl': [
-    #             'http://www.leg.state.or.us/ors_archives/2009/vol1.html'
-    #         ],
-    #         'crawl_link_pattern': re.compile(r'\d+\.html')
-    #     },
-    #     {
-    #         'version': 2011,
-    #         'crawl': [
-    #             'http://www.leg.state.or.us/ors/vol1.html'
-    #         ],
-    #         'crawl_link_pattern': re.compile(r'\d+\.html')
-    #     }
-    # ]
 
     def __init__(self):
         super(OrLawParser, self).__init__()
@@ -134,18 +197,14 @@ class OrLawParser(LawParser):
         model = data_laws.get_chapter_model(self.law_code)
         model.drop_collection()
 
-        logger.setLevel(logging.DEBUG)
+        # logger.setLevel(logging.DEBUG)
 
+        self.begin_crawl_pdf(self.sources[0])
+        return
         for source in self.sources:
-            func = getattr(self, source['crawl_func'])
-            func(source)
-            # urls = self.scrape_urls(source)
-            # for i in range(min(1, len(urls))):
-            #     url = urls[i]
-            #     logger.debug('url: {v}'.format(v=url))
-            #     self.create_laws_from_url(url, version)
-
-            # self.commit(version)
+            crawl_func = getattr(self, source['crawl_func'])
+            crawl_func(source)
+            self.commit(source['version'])
 
         # law = data_laws.fetch_law(self.law_code, '1.060')
         # print(law.text(2011, formatted=True))
@@ -153,6 +212,16 @@ class OrLawParser(LawParser):
         # law = data_laws.fetch_law(self.law_code, '1.195')
         # diff = repos.get_tag_diff(law, '2001', '2011')
         # print('diff: {v}'.format(v=diff))
+
+    def begin_crawl_pdf(self, source_dict):
+        logger.setLevel(logging.DEBUG)
+        url = source_dict['url']
+        self.current_url_base = self.url_base(url)
+        soup = BeautifulSoup(self.fetch_html(url))
+        for link in soup.find_all(href=source_dict['link_patterns'][0]):
+            link_url = self.current_url_base + link.get('href')
+            self.fetch_pdf_text(link_url)
+            break
 
     def begin_crawl_html(self, source_dict):
         """Begin crawling html statutes"""
@@ -180,6 +249,12 @@ class OrLawParser(LawParser):
             self.current_volume.add_chapter(self.current_chapter)
 
             link_url = self.current_url_base + link.get('href')
+
+            self.current_source = data_laws.get_or_create_web_source(
+                link_url)
+            source_label = 'ORS Chapter {}'.format(chapter)
+            self.current_source.set_label(source_label)
+
             html = self.fetch_html(link_url)
             self.create_laws_from_html(html, source_dict)
             break
@@ -221,6 +296,7 @@ class OrLawParser(LawParser):
                     current_law = data_laws.get_or_create_statute(
                         subsection=section, law_code=self.law_code)
                     current_law.set_version_title(version, remainder)
+                    current_law.set_source(version, self.current_source)
                     logger.debug('current_law: {v}'.format(v=current_law))
                     self.current_chapter.add_statute(current_law)
                     text_buffer = ''

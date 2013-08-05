@@ -14,6 +14,7 @@
                 </div>
             </div>
         </form>
+
         <div class="version" ng-show="false">
             <label>Compare Year</label>
             <select ng-model="m.compareYear"
@@ -31,9 +32,20 @@
         ng-show="currentSubsection">
     </div>
     
+    <div class="row">
+        <div class="small-12 columns">
+            <small>
+                Source:
+                <a ng-href="{{source.url}}" target="_blank">{{source.label}}</a>
+            </small>
+        </div>
+    </div>
+
     <div class="row" ng-show="lawText">
         <div class="small-12 columns">
-            <pre>{{lawText}}</pre>
+            <p>
+                <pre>{{lawText}}</pre>
+            </p>
         </div>
     </div>
 

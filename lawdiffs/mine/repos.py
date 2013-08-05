@@ -13,6 +13,8 @@ REPO_TOP_DIR = os.path.join(
 
 
 def get_repo_path(repo_rel_path):
+    if not get_repo_path:
+        raise Exception('No repo path provided')
     return os.path.join(REPO_TOP_DIR, repo_rel_path)
 
 
@@ -50,24 +52,23 @@ def ensure_repo(repo_rel_path):
         wipe_and_init(repo_rel_path)
 
 
-def update(laws, law_code, version):
-    if len(laws) == 0:
-        raise Exception("no laws passed to update()")
-    repo_rel_path = law_code
+def write_file(law, version):
+    repo_rel_path = law.law_code
     ensure_repo(repo_rel_path)
-
     repo_path = get_repo_path(repo_rel_path)
-    for law in laws:
-        f_path = os.path.join(repo_path, law.filename)
-        law.file_path = f_path
-        law.save_attr('file_path')
-        with open(f_path, 'w') as open_f:
-            text = law.get_version(version)
-            open_f.write(text)
+    f_path = os.path.join(repo_path, law.filename)
+    law.file_path = f_path
+    law.save_attr('file_path')
+    with open(f_path, 'w') as open_f:
+        text = law.get_version(version)
+        open_f.write(text)
+    run_git_command('add {}'.format(f_path), repo_rel_path)
 
-    run_git_command('init', repo_rel_path)
-    run_git_command('add -A', repo_rel_path)
-    run_git_command('commit -m "Testing"', repo_rel_path)
+
+def commit(law_code, version):
+    repo_rel_path = law_code
+    commit_msg = "{} {}".format(law_code, version)
+    run_git_command('commit -m "{}"'.format(commit_msg), repo_rel_path)
     run_git_command(
         'tag -a {tag} -m "{tag}"'.format(tag=version), repo_rel_path)
 

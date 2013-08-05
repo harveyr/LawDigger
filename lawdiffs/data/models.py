@@ -87,6 +87,31 @@ class VersionTitlesMixin(object):
         return str(version) in self.titles.keys()
 
 
+class LawSource(moe.Document, Serializeable):
+    label = moe.StringField()
+    meta = {'allow_inheritance': True}
+
+    @classmethod
+    def class_serialize(cls, obj):
+        return {
+            'label': obj.label
+        }
+
+    def set_label(self, label):
+        self.label = label
+        self.save()
+
+
+class LawWebSource(LawSource):
+    url = moe.StringField(required=True, unique=True)
+
+    @classmethod
+    def class_serialize(cls, obj):
+        return {
+            'url': obj.url
+        }
+
+
 class Volume(moe.Document, Serializeable):
     volume = moe.IntField(required=True)
     meta = {'allow_inheritance': True}
@@ -113,8 +138,8 @@ class Chapter(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
 class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
     subsection = moe.StringField(unique=True, required=True)
     texts = moe.DictField()
-    state_code = moe.StringField()
     file_path = moe.StringField()
+    sources = moe.DictField()
 
     meta = {'allow_inheritance': True}
 
@@ -123,13 +148,13 @@ class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
         return {
             'subsection': obj.subsection,
             'titles': obj.titles,
-            'state_code': obj.state_code
+            'law_code': obj.law_code
         }
 
     @classmethod
-    def fetch_by_code_code(cls, state_code):
+    def fetch_by_code_code(cls, law_code):
         c = cls.collection()
-        return c.find({'state_code': state_code})
+        return c.find({'law_code': law_code})
 
     def set_version_text(self, version, text):
         self.texts[str(version)] = text
@@ -138,6 +163,18 @@ class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
     @property
     def versions(self):
         return self.texts.keys()
+
+    def set_source(self, version, source):
+        assert(isinstance(source, LawSource))
+        self.sources[str(version)] = source.id
+        self.save()
+
+    def fetch_source(self, version):
+        version = str(version)
+        if not version in self.sources:
+            return None
+        source_id = self.sources[str(version)]
+        return LawSource.objects(id=source_id).first()
 
     def text(self, version, formatted=False):
         text = self.texts[str(version)]
@@ -159,7 +196,7 @@ class ORSMixin(object):
 
 
 class OregonRevisedStatute(Law, ORSMixin):
-    serialize_attrs = ['state_code']
+    serialize_attrs = ['law_code']
 
     def __str__(self):
         return '<ORS {subs} {versions}>'.format(

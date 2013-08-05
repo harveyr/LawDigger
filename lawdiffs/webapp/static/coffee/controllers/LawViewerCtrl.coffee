@@ -10,6 +10,7 @@ angular.module(APP_NAME).controller 'LawViewerCtrl', ($route, $scope, $rootScope
             return parseInt(b) - parseInt(a)
         $scope.prevSection = law.prev
         $scope.nextSection = law.next
+        $scope.source = law.source
 
     fetchAndApplyLaw = (version, section) ->
         Laws.fetchLaw(version, section).then (response) ->
