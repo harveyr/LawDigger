@@ -114,9 +114,9 @@
         }
         return scope.click = function() {
           if (scope.isNext) {
-            return scope.$emit('navClick', scope.section);
+            return scope.$emit('lawNavClick', scope.section);
           } else if (scope.isPrev) {
-            return scope.$emit('navClick', scope.section);
+            return scope.$emit('lawNavClick', scope.section);
           }
         };
       }
@@ -204,8 +204,29 @@
     Laws = (function() {
       function Laws() {}
 
-      Laws.prototype.fetchAll = function() {
-        return $http.get(UrlBuilder.apiUrl('/laws/ors'));
+      Laws.prototype.allLawsCache = {};
+
+      Laws.prototype.fetchAll = function(lawCode) {
+        var deferred, url,
+          _this = this;
+        if (lawCode == null) {
+          lawCode = 'ors';
+        }
+        deferred = $q.defer();
+        if (_.has(this.allLawsCache, lawCode)) {
+          deferred.resolve(this.allLawsCache[lawCode]);
+        } else {
+          url = UrlBuilder.apiUrl("/laws/" + lawCode);
+          $http.get(url).then(function(response) {
+            var laws;
+            laws = _.sortBy(response.data, function(law) {
+              return law.subsection;
+            });
+            _this.allLawsCache[lawCode] = laws;
+            return deferred.resolve(laws);
+          });
+        }
+        return deferred.promise;
       };
 
       Laws.prototype.fetchLaw = function(version, section) {
@@ -318,8 +339,13 @@
     return new UrlBuilder();
   });
 
-  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope) {
-    console.log('here');
+  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope, $routeParams) {
+    $rootScope.$on('$routeChangeSuccess', function() {
+      console.log('routeChangeSuccess');
+      if ($routeParams.lawCode) {
+        return $rootScope.currentLawCode = $routeParams.lawCode;
+      }
+    });
     return _.mixin({
       "in": function(arr, value) {
         return arr.indexOf(value) !== -1;
@@ -330,6 +356,7 @@
   angular.module('myLilApp').controller('DiffCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) {
     var updateLegendDiffLines;
     $scope.m = {};
+    console.log('$rootScope.currentLawCode:', $rootScope.currentLawCode);
     updateLegendDiffLines = function() {
       var version1, version2;
       version1 = $routeParams.version1;
@@ -366,13 +393,26 @@
         $scope.availableVersions = Sorter.sortVersions(response.data.versions);
         return updateLegendDiffLines();
       });
-    } else {
-      fetchLaws();
+      if ($rootScope.currentLawCode && $rootScope.currentSection) {
+        Laws.fetchVersions($rootScope.currentLawCode, $rootScope.currentSection).then(function(versions) {
+          return console.log('versions:', versions);
+        });
+      }
     }
-    return $scope.$on('navClick', function(e, section) {
+    $scope.lawNavClick = function(section) {
       var url;
-      url = UrlBuilder.diffPage($scope.lawCode, section, $scope.currentVersion1, $scope.currentVersion2);
-      return $location.path(url);
+      if ($scope.currentVersion1 && $scope.currentVersion2) {
+        url = UrlBuilder.diffPage($rootScope.currentLawCode, section, $scope.currentVersion1, $scope.currentVersion2);
+        return $location.path(url);
+      } else {
+        return Laws.fetchVersions($rootScope.currentLawCode, section).then(function(versions) {
+          url = UrlBuilder.diffPage($rootScope.currentLawCode, section, Math.min.apply(null, versions), Math.max.apply(null, versions));
+          return $location.path(url);
+        });
+      }
+    };
+    return $scope.$on('lawNavClick', function(e, section) {
+      return $scope.lawNavClick(section);
     });
   });
 
@@ -395,11 +435,7 @@
       return $scope.nextSection = law.next;
     };
     fetchAllLaws = function() {
-      return Laws.fetchAll().then(function(response) {
-        var laws;
-        laws = _.sortBy(response.data, function(law) {
-          return law.subsection;
-        });
+      return Laws.fetchAll().then(function(laws) {
         return $scope.allLaws = laws;
       });
     };
@@ -455,11 +491,16 @@
       }).when('/view/:lawCode', {
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
-      }).when('/view/:lawCode/:param', {
+      }).when('/view/:lawCode/:version', {
         redirectTo: '/view/ors'
       }).when('/view/:lawCode/:version/:section', {
         controller: 'ViewerCtrl',
         templateUrl: '/static/partials/home.html'
+      }).when('/diff', {
+        redirectTo: '/diff/ors'
+      }).when('/diff/:lawCode', {
+        controller: 'DiffCtrl',
+        templateUrl: '/static/partials/diff.html'
       }).when('/diff/:lawCode/:subsection/:version1/:version2', {
         controller: 'DiffCtrl',
         templateUrl: '/static/partials/diff.html'
@@ -469,5 +510,26 @@
       return $locationProvider.html5Mode(true).hashPrefix('!');
     }
   ]);
+
+  angular.module(DIRECTIVE_MODULE).directive('lawSearch', function($rootScope, Laws) {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: true,
+      template: "<div>\n    <form>\n        <div class=\"row collapse\">\n            <div class=\"small-2 columns\">\n                <span class=\"prefix\">\n                    Search {{lawCode}}\n                </span>\n            </div>\n            <div class=\"small-10 columns\">\n                <input type=\"text\"\n                    placeholder=\"Enter subsection, title, or both\"\n                    ng-change=\"inputChange()\"\n                    ng-model=\"m.lawInput\"\n                    autofocus>\n            </div>\n        </div>\n    </form>\n\n    <div class=\"row\" ng-show=\"m.lawInput && !hideSearchList\">\n        <div class=\"small-10 small-offset-2 columns panel\">\n            <p>\n                <strong>Best Matches</strong>\n            </p>\n            <div class=\"row\" ng-repeat=\"l in laws | filter:m.lawInput | limitTo: 10\">\n                <div class=\"small-12 columns\">\n                    <a ng-click=\"click(l.subsection); $event.stopPropagation()\">\n                        ORS {{l.subsection}} {{l.titles[m.selectedVersion]}}\n                    </a>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>",
+      link: function(scope) {
+        scope.m = {};
+        scope.lawCode = $rootScope.currentLawCode;
+        scope.inputChange = function() {
+          if (!scope.laws) {
+            return scope.laws = Laws.fetchAll();
+          }
+        };
+        return scope.click = function(section) {
+          return scope.$emit('lawNavClick', section);
+        };
+      }
+    };
+  });
 
 }).call(this);

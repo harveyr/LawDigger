@@ -7,12 +7,19 @@ angular.module('myLilApp').config ['$routeProvider', '$locationProvider', ($rout
             controller: 'ViewerCtrl'
             templateUrl: '/static/partials/home.html'
         })
-        .when('/view/:lawCode/:param', {
+        .when('/view/:lawCode/:version', {
             redirectTo: '/view/ors'
         })
         .when('/view/:lawCode/:version/:section', {
             controller: 'ViewerCtrl'
             templateUrl: '/static/partials/home.html'
+        })
+        .when('/diff', {
+            redirectTo: '/diff/ors'
+        })
+        .when('/diff/:lawCode', {
+            controller: 'DiffCtrl'
+            templateUrl: '/static/partials/diff.html'
         })
         .when('/diff/:lawCode/:subsection/:version1/:version2', {
             controller: 'DiffCtrl'

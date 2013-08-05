@@ -7232,13 +7232,18 @@ nav li.current-state a {
 }
 
 /* line 82, ../sass/app.scss */
+.right-j {
+  text-align: right;
+}
+
+/* line 86, ../sass/app.scss */
 .content-wrapper {
   padding-left: 40px;
   padding-right: 40px;
   padding-bottom: 40px;
 }
 
-/* line 88, ../sass/app.scss */
+/* line 92, ../sass/app.scss */
 .law-title {
   width: 100%;
   margin-left: auto;
@@ -7258,7 +7263,7 @@ nav li.current-state a {
 .law-title:after {
   clear: both;
 }
-/* line 92, ../sass/app.scss */
+/* line 96, ../sass/app.scss */
 .law-title > div {
   position: relative;
   padding-left: 0.9375em;
@@ -7267,7 +7272,7 @@ nav li.current-state a {
   float: left;
 }
 
-/* line 98, ../sass/app.scss */
+/* line 102, ../sass/app.scss */
 .version-select .inner {
   width: 100%;
   margin-left: auto;
@@ -7286,7 +7291,7 @@ nav li.current-state a {
 .version-select .inner:after {
   clear: both;
 }
-/* line 101, ../sass/app.scss */
+/* line 105, ../sass/app.scss */
 .version-select .vs-label {
   position: relative;
   padding-left: 0.9375em;
@@ -7294,7 +7299,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 107, ../sass/app.scss */
+/* line 111, ../sass/app.scss */
 .version-select .select {
   position: relative;
   padding-left: 0.9375em;
@@ -7303,7 +7308,7 @@ nav li.current-state a {
   float: left;
 }
 
-/* line 113, ../sass/app.scss */
+/* line 117, ../sass/app.scss */
 .viewer-option-panel {
   width: 100%;
   margin-left: auto;
@@ -7322,17 +7327,17 @@ nav li.current-state a {
 .viewer-option-panel:after {
   clear: both;
 }
-/* line 116, ../sass/app.scss */
+/* line 120, ../sass/app.scss */
 .viewer-option-panel select {
   margin: 0;
 }
-/* line 119, ../sass/app.scss */
+/* line 123, ../sass/app.scss */
 .viewer-option-panel select.inline {
   width: 70px;
   margin-left: 5px;
   margin-right: 5px;
 }
-/* line 126, ../sass/app.scss */
+/* line 130, ../sass/app.scss */
 .viewer-option-panel .label-wrapper {
   position: relative;
   padding-left: 0.9375em;
@@ -7340,7 +7345,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 132, ../sass/app.scss */
+/* line 136, ../sass/app.scss */
 .viewer-option-panel .version-select-wrapper {
   position: relative;
   padding-left: 0.9375em;
@@ -7348,7 +7353,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 136, ../sass/app.scss */
+/* line 140, ../sass/app.scss */
 .viewer-option-panel .next, .viewer-option-panel .prev {
   position: relative;
   padding-left: 0.9375em;
@@ -7356,15 +7361,15 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 139, ../sass/app.scss */
+/* line 143, ../sass/app.scss */
 .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
   margin: 0;
 }
-/* line 147, ../sass/app.scss */
+/* line 151, ../sass/app.scss */
 .viewer-option-panel .next {
   text-align: right;
 }
-/* line 152, ../sass/app.scss */
+/* line 156, ../sass/app.scss */
 .viewer-option-panel .compare-text {
   position: relative;
   padding-left: 0.9375em;
@@ -7376,12 +7381,12 @@ nav li.current-state a {
   float: left;
   text-align: center;
 }
-/* line 157, ../sass/app.scss */
+/* line 161, ../sass/app.scss */
 .viewer-option-panel a.update {
   margin: 0;
 }
 
-/* line 164, ../sass/app.scss */
+/* line 168, ../sass/app.scss */
 .diff-container {
   width: 100%;
   margin-left: auto;
@@ -7404,7 +7409,7 @@ nav li.current-state a {
   clear: both;
 }
 
-/* line 171, ../sass/app.scss */
+/* line 175, ../sass/app.scss */
 .diff-legend-header {
   width: 100%;
   margin-left: auto;
@@ -7425,7 +7430,7 @@ nav li.current-state a {
 .diff-legend-header:after {
   clear: both;
 }
-/* line 175, ../sass/app.scss */
+/* line 179, ../sass/app.scss */
 .diff-legend-header table {
   position: relative;
   padding-left: 0.9375em;
@@ -7435,25 +7440,25 @@ nav li.current-state a {
   margin: 0;
 }
 
-/* line 181, ../sass/app.scss */
+/* line 185, ../sass/app.scss */
 .diff-line-table {
   border: 0;
   margin: 0;
   width: 100%;
 }
-/* line 186, ../sass/app.scss */
+/* line 190, ../sass/app.scss */
 .diff-line-table .plus-minus {
   text-align: center;
   width: 25px !important;
   border-right: 1px solid #d9d9d9;
 }
 
-/* line 193, ../sass/app.scss */
+/* line 197, ../sass/app.scss */
 .diff-subtraction {
   background-color: #ffe2e2;
 }
 
-/* line 197, ../sass/app.scss */
+/* line 201, ../sass/app.scss */
 .diff-addition {
   background-color: #e2ffe2;
 }

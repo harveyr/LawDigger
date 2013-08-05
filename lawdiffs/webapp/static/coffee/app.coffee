@@ -1,12 +1,13 @@
 app = angular.module(APP_NAME, [
     DIRECTIVE_MODULE,
     SERVICES_MODULE,
-]).run ($route, $location, $rootScope) ->
-    # $rootScope.$on '$routeChangeSuccess', ->
-    #     path = $location.path
-    #     $rootScope.partialUrl = partials[$location.path()]
+]).run ($route, $location, $rootScope, $routeParams) ->
 
-    console.log 'here'
+    $rootScope.$on '$routeChangeSuccess', ->
+        console.log 'routeChangeSuccess'
+        if $routeParams.lawCode
+            $rootScope.currentLawCode = $routeParams.lawCode
+
 
     _.mixin({
         in: (arr, value) ->

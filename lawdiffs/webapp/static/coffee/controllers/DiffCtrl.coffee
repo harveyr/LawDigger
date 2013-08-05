@@ -1,6 +1,8 @@
 angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder, Sorter) ->
     $scope.m = {}
 
+    console.log '$rootScope.currentLawCode:', $rootScope.currentLawCode
+
     updateLegendDiffLines = ->
         version1 = $routeParams.version1
         version2 = $routeParams.version2
@@ -51,12 +53,34 @@ angular.module('myLilApp').controller 'DiffCtrl', ($route, $scope, $rootScope, $
                     $scope.availableVersions = Sorter.sortVersions response.data.versions
 
                     updateLegendDiffLines()
-    else
-        fetchLaws()
+        if $rootScope.currentLawCode and $rootScope.currentSection
+            Laws.fetchVersions($rootScope.currentLawCode, $rootScope.currentSection).then (versions) ->
+                console.log 'versions:', versions
+        # else
+        #     promise = Laws.fetchAll().then (laws) ->
+        #         console.log 'laws:', laws
 
-    $scope.$on 'navClick', (e, section) ->
-        url = UrlBuilder.diffPage $scope.lawCode,
-            section,
-            $scope.currentVersion1
-            $scope.currentVersion2
-        $location.path(url)
+        # url = UrlBuilder.diffPage $rootScope.currentLawCode,
+        #     $rootScope.currentSection,
+        #     $rootScope.currentVersion
+
+    $scope.lawNavClick = (section) ->
+        if $scope.currentVersion1 and $scope.currentVersion2
+            url = UrlBuilder.diffPage $rootScope.currentLawCode,
+                section,
+                $scope.currentVersion1
+                $scope.currentVersion2
+            $location.path(url)
+        else
+            Laws.fetchVersions($rootScope.currentLawCode, section)
+                .then (versions) ->
+                    url = UrlBuilder.diffPage $rootScope.currentLawCode,
+                        section,
+                        Math.min.apply(null, versions),
+                        Math.max.apply(null, versions)
+                    $location.path(url)
+
+
+    $scope.$on 'lawNavClick', (e, section) ->
+        $scope.lawNavClick(section)
+

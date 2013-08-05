@@ -12,9 +12,7 @@ angular.module('myLilApp').controller 'ViewerCtrl', ($route, $scope, $rootScope,
         $scope.nextSection = law.next
 
     fetchAllLaws = ->
-        Laws.fetchAll().then (response) ->
-            laws = _.sortBy response.data, (law) ->
-                law.subsection
+        Laws.fetchAll().then (laws) ->
             $scope.allLaws = laws
 
     fetchAndApplyLaw = (version, section) ->

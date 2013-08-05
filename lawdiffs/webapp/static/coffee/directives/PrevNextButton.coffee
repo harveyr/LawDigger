@@ -28,6 +28,6 @@ angular.module(DIRECTIVE_MODULE).directive 'prevNextButton', () ->
 
             scope.click = ->
                 if scope.isNext
-                    scope.$emit 'navClick', scope.section
+                    scope.$emit 'lawNavClick', scope.section
                 else if scope.isPrev
-                    scope.$emit 'navClick', scope.section
+                    scope.$emit 'lawNavClick', scope.section

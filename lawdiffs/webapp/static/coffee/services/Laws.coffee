@@ -1,8 +1,20 @@
 angular.module(SERVICES_MODULE).factory 'Laws', ($http, $q, UrlBuilder, Sorter) ->
     class Laws
 
-        fetchAll: ->
-            $http.get(UrlBuilder.apiUrl('/laws/ors'))
+        allLawsCache: {}
+
+        fetchAll: (lawCode = 'ors') ->
+            deferred = $q.defer()
+            if _.has @allLawsCache, lawCode
+                deferred.resolve @allLawsCache[lawCode]
+            else
+                url = UrlBuilder.apiUrl("/laws/#{lawCode}")
+                $http.get(url).then (response) =>
+                    laws = _.sortBy response.data, (law) =>
+                        law.subsection
+                    @allLawsCache[lawCode] = laws
+                    deferred.resolve laws
+            deferred.promise
 
         fetchLaw: (version, section) ->
             $http.get(UrlBuilder.apiUrl("/law/ors/#{version}/#{section}"))

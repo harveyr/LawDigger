@@ -27,7 +27,8 @@
         </div>
     </div>
 
-    <div law-header 
+    <div law-header
+        code="{{currentLawCode}}"
         title="{{lawTitle}}"
         subsection="{{currentSection}}"
         ng-show="currentSection">
@@ -53,9 +54,6 @@
             <select ng-model="m.compareYear"
                 ng-options="year for year in currentLaw.versions">
             </select>
-        </div>
-        <div class="small-1 columns">
-            <a ng-click="diffMe()" class="button small">Diff</a>
         </div>
 
         <div prev-next-button="{{nextSection}}" next></div>
