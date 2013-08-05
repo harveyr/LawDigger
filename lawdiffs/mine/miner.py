@@ -129,8 +129,14 @@ class LawParser(object):
         for i, page in enumerate(doc.get_pages()):
             interpreter.process_page(page)
             layout = device.get_result()
-            logger.debug('dir(layout): {v}'.format(v=dir(layout)))
+            for obj in layout:
+                try:
+                    text_content.append(obj.get_text())
+                except AttributeError:
+                    pass
+
             break
+        logger.debug('text_content: {v}'.format(v=text_content))
 
     def fetch_pdf_text(self, url):
             self.with_open_pdf(url, self.extract_pdf_text)
