@@ -84,7 +84,7 @@ class VersionTitlesMixin(object):
         return sorted(self.titles.keys(), reverse=True)
 
     def has_title(self, version):
-        return version in self.titles.keys()
+        return str(version) in self.titles.keys()
 
 
 class Volume(moe.Document, Serializeable):
@@ -233,6 +233,7 @@ class ORSChapter(Chapter, ORSMixin):
         if not isinstance(statute, OregonRevisedStatute):
             raise Exception('ORSChapter accepts only ORS. Got {}'.format(
                 statute))
+        logger.setLevel(logging.DEBUG)
         self.statute_ids.append(statute.id)
         self.save()
 

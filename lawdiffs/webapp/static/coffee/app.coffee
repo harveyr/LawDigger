@@ -16,6 +16,8 @@ app = angular.module(APP_NAME, [
         params = current.params
         if _.has params, 'lawCode'
             $rootScope.currentLawCode = params.lawCode
+        if _.has params, 'version'
+            $rootScope.currentVersion = params.version
 
 
     _.mixin({

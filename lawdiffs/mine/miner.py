@@ -190,13 +190,13 @@ class OrLawParser(LawParser):
         current_law = None
         text_buffer = ''
         set_title = False
-
+        logger.setLevel(logging.DEBUG)
         count = 0
         for s in soup.stripped_strings:
             s = ' '.join(s.splitlines())
-            count += 1
-            if count > 20:
-                break
+            # count += 1
+            # if count > 20:
+            #     break
             if not self.current_chapter.has_title(version):
                 if set_title:
                     self.current_chapter.set_version_title(version, s)
@@ -207,6 +207,7 @@ class OrLawParser(LawParser):
                     if regex.match(s):
                         # Set the title on the next pass
                         set_title = True
+                continue
 
             subs_matches = self.subsection_re.match(s)
             if subs_matches:
@@ -221,7 +222,7 @@ class OrLawParser(LawParser):
                         subsection=section, law_code=self.law_code)
                     current_law.set_version_title(version, remainder)
                     logger.debug('current_law: {v}'.format(v=current_law))
-                    self.current_chapter.add_statute
+                    self.current_chapter.add_statute(current_law)
                     text_buffer = ''
                 else:
                     # If first char of remainder is not upper, it's part of

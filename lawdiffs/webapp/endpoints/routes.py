@@ -31,6 +31,18 @@ def fetch_toc(law_code):
     return jsonify(serialized)
 
 
+@blueprint.route('/laws/<law_code>/division/<division>')
+def fetch_division(law_code, division):
+    data = {}
+    if law_code == 'ors':
+        chapter, statutes = data_laws.fetch_ors_by_chapter(division)
+        data['chapter'] = chapter
+        data['statutes'] = statutes
+    if not data:
+        raise Exception('No data found for code' + str(law_code))
+    return jsonify(data)
+
+
 # @blueprint.route('/laws/<law_code>')
 # def fetch_laws(law_code):
 #     laws = data_laws.fetch_by_code(law_code)

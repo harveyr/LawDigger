@@ -1,23 +1,6 @@
 angular.module(SERVICES_MODULE).factory 'Laws', ($http, $q, UrlBuilder, Sorter) ->
     class Laws
 
-        allLawsCache: {}
-
-        fetchAll: (lawCode = 'ors') ->
-            deferred = $q.defer()
-            if _.has @allLawsCache, lawCode
-                deferred.resolve @allLawsCache[lawCode]
-            else
-                url = UrlBuilder.apiUrl("/laws/#{lawCode}")
-                $http.get(url).then (response) =>
-                    laws = _.sortBy response.data, (law) =>
-                        law.subsection
-                    @allLawsCache[lawCode] = laws
-                    count = laws.length
-                    console.log "Fetched #{count} laws"
-                    deferred.resolve laws
-            deferred.promise
-
         fetchLaw: (version, section) ->
             $http.get(UrlBuilder.apiUrl("/law/ors/#{version}/#{section}"))
 
@@ -26,6 +9,14 @@ angular.module(SERVICES_MODULE).factory 'Laws', ($http, $q, UrlBuilder, Sorter) 
             $http.get(UrlBuilder.apiUrl("/versions/#{lawCode}/#{section}"))
                 .success (data) ->
                     deferred.resolve Sorter.sortVersions data.versions
+            deferred.promise
+
+        fetchDivision: (lawCode, division) ->
+            deferred = $q.defer()
+            url = UrlBuilder.api "/laws/#{lawCode}/division/#{division}"
+            $http.get(url)
+                .success (data) ->
+                    deferred.resolve data
             deferred.promise
 
         nearestVersion: (lawCode, section, version) ->

@@ -95,6 +95,27 @@
     };
   });
 
+  angular.module(DIRECTIVE_MODULE).directive('lawSearch', function($rootScope, Laws) {
+    var directive;
+    return directive = {
+      replace: true,
+      scope: true,
+      template: "<div>\n    <form>\n        <div class=\"row collapse\">\n            <div class=\"small-2 columns\">\n                <span class=\"prefix\">\n                    Search {{lawCode}}\n                </span>\n            </div>\n            <div class=\"small-10 columns\">\n                <input type=\"text\"\n                    placeholder=\"Enter subsection, title, or both\"\n                    ng-change=\"inputChange()\"\n                    ng-model=\"m.lawInput\"\n                    autofocus>\n            </div>\n        </div>\n    </form>\n\n    <div class=\"row\" ng-show=\"m.lawInput && !hideSearchList\">\n        <div class=\"small-10 small-offset-2 columns panel\">\n            <p>\n                <strong>Best Matches</strong>\n            </p>\n            <div class=\"row\" ng-repeat=\"l in laws | filter:m.lawInput | limitTo: 10\">\n                <div class=\"small-12 columns\">\n                    <a ng-click=\"click(l.subsection); $event.stopPropagation()\">\n                        ORS {{l.subsection}} {{l.titles[m.selectedVersion]}}\n                    </a>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>",
+      link: function(scope) {
+        scope.m = {};
+        scope.lawCode = $rootScope.currentLawCode;
+        scope.inputChange = function() {
+          if (!scope.laws) {
+            return scope.laws = Laws.fetchAll();
+          }
+        };
+        return scope.click = function(section) {
+          return scope.$emit('lawNavClick', section);
+        };
+      }
+    };
+  });
+
   angular.module(DIRECTIVE_MODULE).directive('prevNextButton', function() {
     var directive;
     return directive = {
@@ -208,33 +229,6 @@
     Laws = (function() {
       function Laws() {}
 
-      Laws.prototype.allLawsCache = {};
-
-      Laws.prototype.fetchAll = function(lawCode) {
-        var deferred, url,
-          _this = this;
-        if (lawCode == null) {
-          lawCode = 'ors';
-        }
-        deferred = $q.defer();
-        if (_.has(this.allLawsCache, lawCode)) {
-          deferred.resolve(this.allLawsCache[lawCode]);
-        } else {
-          url = UrlBuilder.apiUrl("/laws/" + lawCode);
-          $http.get(url).then(function(response) {
-            var count, laws;
-            laws = _.sortBy(response.data, function(law) {
-              return law.subsection;
-            });
-            _this.allLawsCache[lawCode] = laws;
-            count = laws.length;
-            console.log("Fetched " + count + " laws");
-            return deferred.resolve(laws);
-          });
-        }
-        return deferred.promise;
-      };
-
       Laws.prototype.fetchLaw = function(version, section) {
         return $http.get(UrlBuilder.apiUrl("/law/ors/" + version + "/" + section));
       };
@@ -244,6 +238,16 @@
         deferred = $q.defer();
         $http.get(UrlBuilder.apiUrl("/versions/" + lawCode + "/" + section)).success(function(data) {
           return deferred.resolve(Sorter.sortVersions(data.versions));
+        });
+        return deferred.promise;
+      };
+
+      Laws.prototype.fetchDivision = function(lawCode, division) {
+        var deferred, url;
+        deferred = $q.defer();
+        url = UrlBuilder.api("/laws/" + lawCode + "/division/" + division);
+        $http.get(url).success(function(data) {
+          return deferred.resolve(data);
         });
         return deferred.promise;
       };
@@ -321,8 +325,12 @@
         return this.api(url);
       };
 
-      UrlBuilder.prototype.appUrl = function(url) {
+      UrlBuilder.prototype.app = function(url) {
         return this.APP_PREFIX + url;
+      };
+
+      UrlBuilder.prototype.appUrl = function(url) {
+        return this.app(url);
       };
 
       UrlBuilder.prototype.template = function(url) {
@@ -373,7 +381,10 @@
       }
       params = current.params;
       if (_.has(params, 'lawCode')) {
-        return $rootScope.currentLawCode = params.lawCode;
+        $rootScope.currentLawCode = params.lawCode;
+      }
+      if (_.has(params, 'version')) {
+        return $rootScope.currentVersion = params.version;
       }
     });
     return _.mixin({
@@ -453,6 +464,25 @@
     return console.log('HomeCtrl');
   });
 
+  angular.module(APP_NAME).controller('TocParentCtrl', function($route, $scope, $rootScope, $http, $routeParams, UrlBuilder) {
+    var url;
+    $scope.m = {};
+    if (!$scope.tocData && !$routeParams.division) {
+      url = UrlBuilder.api("/laws/" + $rootScope.currentLawCode + "/toc");
+      $http.get(url).success(function(data) {
+        $scope.tocData = data;
+        if (!$rootScope.currentVersion) {
+          $rootScope.currentVersion = data.versions[0];
+        }
+        return $scope.m.selectedVersion = $rootScope.currentVersion;
+      });
+    }
+    switch ($rootScope.currentLawCode) {
+      case 'ors':
+        return $scope.tocChildTemplate = UrlBuilder.template('toc_ors.html');
+    }
+  });
+
   angular.module(APP_NAME).controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
     var applyLaw, fetchAllLaws, fetchAndApplyLaw, fetchedLaws;
     console.log('ViewerCtrl');
@@ -523,16 +553,9 @@
       defaultCode = 'ors';
       appPrefix = APP_PREFIX;
       templatePrefix = PARTIALS_PREFIX;
-      $routeProvider.when(appPrefix + '/view', {
-        redirectTo: "/view/" + defaultCode
-      }).when(appPrefix + '/view/:lawCode', {
-        controller: 'ViewerCtrl',
-        templateUrl: templatePrefix + '/home.html'
-      }).when(appPrefix + '/view/:lawCode/:version', {
-        redirectTo: "/view/" + defaultCode
-      }).when(appPrefix + '/view/:lawCode/:version/:section', {
-        controller: 'ViewerCtrl',
-        templateUrl: templatePrefix + '/home.html'
+      $routeProvider.when(appPrefix + '/view/:lawCode/:version/:divison', {
+        controller: 'DivisionViewerCtrl',
+        templateUrl: templatePrefix + '/view_division.html'
       }).when(appPrefix + '/diff', {
         redirectTo: '/diff/ors'
       }).when(appPrefix + '/diff/:lawCode', {
@@ -544,6 +567,9 @@
       }).when(appPrefix + '/toc/:lawCode', {
         controller: 'TocParentCtrl',
         templateUrl: templatePrefix + '/toc_base.html'
+      }).when(appPrefix + '/toc/:lawCode/:version/:division', {
+        controller: 'TocParentCtrl',
+        templateUrl: templatePrefix + '/toc_base.html'
       }).otherwise({
         redirectTo: appPrefix + ("/toc/" + defaultCode)
       });
@@ -551,41 +577,21 @@
     }
   ]);
 
-  angular.module(DIRECTIVE_MODULE).directive('lawSearch', function($rootScope, Laws) {
-    var directive;
-    return directive = {
-      replace: true,
-      scope: true,
-      template: "<div>\n    <form>\n        <div class=\"row collapse\">\n            <div class=\"small-2 columns\">\n                <span class=\"prefix\">\n                    Search {{lawCode}}\n                </span>\n            </div>\n            <div class=\"small-10 columns\">\n                <input type=\"text\"\n                    placeholder=\"Enter subsection, title, or both\"\n                    ng-change=\"inputChange()\"\n                    ng-model=\"m.lawInput\"\n                    autofocus>\n            </div>\n        </div>\n    </form>\n\n    <div class=\"row\" ng-show=\"m.lawInput && !hideSearchList\">\n        <div class=\"small-10 small-offset-2 columns panel\">\n            <p>\n                <strong>Best Matches</strong>\n            </p>\n            <div class=\"row\" ng-repeat=\"l in laws | filter:m.lawInput | limitTo: 10\">\n                <div class=\"small-12 columns\">\n                    <a ng-click=\"click(l.subsection); $event.stopPropagation()\">\n                        ORS {{l.subsection}} {{l.titles[m.selectedVersion]}}\n                    </a>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>",
-      link: function(scope) {
-        scope.m = {};
-        scope.lawCode = $rootScope.currentLawCode;
-        scope.inputChange = function() {
-          if (!scope.laws) {
-            return scope.laws = Laws.fetchAll();
-          }
-        };
-        return scope.click = function(section) {
-          return scope.$emit('lawNavClick', section);
-        };
-      }
-    };
+  angular.module(APP_NAME).controller('DivisionViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, UrlBuilder) {
+    return $scope.m = {};
   });
 
-  angular.module(APP_NAME).controller('TocParentCtrl', function($route, $scope, $rootScope, $http, UrlBuilder) {
-    $scope.m = {};
-    $http.get(UrlBuilder.api("/laws/" + $rootScope.currentLawCode + "/toc")).success(function(data) {
-      $scope.tocData = data;
-      return $scope.m.selectedVersion = data.versions[0];
-    });
-    switch ($rootScope.currentLawCode) {
-      case 'ors':
-        return $scope.tocChildTemplate = UrlBuilder.template('toc_ors.html');
+  angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
+    var chapter, promise;
+    $scope.chapterLinkBase = UrlBuilder.app("/toc/" + $rootScope.currentLawCode + "/" + $rootScope.currentVersion);
+    if ($routeParams.division) {
+      chapter = $routeParams.division;
+      promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
+      return promise.then(function(data) {
+        $scope.currentChapter = data.chapter;
+        return $scope.chapterStatutes = data.statutes;
+      });
     }
-  });
-
-  angular.module(APP_NAME).controller('OrsParentCtrl', function($route, $scope, $rootScope, $http, $routeParams, UrlBuilder) {
-    return console.log('$scope.tocData:', $scope.tocData);
   });
 
 }).call(this);

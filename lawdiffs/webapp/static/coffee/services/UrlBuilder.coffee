@@ -10,8 +10,11 @@ angular.module(SERVICES_MODULE).factory 'UrlBuilder', ($rootScope) ->
         apiUrl: (url) ->
             @api url
 
-        appUrl: (url) ->
+        app: (url) ->
             @APP_PREFIX + url
+
+        appUrl: (url) ->
+            @app url
 
         template: (url) ->
             @TEMPLATE_PREFIX + "/#{url}"

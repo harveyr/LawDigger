@@ -5,19 +5,9 @@ angular.module(APP_NAME).config ['$routeProvider', '$locationProvider', ($routeP
     templatePrefix = PARTIALS_PREFIX
 
     $routeProvider
-        .when(appPrefix + '/view', {
-            redirectTo: "/view/#{defaultCode}"
-        })
-        .when(appPrefix + '/view/:lawCode', {
-            controller: 'ViewerCtrl'
-            templateUrl: templatePrefix + '/home.html'
-        })
-        .when(appPrefix + '/view/:lawCode/:version', {
-            redirectTo: "/view/#{defaultCode}"
-        })
-        .when(appPrefix + '/view/:lawCode/:version/:section', {
-            controller: 'ViewerCtrl'
-            templateUrl: templatePrefix + '/home.html'
+        .when(appPrefix + '/view/:lawCode/:version/:divison', {
+            controller: 'DivisionViewerCtrl'
+            templateUrl: templatePrefix + '/view_division.html'
         })
         .when(appPrefix + '/diff', {
             redirectTo: '/diff/ors'
@@ -31,6 +21,10 @@ angular.module(APP_NAME).config ['$routeProvider', '$locationProvider', ($routeP
             templateUrl: templatePrefix + '/diff.html'
         })
         .when(appPrefix + '/toc/:lawCode', {
+            controller: 'TocParentCtrl'
+            templateUrl: templatePrefix + '/toc_base.html'
+        })
+        .when(appPrefix + '/toc/:lawCode/:version/:division', {
             controller: 'TocParentCtrl'
             templateUrl: templatePrefix + '/toc_base.html'
         })
