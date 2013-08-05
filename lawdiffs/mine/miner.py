@@ -189,8 +189,25 @@ class OrLawParser(LawParser):
         soup = BeautifulSoup(html)
         current_law = None
         text_buffer = ''
+        set_title = False
+
+        count = 0
         for s in soup.stripped_strings:
             s = ' '.join(s.splitlines())
+            count += 1
+            if count > 20:
+                break
+            if not self.current_chapter.has_title(version):
+                if set_title:
+                    self.current_chapter.set_version_title(version, s)
+                    set_title = False
+                else:
+                    regex = re.compile(
+                        r'{}\.'.format(self.current_chapter.chapter))
+                    if regex.match(s):
+                        # Set the title on the next pass
+                        set_title = True
+
             subs_matches = self.subsection_re.match(s)
             if subs_matches:
                 section = subs_matches.group(1)

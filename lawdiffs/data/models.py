@@ -58,6 +58,32 @@ class Serializeable(object):
         return d
 
 
+class PyMongoMixin(object):
+    def save_attr(self, attr):
+        collection = self.__class__._get_collection()
+        collection.update(
+            {'_id': self.id},
+            {'$set': {attr: getattr(self, attr)}}
+        )
+
+
+class VersionTitlesMixin(object):
+    titles = moe.DictField()
+
+    def set_version_title(self, version, title):
+        self.titles[str(version)] = title
+        self.save_attr('titles')
+
+    def title(self, version):
+        version = str(version)
+        if version in self.titles:
+            return self.titles[version]
+        return ''
+
+    def has_title(self, version):
+        return version in self.titles.keys()
+
+
 class Volume(moe.Document, Serializeable):
     volume = moe.IntField(required=True)
     meta = {'allow_inheritance': True}
@@ -69,20 +95,20 @@ class Volume(moe.Document, Serializeable):
         }
 
 
-class Chapter(moe.Document, Serializeable):
+class Chapter(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
     chapter = moe.IntField(required=True)
     meta = {'allow_inheritance': True}
 
     @classmethod
     def class_serialize(cls, obj):
         return {
-            'chapter': obj.chapter
+            'chapter': obj.chapter,
+            'titles': obj.titles
         }
 
 
-class Law(moe.Document, Serializeable):
+class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
     subsection = moe.StringField(unique=True, required=True)
-    titles = moe.DictField()
     texts = moe.DictField()
     state_code = moe.StringField()
     file_path = moe.StringField()
@@ -102,17 +128,6 @@ class Law(moe.Document, Serializeable):
         c = cls.collection()
         return c.find({'state_code': state_code})
 
-    def save_attr(self, attr):
-        collection = self.__class__._get_collection()
-        collection.update(
-            {'_id': self.id},
-            {'$set': {attr: getattr(self, attr)}}
-        )
-
-    def set_version_title(self, version, title):
-        self.titles[str(version)] = title
-        self.save_attr('titles')
-
     def set_version_text(self, version, text):
         self.texts[str(version)] = text
         self.save_attr('texts')
@@ -120,12 +135,6 @@ class Law(moe.Document, Serializeable):
     @property
     def versions(self):
         return self.texts.keys()
-
-    def title(self, version):
-        version = str(version)
-        if version in self.titles:
-            return self.titles[version]
-        return ''
 
     def text(self, version, formatted=False):
         text = self.texts[str(version)]
