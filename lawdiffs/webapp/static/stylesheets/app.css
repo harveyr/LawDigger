@@ -4584,13 +4584,13 @@ label.error {
 /* line 117, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar .name h1 {
   line-height: 45px;
-  font-size: 1.0625em;
+  font-size: 1.375em;
   margin: 0;
 }
 /* line 121, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar .name h1 a {
-  font-weight: bold;
-  color: white;
+  font-weight: normal;
+  color: #b3b3b3;
   width: 50%;
   display: block;
   padding: 0 15px;
@@ -4603,7 +4603,7 @@ label.error {
 }
 /* line 137, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar .toggle-topbar a {
-  color: white;
+  color: #b3b3b3;
   text-transform: uppercase;
   font-size: 0.8125em;
   font-weight: bold;
@@ -4689,11 +4689,11 @@ label.error {
 .top-bar-section ul li > a {
   display: block;
   width: 100%;
-  color: white;
+  color: #b3b3b3;
   padding: 12px 0 12px 0;
   padding-left: 15px;
   font-size: 0.8125em;
-  font-weight: bold;
+  font-weight: normal;
   background: #222222;
 }
 /* line 246, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
@@ -4790,7 +4790,7 @@ label.error {
 }
 /* line 327, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar-section .dropdown li a.parent-link {
-  font-weight: bold;
+  font-weight: normal;
 }
 /* line 332, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar-section .dropdown li.title h5 {
@@ -4798,7 +4798,7 @@ label.error {
 }
 /* line 333, ../../../../../../../../Library/Ruby/Gems/1.8/gems/zurb-foundation-4.3.0/scss/foundation/components/_top-bar.scss */
 .top-bar-section .dropdown li.title h5 a {
-  color: white;
+  color: #b3b3b3;
   line-height: 22.5px;
   display: block;
 }
@@ -7215,35 +7215,43 @@ pre {
   line-height: 1.4em;
 }
 
-/* line 67, ../sass/app.scss */
-nav li.name .subtitle {
+/* line 68, ../sass/app.scss */
+nav li.name > h1 > a .subtitle {
   font-style: italic;
   color: #2ba6cb;
   font-size: 80%;
 }
 /* line 73, ../sass/app.scss */
+nav li.name > h1 > a .color-one {
+  color: #dadada;
+}
+/* line 76, ../sass/app.scss */
+nav li.name > h1 > a .color-two {
+  color: #a7a7a7;
+}
+/* line 81, ../sass/app.scss */
 nav li.current-state a {
   color: #5da423;
 }
 
-/* line 78, ../sass/app.scss */
+/* line 86, ../sass/app.scss */
 .centered {
   text-align: center;
 }
 
-/* line 82, ../sass/app.scss */
+/* line 90, ../sass/app.scss */
 .right-j {
   text-align: right;
 }
 
-/* line 86, ../sass/app.scss */
+/* line 94, ../sass/app.scss */
 .content-wrapper {
   padding-left: 40px;
   padding-right: 40px;
   padding-bottom: 40px;
 }
 
-/* line 92, ../sass/app.scss */
+/* line 100, ../sass/app.scss */
 .law-title {
   width: 100%;
   margin-left: auto;
@@ -7263,7 +7271,7 @@ nav li.current-state a {
 .law-title:after {
   clear: both;
 }
-/* line 96, ../sass/app.scss */
+/* line 104, ../sass/app.scss */
 .law-title > div {
   position: relative;
   padding-left: 0.9375em;
@@ -7272,7 +7280,7 @@ nav li.current-state a {
   float: left;
 }
 
-/* line 102, ../sass/app.scss */
+/* line 110, ../sass/app.scss */
 .version-select .inner {
   width: 100%;
   margin-left: auto;
@@ -7291,7 +7299,7 @@ nav li.current-state a {
 .version-select .inner:after {
   clear: both;
 }
-/* line 105, ../sass/app.scss */
+/* line 113, ../sass/app.scss */
 .version-select .vs-label {
   position: relative;
   padding-left: 0.9375em;
@@ -7299,7 +7307,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 111, ../sass/app.scss */
+/* line 119, ../sass/app.scss */
 .version-select .select {
   position: relative;
   padding-left: 0.9375em;
@@ -7308,7 +7316,7 @@ nav li.current-state a {
   float: left;
 }
 
-/* line 117, ../sass/app.scss */
+/* line 125, ../sass/app.scss */
 .viewer-option-panel {
   width: 100%;
   margin-left: auto;
@@ -7327,17 +7335,17 @@ nav li.current-state a {
 .viewer-option-panel:after {
   clear: both;
 }
-/* line 120, ../sass/app.scss */
+/* line 128, ../sass/app.scss */
 .viewer-option-panel select {
   margin: 0;
 }
-/* line 123, ../sass/app.scss */
+/* line 131, ../sass/app.scss */
 .viewer-option-panel select.inline {
   width: 70px;
   margin-left: 5px;
   margin-right: 5px;
 }
-/* line 130, ../sass/app.scss */
+/* line 138, ../sass/app.scss */
 .viewer-option-panel .label-wrapper {
   position: relative;
   padding-left: 0.9375em;
@@ -7345,7 +7353,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 136, ../sass/app.scss */
+/* line 144, ../sass/app.scss */
 .viewer-option-panel .version-select-wrapper {
   position: relative;
   padding-left: 0.9375em;
@@ -7353,7 +7361,7 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 140, ../sass/app.scss */
+/* line 148, ../sass/app.scss */
 .viewer-option-panel .next, .viewer-option-panel .prev {
   position: relative;
   padding-left: 0.9375em;
@@ -7361,15 +7369,15 @@ nav li.current-state a {
   width: 16.66667%;
   float: left;
 }
-/* line 143, ../sass/app.scss */
+/* line 151, ../sass/app.scss */
 .viewer-option-panel .next > a, .viewer-option-panel .prev > a {
   margin: 0;
 }
-/* line 151, ../sass/app.scss */
+/* line 159, ../sass/app.scss */
 .viewer-option-panel .next {
   text-align: right;
 }
-/* line 156, ../sass/app.scss */
+/* line 164, ../sass/app.scss */
 .viewer-option-panel .compare-text {
   position: relative;
   padding-left: 0.9375em;
@@ -7381,12 +7389,12 @@ nav li.current-state a {
   float: left;
   text-align: center;
 }
-/* line 161, ../sass/app.scss */
+/* line 169, ../sass/app.scss */
 .viewer-option-panel a.update {
   margin: 0;
 }
 
-/* line 168, ../sass/app.scss */
+/* line 176, ../sass/app.scss */
 .diff-container {
   width: 100%;
   margin-left: auto;
@@ -7409,7 +7417,7 @@ nav li.current-state a {
   clear: both;
 }
 
-/* line 175, ../sass/app.scss */
+/* line 183, ../sass/app.scss */
 .diff-legend-header {
   width: 100%;
   margin-left: auto;
@@ -7430,7 +7438,7 @@ nav li.current-state a {
 .diff-legend-header:after {
   clear: both;
 }
-/* line 179, ../sass/app.scss */
+/* line 187, ../sass/app.scss */
 .diff-legend-header table {
   position: relative;
   padding-left: 0.9375em;
@@ -7440,25 +7448,25 @@ nav li.current-state a {
   margin: 0;
 }
 
-/* line 185, ../sass/app.scss */
+/* line 193, ../sass/app.scss */
 .diff-line-table {
   border: 0;
   margin: 0;
   width: 100%;
 }
-/* line 190, ../sass/app.scss */
+/* line 198, ../sass/app.scss */
 .diff-line-table .plus-minus {
   text-align: center;
   width: 25px !important;
   border-right: 1px solid #d9d9d9;
 }
 
-/* line 197, ../sass/app.scss */
+/* line 205, ../sass/app.scss */
 .diff-subtraction {
   background-color: #ffe2e2;
 }
 
-/* line 201, ../sass/app.scss */
+/* line 209, ../sass/app.scss */
 .diff-addition {
   background-color: #e2ffe2;
 }

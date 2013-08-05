@@ -17,10 +17,10 @@
 {% block navsections %}
   <section class="top-bar-section">
       <ul class="left">
-          <li class="active">
+          <li ng-class="{active: currentNav == 'view'}">
               <a href="/view">View</a>
           </li>
-          <li>
+          <li ng-class="{active: currentNav == 'diff'}">
               <a href="/diff">Diff</a>
           </li>
       </ul>

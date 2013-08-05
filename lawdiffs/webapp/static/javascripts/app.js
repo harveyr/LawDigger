@@ -339,16 +339,26 @@
     return new UrlBuilder();
   });
 
-  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope, $routeParams) {
-    $rootScope.$on('$routeChangeSuccess', function() {
-      console.log('routeChangeSuccess');
-      if ($routeParams.lawCode) {
-        return $rootScope.currentLawCode = $routeParams.lawCode;
+  app = angular.module(APP_NAME, [DIRECTIVE_MODULE, SERVICES_MODULE]).run(function($route, $location, $rootScope) {
+    $rootScope.$on('$routeChangeSuccess', function(e, current, previous) {
+      var params, path;
+      path = $location.path();
+      if (_.beginswith(path, '/view')) {
+        $rootScope.currentNav = 'view';
+      } else if (_.beginswith(path, '/diff')) {
+        $rootScope.currentNav = 'diff';
+      }
+      params = current.params;
+      if (_.has(params, 'lawCode')) {
+        return $rootScope.currentLawCode = params.lawCode;
       }
     });
     return _.mixin({
       "in": function(arr, value) {
         return arr.indexOf(value) !== -1;
+      },
+      beginswith: function(string_, substring_) {
+        return string_.indexOf(substring_) === 0;
       }
     });
   });

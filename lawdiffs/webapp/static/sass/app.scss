@@ -64,10 +64,18 @@ pre {
 }
 
 nav {
-    li.name .subtitle {
-        font-style: italic;
-        color: $primary-color;
-        font-size: $small-font-size;
+    li.name > h1 > a {
+        .subtitle {
+            font-style: italic;
+            color: $primary-color;
+            font-size: $small-font-size;
+        }
+        .color-one {
+            color: #dadada;
+        }
+        .color-two {
+            color: darken(#dadada, 20%);
+        }
     }
 
     li.current-state a {
