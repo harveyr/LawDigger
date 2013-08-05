@@ -575,7 +575,8 @@
   angular.module(APP_NAME).controller('TocParentCtrl', function($route, $scope, $rootScope, $http, UrlBuilder) {
     $scope.m = {};
     $http.get(UrlBuilder.api("/laws/" + $rootScope.currentLawCode + "/toc")).success(function(data) {
-      return $scope.tocData = data;
+      $scope.tocData = data;
+      return $scope.m.selectedVersion = data.versions[0];
     });
     switch ($rootScope.currentLawCode) {
       case 'ors':
@@ -584,7 +585,7 @@
   });
 
   angular.module(APP_NAME).controller('OrsParentCtrl', function($route, $scope, $rootScope, $http, $routeParams, UrlBuilder) {
-    return $scope.m = {};
+    return console.log('$scope.tocData:', $scope.tocData);
   });
 
 }).call(this);

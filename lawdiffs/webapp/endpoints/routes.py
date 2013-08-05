@@ -23,6 +23,9 @@ def fetch_toc(law_code):
             d['chapters'] = [c.serialize() for c in chapters]
             serialized['volumes'].append(d)
 
+            if not 'versions' in serialized:
+                serialized['versions'] = chapters[0].title_versions()
+
     if not serialized:
         raise Exception('No TOC serialized for code' + str(law_code))
     return jsonify(serialized)

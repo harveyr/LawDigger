@@ -80,6 +80,9 @@ class VersionTitlesMixin(object):
             return self.titles[version]
         return ''
 
+    def title_versions(self):
+        return sorted(self.titles.keys(), reverse=True)
+
     def has_title(self, version):
         return version in self.titles.keys()
 

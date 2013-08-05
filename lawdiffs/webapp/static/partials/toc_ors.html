@@ -1,18 +1,23 @@
-<div class="row">
-    <div class="small-12 columns">
-        <h3 class="subheader">Oregon Revised Statutes</h3>
-    </div>
-</div>
-<div class="row" ng-repeat="vol in tocData.volumes" >
-    <div class="small-12 columns">
-        <div class="row">
-            <div class="small-12 columns">
-                <h5>Volume {{vol.volume}}</h5>
-            </div>
+<div ng-controller="OrsParentCtrl">
+    <div class="row">
+        <div class="small-12 columns">
+            <h3 class="subheader">Oregon Revised Statutes</h3>
         </div>
-        <div ng-repeat="ch in vol.chapters" class="row">
-            <div class="small-11 small-offset-1 columns">
-                Chapter {{ch.chapter}}
+    </div>
+    <div class="row" ng-repeat="vol in tocData.volumes" >
+        <div class="small-12 columns">
+            <div class="row">
+                <div class="small-12 columns">
+                    <h5>Volume {{vol.volume}}</h5>
+                </div>
+            </div>
+            <div ng-repeat="ch in vol.chapters" class="row">
+                <div class="small-11 small-offset-1 columns">
+                    <a href="">
+                        Chapter {{ch.chapter}}.
+                        {{ch.titles[m.selectedVersion]}}
+                    </a>
+                </div>
             </div>
         </div>
     </div>
