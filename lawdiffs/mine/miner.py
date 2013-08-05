@@ -138,24 +138,38 @@ class LawParser(object):
         laparams = LAParams()
         device = PDFPageAggregator(rsrcmgr, laparams=laparams)
         interpreter = PDFPageInterpreter(rsrcmgr, device)
-        text_buffer = ''
+        text_buffer = ' '
         for i, page in enumerate(doc.get_pages()):
             interpreter.process_page(page)
             layout = device.get_result()
             for obj in layout:
                 try:
-                    text_buffer += ' ' + obj.get_text().encode('utf-8').strip()
+                    text = obj.get_text().encode('utf-8').rstrip()
+                    for line in text.splitlines():
+                        line = line.strip()
+                        line = self.pdf_text_pre_append_hook(line)
+                        if text_buffer[-1] == '-':
+                            text_buffer = text_buffer[:-1]
+                        else:
+                            text_buffer += ' '
+                        text_buffer += line
                 except AttributeError:
                     pass
+            if i > 5:
+                logger.debug('text_buffer: {v}'.format(v=text_buffer))
+                break
         self.cache_pdf_text(url, text_buffer)
         text_callback(text_buffer)
-        # return text_callback(text_buffer.encode('utf-8'))
+
+    def pdf_text_pre_append_hook(self, text):
+        # Override as necessary
+        return text
 
     def fetch_pdf_text(self, url, callback):
-        cached = self.fetch_cached_pdf_text(url)
-        if cached:
-            callback(cached)
-            return
+        # cached = self.fetch_cached_pdf_text(url)
+        # if cached:
+        #     callback(cached)
+        #     return
         self.with_open_pdf(url, self.extract_pdf_text, callback)
 
     def get_soup_text(self, soup_elem):
@@ -236,6 +250,13 @@ class OrLawParser(LawParser):
         # diff = repos.get_tag_diff(law, '2001', '2011')
         # print('diff: {v}'.format(v=diff))
 
+    def pdf_text_pre_append_hook(self, text):
+        # if re.match(r'(Title|Page) \d+', text):
+        #     return ''
+        # if re.match(r'\(\d+ Edition\)', text):
+        #     return ''
+        return text
+
     def begin_crawl_pdf(self, source_dict):
         url = source_dict['url']
         self.current_url_base = self.url_base(url)
@@ -247,9 +268,55 @@ class OrLawParser(LawParser):
 
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
+        return
         first_subsection = None
+        first_subsection_reached = False
+        count = 0
+        text_buffer = ''
+        # subs_re =
         for line in text.splitlines():
-            print(line)
+            # if not first_subsection
+            subs_hit = re.search(r'(\d+\.\d+)', line)
+            # Skip over content until we reach the actual first
+            # subsection
+            if not first_subsection:
+                first_subsection = subs_hit.group(1)
+                continue
+            else:
+                if subsection == first_subsection:
+                    first_subsection_reached = True
+                else:
+                    continue
+
+            subs_hit = re.search(r'(\d+\.\d+)', line)
+            if subs_hit:
+                subsection = subs_hit.group(1)
+
+                if not first_subsection_reached:
+                    # Skip over content until we reach the actual first
+                    # subsection
+                    if not first_subsection:
+                        first_subsection = subs_hit.group(1)
+                        continue
+                    else:
+                        if subsection == first_subsection:
+                            first_subsection_reached = True
+                        else:
+                            continue
+                logger.debug('subs line: ' + line)
+            else:
+                if not first_subsection_reached:
+                    continue
+                line = re.sub(
+                    r'Title \d Page \d \(\d+ Edition\).*[A-Z;]+', '', line)
+
+                logger.debug('line: {v}'.format(v=line))
+                text_buffer += line
+
+                count += 1
+                if count > 200:
+                    logger.debug('breaking')
+                    break
 
     def begin_crawl_html(self, source_dict):
         """Begin crawling html statutes"""
