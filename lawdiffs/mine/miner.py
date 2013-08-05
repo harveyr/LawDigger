@@ -39,13 +39,38 @@ class LawParser(object):
             raise Exception("No file extension for url {}".format(url))
         return extension.lower()
 
-    def hashed_filename(self, url):
+    def hashed_filename(self, url, force_extension=None):
         hash_ = md5.new(url).hexdigest()
-        extension = self.get_url_file_extension(url)
+        if force_extension:
+            extension = force_extension
+        else:
+            extension = self.get_url_file_extension(url)
         return hash_ + extension
 
-    def cache_file_path_for_url(self, url):
-        return os.path.join(CACHE_PATH, self.hashed_filename(url))
+    def cache_file_path_for_url(self, url, force_extension=None):
+        return os.path.join(
+            CACHE_PATH,
+            self.hashed_filename(url, force_extension))
+
+    def cache_url_contents(self, url, contents):
+        hashed_filename = self.hashed_filename(url)
+        path = os.path.join(CACHE_PATH, hashed_filename)
+        with open(path, 'w') as f:
+            f.write(contents)
+
+    def cache_pdf_text(self, url, text):
+        cache_file_path = self.cache_file_path_for_url(
+            url, force_extension='.txt')
+        logger.debug('writing cache_file_path: {v}'.format(v=cache_file_path))
+        with open(cache_file_path, 'w') as f:
+            f.write(text)
+
+    def fetch_cached_pdf_text(self, url):
+        cache_file_path = self.cache_file_path_for_url(
+            url, force_extension='.txt')
+        if os.path.exists(cache_file_path):
+            with open(cache_file_path, 'r') as f:
+                return f.read()
 
     def fetch_cached_url(self, url):
         hashed_filename = self.hashed_filename(url)
@@ -67,18 +92,6 @@ class LawParser(object):
             with open(path, 'rb') as f:
                 return f.read()
 
-    def cache_url_contents(self, url, contents):
-        hashed_filename = self.hashed_filename(url)
-        path = os.path.join(CACHE_PATH, hashed_filename)
-        with open(path, 'w') as f:
-            f.write(contents)
-
-    def cache_pdf_contents(self, url, contents):
-        hashed_filename = self.hashed_filename(url)
-        path = os.path.join(CACHE_PATH, hashed_filename)
-        with open(path, 'wb') as f:
-            f.write(contents)
-
     def fetch_html(self, url):
         cached = self.fetch_cached_url(url)
         if cached:
@@ -95,25 +108,25 @@ class LawParser(object):
     def fetch_soup(self, url):
         return BeautifulSoup(self.fetch_html(url))
 
-    def with_open_pdf(self, url, callback):
+    def with_open_pdf(self, url, extraction_callback, text_callback):
         if self.get_url_file_extension(url) != '.pdf':
             raise Exception('Not a pdf: {}'.format(url))
         logger.setLevel(logging.DEBUG)
         path = self.cache_file_path_for_url(url)
         if os.path.exists(path) and os.path.isfile(path):
-            logger.debug('using cached ' + url)
+            logger.debug('Using cached ' + url)
             with open(path, 'rb') as f:
-                callback(f)
+                extraction_callback(url, f, text_callback)
         else:
-            logger.debug('fetching fresh ' + url)
+            logger.debug('Fetching fresh ' + url)
             path = self.cache_file_path_for_url(url)
             response = urllib2.urlopen(url)
             with open(path, 'wb') as f:
                 f.write(response.read())
             with open(path, 'rb') as f:
-                callback(f)
+                extraction_callback(url, f, text_callback)
 
-    def extract_pdf_text(self, open_file):
+    def extract_pdf_text(self, url, open_file, text_callback):
         parser = PDFParser(open_file)
         doc = PDFDocument()
         parser.set_document(doc)
@@ -125,21 +138,25 @@ class LawParser(object):
         laparams = LAParams()
         device = PDFPageAggregator(rsrcmgr, laparams=laparams)
         interpreter = PDFPageInterpreter(rsrcmgr, device)
-        text_content = []
+        text_buffer = ''
         for i, page in enumerate(doc.get_pages()):
             interpreter.process_page(page)
             layout = device.get_result()
             for obj in layout:
                 try:
-                    text_content.append(obj.get_text())
+                    text_buffer += ' ' + obj.get_text().encode('utf-8').strip()
                 except AttributeError:
                     pass
+        self.cache_pdf_text(url, text_buffer)
+        text_callback(text_buffer)
+        # return text_callback(text_buffer.encode('utf-8'))
 
-            break
-        logger.debug('text_content: {v}'.format(v=text_content))
-
-    def fetch_pdf_text(self, url):
-            self.with_open_pdf(url, self.extract_pdf_text)
+    def fetch_pdf_text(self, url, callback):
+        cached = self.fetch_cached_pdf_text(url)
+        if cached:
+            callback(cached)
+            return
+        self.with_open_pdf(url, self.extract_pdf_text, callback)
 
     def get_soup_text(self, soup_elem):
         try:
@@ -203,10 +220,10 @@ class OrLawParser(LawParser):
         model = data_laws.get_chapter_model(self.law_code)
         model.drop_collection()
 
-        # logger.setLevel(logging.DEBUG)
-
+        logger.setLevel(logging.DEBUG)
         self.begin_crawl_pdf(self.sources[0])
         return
+
         for source in self.sources:
             crawl_func = getattr(self, source['crawl_func'])
             crawl_func(source)
@@ -220,14 +237,19 @@ class OrLawParser(LawParser):
         # print('diff: {v}'.format(v=diff))
 
     def begin_crawl_pdf(self, source_dict):
-        logger.setLevel(logging.DEBUG)
         url = source_dict['url']
         self.current_url_base = self.url_base(url)
         soup = BeautifulSoup(self.fetch_html(url))
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
             link_url = self.current_url_base + link.get('href')
-            self.fetch_pdf_text(link_url)
+            self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
             break
+
+    def create_laws_from_pdf_text(self, text):
+        """Assume one, big, pre-extracted string."""
+        first_subsection = None
+        for line in text.splitlines():
+            print(line)
 
     def begin_crawl_html(self, source_dict):
         """Begin crawling html statutes"""
