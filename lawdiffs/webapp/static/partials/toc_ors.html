@@ -1,9 +1,27 @@
 <div ng-controller="OrsTocCtrl">
+
     <div class="row">
         <div class="small-12 columns">
             <h3 class="subheader">Oregon Revised Statutes</h3>
         </div>
     </div>
+
+    <form>
+        <div class="row collapse">
+            <div class="small-2 columns">
+                <span class="prefix">
+                    Filter
+                </span>
+            </div>
+            <div class="small-10 columns">
+                <input type="text"
+                    placeholder="Enter subsection, title, or both"
+                    ng-model="m.filterInput"
+                    autofocus>
+            </div>
+        </div>
+    </form>
+
     <div ng-show="tocData">
         <div class="row" ng-repeat="vol in tocData.volumes">
             <div class="small-12 columns">
@@ -28,12 +46,15 @@
         <div class="small-12 columns">
             <div class="row">
                 <div class="small-12 columns">
-                    <h5>Chapter {{currentChapter.chapter}}</h5>
+                    <h5>
+                        Chapter {{currentChapter.chapter}}.
+                        {{currentChapter.titles[currentVersion]}}
+                    </h5>
                 </div>
             </div>
-            <div ng-repeat="statute in chapterStatutes" class="row">
+            <div ng-repeat="statute in chapterStatutes | filter:m.filterInput" class="row">
                 <div class="small-12 columns">
-                    <a href="">
+                    <a ng-href="{{statuteLinkBase}}/{{statute.subsection}}">
                         ORS {{statute.subsection}}.
                         {{statute.titles[currentVersion]}}
                     </a>

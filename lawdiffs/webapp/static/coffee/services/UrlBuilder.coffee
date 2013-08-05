@@ -29,7 +29,8 @@ angular.module(SERVICES_MODULE).factory 'UrlBuilder', ($rootScope) ->
                 if not $rootScope.currentVersion
                     throw 'No version in args or rootScope'
                 version = $rootScope.currentVersion
-            "/view/#{lawCode}/#{version}/#{subsection}"
+            @appUrl "/view/#{lawCode}/#{version}/#{subsection}"
+            
 
         diffPage: (lawCode, subsection, version1, version2) ->
             "/diff/#{lawCode}/#{subsection}/#{version1}/#{version2}"

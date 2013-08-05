@@ -5,9 +5,9 @@ angular.module(APP_NAME).config ['$routeProvider', '$locationProvider', ($routeP
     templatePrefix = PARTIALS_PREFIX
 
     $routeProvider
-        .when(appPrefix + '/view/:lawCode/:version/:divison', {
-            controller: 'DivisionViewerCtrl'
-            templateUrl: templatePrefix + '/view_division.html'
+        .when(appPrefix + '/view/:lawCode/:version/:subsection', {
+            controller: 'LawViewerCtrl'
+            templateUrl: templatePrefix + '/view_law.html'
         })
         .when(appPrefix + '/diff', {
             redirectTo: '/diff/ors'

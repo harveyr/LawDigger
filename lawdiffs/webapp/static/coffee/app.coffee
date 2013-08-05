@@ -18,6 +18,8 @@ app = angular.module(APP_NAME, [
             $rootScope.currentLawCode = params.lawCode
         if _.has params, 'version'
             $rootScope.currentVersion = params.version
+        if _.has params, 'subsection'
+            $rootScope.currentSubsection = params.subsection
 
 
     _.mixin({

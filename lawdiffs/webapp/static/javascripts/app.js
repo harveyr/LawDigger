@@ -356,7 +356,7 @@
           }
           version = $rootScope.currentVersion;
         }
-        return "/view/" + lawCode + "/" + version + "/" + subsection;
+        return this.appUrl("/view/" + lawCode + "/" + version + "/" + subsection);
       };
 
       UrlBuilder.prototype.diffPage = function(lawCode, subsection, version1, version2) {
@@ -384,7 +384,10 @@
         $rootScope.currentLawCode = params.lawCode;
       }
       if (_.has(params, 'version')) {
-        return $rootScope.currentVersion = params.version;
+        $rootScope.currentVersion = params.version;
+      }
+      if (_.has(params, 'subsection')) {
+        return $rootScope.currentSubsection = params.subsection;
       }
     });
     return _.mixin({
@@ -483,8 +486,58 @@
     }
   });
 
-  angular.module(APP_NAME).controller('ViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
-    var applyLaw, fetchAllLaws, fetchAndApplyLaw, fetchedLaws;
+  angular.module(APP_NAME).config([
+    '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+      var appPrefix, defaultCode, templatePrefix;
+      defaultCode = 'ors';
+      appPrefix = APP_PREFIX;
+      templatePrefix = PARTIALS_PREFIX;
+      $routeProvider.when(appPrefix + '/view/:lawCode/:version/:subsection', {
+        controller: 'LawViewerCtrl',
+        templateUrl: templatePrefix + '/view_law.html'
+      }).when(appPrefix + '/diff', {
+        redirectTo: '/diff/ors'
+      }).when(appPrefix + '/diff/:lawCode', {
+        controller: 'DiffCtrl',
+        templateUrl: templatePrefix + '/diff.html'
+      }).when(appPrefix + '/diff/:lawCode/:subsection/:version1/:version2', {
+        controller: 'DiffCtrl',
+        templateUrl: templatePrefix + '/diff.html'
+      }).when(appPrefix + '/toc/:lawCode', {
+        controller: 'TocParentCtrl',
+        templateUrl: templatePrefix + '/toc_base.html'
+      }).when(appPrefix + '/toc/:lawCode/:version/:division', {
+        controller: 'TocParentCtrl',
+        templateUrl: templatePrefix + '/toc_base.html'
+      }).otherwise({
+        redirectTo: appPrefix + ("/toc/" + defaultCode)
+      });
+      return $locationProvider.html5Mode(true).hashPrefix('!');
+    }
+  ]);
+
+  angular.module(APP_NAME).controller('DivisionViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, UrlBuilder) {
+    return $scope.m = {};
+  });
+
+  angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
+    var chapter, lawCode, promise, version;
+    lawCode = $rootScope.currentLawCode;
+    version = $rootScope.currentVersion;
+    $scope.chapterLinkBase = UrlBuilder.app("/toc/" + lawCode + "/" + version);
+    $scope.statuteLinkBase = UrlBuilder.app("/view/" + lawCode + "/" + version);
+    if ($routeParams.division) {
+      chapter = $routeParams.division;
+      promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
+      return promise.then(function(data) {
+        $scope.currentChapter = data.chapter;
+        return $scope.chapterStatutes = data.statutes;
+      });
+    }
+  });
+
+  angular.module(APP_NAME).controller('LawViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) {
+    var applyLaw, fetchAndApplyLaw, fetchedLaws;
     console.log('ViewerCtrl');
     $scope.m = {};
     fetchedLaws = false;
@@ -496,11 +549,6 @@
       });
       $scope.prevSection = law.prev;
       return $scope.nextSection = law.next;
-    };
-    fetchAllLaws = function() {
-      return Laws.fetchAll().then(function(laws) {
-        return $scope.allLaws = laws;
-      });
     };
     fetchAndApplyLaw = function(version, section) {
       return Laws.fetchLaw(version, section).then(function(response) {
@@ -531,67 +579,15 @@
     $scope.selectedVersionChange = function(version) {
       return $location.path("/view/ors/" + version + "/" + $scope.activeSection);
     };
-    if ($routeParams.section) {
-      $rootScope.currentLawCode = $routeParams.lawCode;
-      $rootScope.currentVersion = $scope.m.selectedVersion = $routeParams.version;
-      $rootScope.currentSection = $routeParams.section;
-      fetchAndApplyLaw($rootScope.currentVersion, $scope.currentSection);
-    } else {
-      $rootScope.currentVersion = $scope.m.selectedVersion = 2011;
-      fetchAllLaws();
+    if (!$rootScope.currentSubsection) {
+      throw 'No currentSubsection in rootScope';
     }
-    return $scope.$on('navClick', function(e, section) {
+    fetchAndApplyLaw($rootScope.currentVersion, $scope.currentSubsection);
+    return $scope.$on('lawNavClick', function(e, section) {
       var url;
       url = UrlBuilder.viewPage(section);
       return $location.path(url);
     });
-  });
-
-  angular.module(APP_NAME).config([
-    '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
-      var appPrefix, defaultCode, templatePrefix;
-      defaultCode = 'ors';
-      appPrefix = APP_PREFIX;
-      templatePrefix = PARTIALS_PREFIX;
-      $routeProvider.when(appPrefix + '/view/:lawCode/:version/:divison', {
-        controller: 'DivisionViewerCtrl',
-        templateUrl: templatePrefix + '/view_division.html'
-      }).when(appPrefix + '/diff', {
-        redirectTo: '/diff/ors'
-      }).when(appPrefix + '/diff/:lawCode', {
-        controller: 'DiffCtrl',
-        templateUrl: templatePrefix + '/diff.html'
-      }).when(appPrefix + '/diff/:lawCode/:subsection/:version1/:version2', {
-        controller: 'DiffCtrl',
-        templateUrl: templatePrefix + '/diff.html'
-      }).when(appPrefix + '/toc/:lawCode', {
-        controller: 'TocParentCtrl',
-        templateUrl: templatePrefix + '/toc_base.html'
-      }).when(appPrefix + '/toc/:lawCode/:version/:division', {
-        controller: 'TocParentCtrl',
-        templateUrl: templatePrefix + '/toc_base.html'
-      }).otherwise({
-        redirectTo: appPrefix + ("/toc/" + defaultCode)
-      });
-      return $locationProvider.html5Mode(true).hashPrefix('!');
-    }
-  ]);
-
-  angular.module(APP_NAME).controller('DivisionViewerCtrl', function($route, $scope, $rootScope, $http, $routeParams, $location, UrlBuilder) {
-    return $scope.m = {};
-  });
-
-  angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
-    var chapter, promise;
-    $scope.chapterLinkBase = UrlBuilder.app("/toc/" + $rootScope.currentLawCode + "/" + $rootScope.currentVersion);
-    if ($routeParams.division) {
-      chapter = $routeParams.division;
-      promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
-      return promise.then(function(data) {
-        $scope.currentChapter = data.chapter;
-        return $scope.chapterStatutes = data.statutes;
-      });
-    }
   });
 
 }).call(this);

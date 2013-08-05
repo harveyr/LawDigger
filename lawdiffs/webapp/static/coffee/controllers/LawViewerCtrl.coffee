@@ -1,4 +1,4 @@
-angular.module(APP_NAME).controller 'ViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
+angular.module(APP_NAME).controller 'LawViewerCtrl', ($route, $scope, $rootScope, $http, $routeParams, $location, Laws, UrlBuilder) ->
     console.log 'ViewerCtrl'
     $scope.m = {}
     fetchedLaws = false
@@ -10,10 +10,6 @@ angular.module(APP_NAME).controller 'ViewerCtrl', ($route, $scope, $rootScope, $
             return parseInt(b) - parseInt(a)
         $scope.prevSection = law.prev
         $scope.nextSection = law.next
-
-    fetchAllLaws = ->
-        Laws.fetchAll().then (laws) ->
-            $scope.allLaws = laws
 
     fetchAndApplyLaw = (version, section) ->
         Laws.fetchLaw(version, section).then (response) ->
@@ -45,16 +41,10 @@ angular.module(APP_NAME).controller 'ViewerCtrl', ($route, $scope, $rootScope, $
     $scope.selectedVersionChange = (version) ->
         $location.path("/view/ors/#{version}/#{$scope.activeSection}")
 
-    # Handle route
-    if $routeParams.section
-        $rootScope.currentLawCode = $routeParams.lawCode
-        $rootScope.currentVersion = $scope.m.selectedVersion = $routeParams.version
-        $rootScope.currentSection = $routeParams.section
-        fetchAndApplyLaw $rootScope.currentVersion, $scope.currentSection
-    else
-        $rootScope.currentVersion = $scope.m.selectedVersion = 2011
-        fetchAllLaws()
+    if not $rootScope.currentSubsection
+        throw 'No currentSubsection in rootScope'
+    fetchAndApplyLaw $rootScope.currentVersion, $scope.currentSubsection
 
-    $scope.$on 'navClick', (e, section) ->
+    $scope.$on 'lawNavClick', (e, section) ->
         url = UrlBuilder.viewPage section
         $location.path(url)

@@ -35,6 +35,29 @@ def get_chapter_model(law_code):
     return law_code_to_model_map[law_code]['chapter']
 
 
+def fetch_code_subsections(law_code):
+    cache_key = 'fetch_code_subsections_{}'.format(law_code)
+    cached = cache.get(cache_key)
+    if cached:
+        return cached
+
+    as_float = False
+    if law_code in ['ors']:
+        as_float = True
+
+    model = get_statute_model(law_code)
+    subsections = []
+    laws = model.objects.only('subsection').order_by('subsection')
+    for law in laws:
+        if as_float:
+            subsections.append(float(law.subsection))
+        else:
+            subsections.append(law.subsection)
+    subsections.sort()
+    cache.set(cache_key, subsections)
+    return subsections
+
+
 def fetch_law(law_code, subsection):
     model = get_statute_model(law_code)
     return model.objects(subsection=subsection).first()

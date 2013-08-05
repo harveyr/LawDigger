@@ -1,6 +1,11 @@
 angular.module(APP_NAME).controller 'OrsTocCtrl', ($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) ->
 
-    $scope.chapterLinkBase = UrlBuilder.app("/toc/#{$rootScope.currentLawCode}/#{$rootScope.currentVersion}")
+    lawCode = $rootScope.currentLawCode
+    version = $rootScope.currentVersion
+
+    $scope.chapterLinkBase = UrlBuilder.app "/toc/#{lawCode}/#{version}"
+
+    $scope.statuteLinkBase = UrlBuilder.app "/view/#{lawCode}/#{version}"
 
     if $routeParams.division
         chapter = $routeParams.division
