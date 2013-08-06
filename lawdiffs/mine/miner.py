@@ -205,8 +205,10 @@ class OrLawParser(LawParser):
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
     chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
     pdf_subsection_re = re.compile(r'\b(\d+\.\d+)\b')
-    pdf_footer_re = re.compile(
+    pdf_footer1_re = re.compile(
         r'Title \d+ Page \d+ \(\d+ Edition\) \d+\.\d+ [A-Z;\s]+')
+    pdf_footer2_re = re.compile(
+        r'Title \d+ Page \d+ \(\d+ Edition\) [A-Z;\s]+ \d+\.\d+\s')
 
     sources = [
         {
@@ -215,6 +217,10 @@ class OrLawParser(LawParser):
             'crawl_func': 'begin_crawl_pdf',
             'link_patterns': [
                 re.compile(r'\d+\.pdf')
+            ],
+            'fixes': [(
+                u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
+                u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8'))
             ]
         },
         {
@@ -244,6 +250,7 @@ class OrLawParser(LawParser):
 
         logger.setLevel(logging.DEBUG)
         self.begin_crawl_pdf(self.sources[0])
+        # self.commit(source['version'])
         return
 
         for source in self.sources:
@@ -251,21 +258,7 @@ class OrLawParser(LawParser):
             crawl_func(source)
             self.commit(source['version'])
 
-        # law = data_laws.fetch_law(self.law_code, '1.060')
-        # print(law.text(2011, formatted=True))
-
-        # law = data_laws.fetch_law(self.law_code, '1.195')
-        # diff = repos.get_tag_diff(law, '2001', '2011')
-        # print('diff: {v}'.format(v=diff))
-
     def pdf_text_pre_append_hook(self, text):
-        # logger.debug('text: {v}'.format(v=text))
-        # if text.isupper():
-        #     logger.debug('upper: ' + text)
-        # if re.match(r'(Title|Page) \d+', text):
-        #     return ''
-        # if re.match(r'\(\d+ Edition\)', text):
-        #     return ''
         return text
 
     def begin_crawl_pdf(self, source_dict):
@@ -274,13 +267,14 @@ class OrLawParser(LawParser):
         soup = BeautifulSoup(self.fetch_html(url))
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
             self.current_version = source_dict['version']
+            self.current_fixes = source_dict['fixes']
             link_url = self.current_url_base + link.get('href')
             self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
-            break
+
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
-        logger.debug('subsection: {v}'.format(v=subsection))
-        logger.debug('next_subsection: {v}'.format(v=next_subsection))
+        logger.debug('subsection: {}, next: {}'.format(subsection,
+            next_subsection))
         if not re.match(r'{}'.format(subsection), text):
             raise Exception(
                 'Text does not start with subsection {}'.format(
@@ -299,7 +293,7 @@ class OrLawParser(LawParser):
         if not next_section_hit:
             raise Exception(
                 'Could not find next section {} with text: "{}..."'.format(
-                    next_subsection, text[:3000]))
+                    next_subsection, text[:6000]))
 
         this_section_end_index = next_section_hit.start() + 2
 
@@ -365,8 +359,12 @@ class OrLawParser(LawParser):
 
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
-        # Title \d+ Page \d+ \(\d{4} Edition\) [A-Z\s;]+
-        text = self.pdf_footer_re.sub('', text)
+        text = self.pdf_footer1_re.sub('', text)
+        text = self.pdf_footer2_re.sub('', text)
+
+        if self.current_fixes:
+            for fix in self.current_fixes:
+                text = text.replace(fix[0], fix[1])
 
         heading_matches = re.findall(r'[A-Z]+[A-Z\s]+\d+\.\d+', text)
         for match in heading_matches:
