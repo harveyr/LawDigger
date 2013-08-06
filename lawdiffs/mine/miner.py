@@ -220,24 +220,29 @@ class OrLawParser(LawParser):
             ],
             'fixes': {
                 8: [(
-                    u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
-                    u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
+                        u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
+                        u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
                     ),
                     (
                         'representing and 8.690 Advising',
                         '8.690 Advising and representing'
                     )],
                 14: [(
-                    'judge; of 14.250 Disqualification',
-                    '14.250 Disqualification of judge;'
+                        'judge; of 14.250 Disqualification',
+                        '14.250 Disqualification of judge;'
                     )],
                 18: [(
-                    'in 18.190 Spousal support awards',
-                    '18.190 Spousal support awards in'
+                        'in 18.190 Spousal support awards',
+                        '18.190 Spousal support awards in'
                     ),
                     (
                         u'under this section. \u00A731] [2003 c.576 18.268 Conduct of debtor examination;'.encode('utf-8'),
                         u'under this section. [2003 c.576 \u00A731] 18.268 Conduct of debtor examination;'.encode('utf-8')
+                    ),
+                    (
+                        u'this section. c.249 \u00A737; 2003 c.576 \u00A764] [2001 18.730 Payment'.encode('utf8'),
+                        u'this section. [2001 c.249 \u00A737; 2003 c.576 \u00A764] 18.730 Payment'.encode('utf8')
+
                     )]
             }
         },
@@ -361,9 +366,11 @@ class OrLawParser(LawParser):
         chapter_hit = re.search(r'Chapter (\d+)', text)
         chapter = chapter_hit.group(1)
 
-        if self.current_fixes and int(chapter) in self.current_fixes:
-            for fix in self.current_fixes[int(chapter)]:
-                text = text.replace(fix[0], fix[1])
+        text = text.decode('utf8')
+        # text = text
+        prime_re = re.compile(u'\u2032\s?', re.UNICODE)
+        text = prime_re.sub("'", text)
+        text = text.encode('utf8')
 
         upper_pattern = r"[A-Z]+[A-Z;,'\-\s]+"
         title_or_upper_pattern = r"[A-Z]+[A-Za-z;,'\-\s]+"
@@ -374,6 +381,14 @@ class OrLawParser(LawParser):
                 tu=title_or_upper_pattern, ch=chapter)
         ]
 
+        if self.current_fixes and int(chapter) in self.current_fixes:
+            for fix in self.current_fixes[int(chapter)]:
+                try:
+                    text.index(fix[0])
+                    text = text.replace(fix[0], fix[1])
+                except ValueError:
+                    raise Exception('Could not find fix: {}'.format(fix))
+
         for pattern in heading_patterns:
             logger.debug('pattern: {v}'.format(v=pattern))
             for match in re.findall(pattern, text):
@@ -383,11 +398,6 @@ class OrLawParser(LawParser):
                 sub_str = [s for s in re.split(r'(\d+\.\d+)', match) if s][1]
                 text = text.replace(match, sub_str)
 
-        text = text.decode('utf8')
-        # text = text
-        prime_re = re.compile(u'\u2032\s?', re.UNICODE)
-        text = prime_re.sub("'", text)
-        text = text.encode('utf8')
         # Create list of expected subsections
         # subs_hit = self.pdf_subsection_re.search(text)
         subsections, start_index = self.expected_subsections_from_pdf_text(
