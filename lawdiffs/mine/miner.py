@@ -127,6 +127,7 @@ class LawParser(object):
                 extraction_callback(url, f, text_callback)
 
     def extract_pdf_text(self, url, open_file, text_callback):
+        """Extract pdf text from open file and cache it."""
         parser = PDFParser(open_file)
         doc = PDFDocument()
         parser.set_document(doc)
@@ -155,9 +156,12 @@ class LawParser(object):
                         text_buffer += line
                 except AttributeError:
                     pass
+
             if i > 5:
-                logger.debug('text_buffer: {v}'.format(v=text_buffer))
+                logger.warn('breaking on page {}'.format(i))
                 break
+
+        text_buffer = re.sub(r'\s{2}', ' ', text_buffer)
         self.cache_pdf_text(url, text_buffer)
         text_callback(text_buffer)
 
@@ -166,6 +170,7 @@ class LawParser(object):
         return text
 
     def fetch_pdf_text(self, url, callback):
+        """Fetch pdf text from url"""
         # cached = self.fetch_cached_pdf_text(url)
         # if cached:
         #     callback(cached)
@@ -199,6 +204,7 @@ class OrLawParser(LawParser):
 
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
     chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
+    subsection_re_pdf = re.compile(r'\b(\d+\.\d+)\b')
 
     sources = [
         {
@@ -251,10 +257,13 @@ class OrLawParser(LawParser):
         # print('diff: {v}'.format(v=diff))
 
     def pdf_text_pre_append_hook(self, text):
-        # if re.match(r'(Title|Page) \d+', text):
-        #     return ''
-        # if re.match(r'\(\d+ Edition\)', text):
-        #     return ''
+        # logger.debug('text: {v}'.format(v=text))
+        if text.isupper():
+            return ''
+        if re.match(r'(Title|Page) \d+', text):
+            return ''
+        if re.match(r'\(\d+ Edition\)', text):
+            return ''
         return text
 
     def begin_crawl_pdf(self, source_dict):
@@ -262,21 +271,102 @@ class OrLawParser(LawParser):
         self.current_url_base = self.url_base(url)
         soup = BeautifulSoup(self.fetch_html(url))
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
+            self.current_version = source_dict['version']
             link_url = self.current_url_base + link.get('href')
             self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
             break
 
+    def create_law_from_pdf_text(self, sections, start_index):
+        start_section = sections[start_index]
+
+        if not self.subsection_re_pdf.match(start_section):
+            raise Exception(
+                'Subsection not found in starting section: {}'.format(
+                    start_section))
+
+        subsection = start_section
+        next_section = sections[start_index + 1]
+        continue_index = start_index + 2
+
+        law = data_laws.get_or_create_statute(subsection, self.law_code)
+
+        if next_section.lstrip().startswith('['):
+            law.set_version_text(self.current_version, next_section)
+            return (law, continue_index)
+
+        title_split = next_section.split('.', 1)
+        if not len(title_split) > 1:
+            raise Exception(
+                'Unexpected title split: {} ({}) (start section: {})'.format(
+                    title_split, next_section, start_section))
+
+        law.set_version_title(self.current_version, title_split[0])
+        text_buffer = title_split[1]
+
+        while not text_buffer.rstrip().endswith(']'):
+            section = sections[continue_index].strip()
+            text_buffer += section
+            continue_index += 1
+
+        law.set_version_text(self.current_version, text_buffer)
+        logger.debug('created law: {v}'.format(v=law))
+        return continue_index
+
+    def expected_subsections_from_pdf_text(self, text):
+        first_hit = self.subsection_re_pdf.search(text)
+        first_subsection = first_hit.group(1)
+        first_subsection_re = re.compile(r'{}'.format(first_subsection))
+        second_hit = first_subsection_re.search(text, first_hit.end())
+        text = text[first_hit.start():second_hit.start()]
+        subsections = self.subsection_re_pdf.findall(text)
+        return (sorted(subsections, key=float), second_hit.start())
+
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
-        return
         first_subsection = None
         first_subsection_reached = False
         count = 0
         text_buffer = ''
-        # subs_re =
+
+        # Create list of expected subsections
+        # subs_hit = self.subsection_re_pdf.search(text)
+        subsections, start_index = self.expected_subsections_from_pdf_text(
+            text)
+        logger.debug('subsections: {v}'.format(v=subsections))
+        text = text[start_index:]
+        logger.debug('starting text: {}'.format(text[:600]))
+        current_law = None
+        for i in range(len(subsections) - 1):
+            subsection = subsections[i]
+            logger.debug('subsection: {v}'.format(v=subsection))
+            if not re.match(r'{}'.format(subsection), text):
+                exception_print_idx = min(600, len(text))
+                raise Exception(
+                    'Text does not match expected subsection {}: {}'.format(
+                        subsection, text[:exception_print_idx]))
+            if i == len(subsections) - 1:
+                next_subsection = None
+            else:
+                next_subsection = subsections[i + 1]
+            self.create_law_from_pdf_text(text, subsection, next_subsection)
+        return
+
+        # Get to the start of the subsections
+        first_subsection = subs_hit.group(1)
+        text = text[subs_hit.end():]
+        subs_hit = re.search(r'{}'.format(first_subsection), text)
+        text = text[subs_hit.start():]
+
+        subsections = [s for s in self.subsection_re_pdf.split(text) if s]
+        for i in range(len(subsections) - 1):
+            section = subsections[i]
+            if self.subsection_re_pdf.match(section.strip()):
+                if i == 0 or (subsections[i - 1].strip().endswith(']')):
+                    self.create_law_from_pdf_text(subsections, i)
+        return
+
         for line in text.splitlines():
             # if not first_subsection
-            subs_hit = re.search(r'(\d+\.\d+)', line)
             # Skip over content until we reach the actual first
             # subsection
             if not first_subsection:

@@ -157,6 +157,8 @@ class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
         return c.find({'law_code': law_code})
 
     def set_version_text(self, version, text):
+        if not version:
+            raise Exception('No version provided')
         self.texts[str(version)] = text
         self.save_attr('texts')
 
