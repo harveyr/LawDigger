@@ -218,17 +218,28 @@ class OrLawParser(LawParser):
             'link_patterns': [
                 re.compile(r'\d+\.pdf')
             ],
-            'fixes': [(
-                u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
-                u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
-            ), (
-                'representing and 8.690 Advising',
-                '8.690 Advising and representing'
-            ), (
-                'judge; of 14.250 Disqualification',
-                '14.250 Disqualification of judge;'
-            )
-            ]
+            'fixes': {
+                8: [(
+                    u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
+                    u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
+                    ),
+                    (
+                        'representing and 8.690 Advising',
+                        '8.690 Advising and representing'
+                    )],
+                14: [(
+                    'judge; of 14.250 Disqualification',
+                    '14.250 Disqualification of judge;'
+                    )],
+                18: [(
+                    'in 18.190 Spousal support awards',
+                    '18.190 Spousal support awards in'
+                    ),
+                    (
+                        u'under this section. \u00A731] [2003 c.576 18.268 Conduct of debtor examination;'.encode('utf-8'),
+                        u'under this section. [2003 c.576 \u00A731] 18.268 Conduct of debtor examination;'.encode('utf-8')
+                    )]
+            }
         },
         {
             'version': 2011,
@@ -276,8 +287,8 @@ class OrLawParser(LawParser):
             self.current_version = source_dict['version']
             self.current_fixes = source_dict['fixes']
             link_url = self.current_url_base + link.get('href')
-            # if not '003.pdf' in link_url:
-            #     continue
+            if not '018.pdf' in link_url:
+                continue
             try:
                 self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
             except urllib2.HTTPError:
@@ -350,12 +361,12 @@ class OrLawParser(LawParser):
         chapter_hit = re.search(r'Chapter (\d+)', text)
         chapter = chapter_hit.group(1)
 
-        if self.current_fixes:
-            for fix in self.current_fixes:
+        if self.current_fixes and int(chapter) in self.current_fixes:
+            for fix in self.current_fixes[int(chapter)]:
                 text = text.replace(fix[0], fix[1])
 
-        upper_pattern = r'[A-Z]+[A-Z;,\-\s]+'
-        title_or_upper_pattern = r'[A-Z]+[A-Za-z;,\-\s]+'
+        upper_pattern = r"[A-Z]+[A-Z;,'\-\s]+"
+        title_or_upper_pattern = r"[A-Z]+[A-Za-z;,'\-\s]+"
         heading_patterns = [
             r'{u}(?:\({tu}\))?\s+{ch}\.\d+'.format(
                 u=upper_pattern, tu=title_or_upper_pattern, ch=chapter),
@@ -363,8 +374,6 @@ class OrLawParser(LawParser):
                 tu=title_or_upper_pattern, ch=chapter)
         ]
 
-        heading_matches = re.findall(
-            r'[A-Z]+[A-Z\s,\-]+(?:\([A-za-z\s]+\))?\s+\d+\.\d+', text)
         for pattern in heading_patterns:
             logger.debug('pattern: {v}'.format(v=pattern))
             for match in re.findall(pattern, text):
@@ -374,6 +383,11 @@ class OrLawParser(LawParser):
                 sub_str = [s for s in re.split(r'(\d+\.\d+)', match) if s][1]
                 text = text.replace(match, sub_str)
 
+        text = text.decode('utf8')
+        # text = text
+        prime_re = re.compile(u'\u2032\s?', re.UNICODE)
+        text = prime_re.sub("'", text)
+        text = text.encode('utf8')
         # Create list of expected subsections
         # subs_hit = self.pdf_subsection_re.search(text)
         subsections, start_index = self.expected_subsections_from_pdf_text(
