@@ -220,7 +220,11 @@ class OrLawParser(LawParser):
             ],
             'fixes': [(
                 u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
-                u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8'))
+                u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
+            ), (
+                'representing and 8.690 Advising',
+                '8.690 Advising and representing'
+            )
             ]
         },
         {
