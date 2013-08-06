@@ -269,8 +269,8 @@ class OrLawParser(LawParser):
             self.current_version = source_dict['version']
             self.current_fixes = source_dict['fixes']
             link_url = self.current_url_base + link.get('href')
-            if not '003.pdf' in link_url:
-                continue
+            # if not '003.pdf' in link_url:
+            #     continue
             self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
@@ -316,12 +316,8 @@ class OrLawParser(LawParser):
             # v=remainder[:200]))
         return (law, remainder)
 
-    def expected_subsections_from_pdf_text(self, text):
-        logger.debug('text: {v}'.format(v=text[:2000]))
-        chapter_hit = re.search(r'Chapter (\d+)', text)
-        chapter = chapter_hit.group(1)
-
-        chapter_subs_re = re.compile(r'({}\.\d+)'.format(chapter))
+    def expected_subsections_from_pdf_text(self, text, chapter):
+        chapter_subs_re = re.compile(r'\b({}\.\d+)'.format(chapter))
 
         subsections = []
         for match in chapter_subs_re.finditer(text):
@@ -340,21 +336,37 @@ class OrLawParser(LawParser):
         text = self.pdf_footer1_re.sub('', text)
         text = self.pdf_footer2_re.sub('', text)
 
+        chapter_hit = re.search(r'Chapter (\d+)', text)
+        chapter = chapter_hit.group(1)
+
         if self.current_fixes:
             for fix in self.current_fixes:
                 text = text.replace(fix[0], fix[1])
 
-        heading_matches = re.findall(r'[A-Z]+[A-Z\s,]+\d+\.\d+', text)
-        for match in heading_matches:
-            if match.startswith('ORS'):
-                continue
-            sub_str = [s for s in re.split(r'(\d+\.\d+)', match) if s][1]
-            text = text.replace(match, sub_str)
+        upper_pattern = r'[A-Z]+[A-Z;,\-\s]+'
+        title_or_upper_pattern = r'[A-Z]+[A-Za-z;,\-\s]+'
+        heading_patterns = [
+            r'{u}(?:\({tu}\))?\s+{ch}\.\d+'.format(
+                u=upper_pattern, tu=title_or_upper_pattern, ch=chapter),
+            r'(\({tu}\)\s+{ch}\.\d+)'.format(
+                tu=title_or_upper_pattern, ch=chapter)
+        ]
+
+        heading_matches = re.findall(
+            r'[A-Z]+[A-Z\s,\-]+(?:\([A-za-z\s]+\))?\s+\d+\.\d+', text)
+        for pattern in heading_patterns:
+            logger.debug('pattern: {v}'.format(v=pattern))
+            for match in re.findall(pattern, text):
+                if match.startswith('ORS'):
+                    continue
+                logger.debug('match: "{v}"'.format(v=match))
+                sub_str = [s for s in re.split(r'(\d+\.\d+)', match) if s][1]
+                text = text.replace(match, sub_str)
 
         # Create list of expected subsections
         # subs_hit = self.pdf_subsection_re.search(text)
         subsections, start_index = self.expected_subsections_from_pdf_text(
-            text)
+            text, chapter)
         text = text[start_index:]
         current_law = None
         for i in range(len(subsections) - 1):
