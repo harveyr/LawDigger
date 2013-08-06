@@ -204,7 +204,8 @@ class OrLawParser(LawParser):
 
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
     chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
-    subsection_re_pdf = re.compile(r'\b(\d+\.\d+)\b')
+    pdf_subsection_re = re.compile(r'\b(\d+\.\d+)\b')
+    pdf_footer_re = re.compile(r'Title \d+ Page \d+ \(\d+ Edition\) [A-Z\s;]+ \d+\.\d+\s')
 
     sources = [
         {
@@ -258,12 +259,12 @@ class OrLawParser(LawParser):
 
     def pdf_text_pre_append_hook(self, text):
         # logger.debug('text: {v}'.format(v=text))
-        if text.isupper():
-            return ''
-        if re.match(r'(Title|Page) \d+', text):
-            return ''
-        if re.match(r'\(\d+ Edition\)', text):
-            return ''
+        # if text.isupper():
+        #     return ''
+        # if re.match(r'(Title|Page) \d+', text):
+        #     return ''
+        # if re.match(r'\(\d+ Edition\)', text):
+        #     return ''
         return text
 
     def begin_crawl_pdf(self, source_dict):
@@ -276,68 +277,103 @@ class OrLawParser(LawParser):
             self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
             break
 
-    def create_law_from_pdf_text(self, sections, start_index):
-        start_section = sections[start_index]
-
-        if not self.subsection_re_pdf.match(start_section):
+    def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
+        if not re.match(r'{}'.format(subsection), text):
             raise Exception(
-                'Subsection not found in starting section: {}'.format(
+                'Text does not start with subsection {}'.format(
                     start_section))
 
-        subsection = start_section
-        next_section = sections[start_index + 1]
-        continue_index = start_index + 2
+        if not next_subsection:
+            raise Exception("Handle me!")
 
         law = data_laws.get_or_create_statute(subsection, self.law_code)
+        text = text[len(subsection):].lstrip()
 
-        if next_section.lstrip().startswith('['):
-            law.set_version_text(self.current_version, next_section)
-            return (law, continue_index)
+        parts = re.split(r'({})'.format(next_subsection), text)
 
-        title_split = next_section.split('.', 1)
-        if not len(title_split) > 1:
-            raise Exception(
-                'Unexpected title split: {} ({}) (start section: {})'.format(
-                    title_split, next_section, start_section))
+        first_part = parts[0].strip()
+        # logger.debug('first_part: {v}'.format(v=first_part))
+        if first_part.startswith('['):
+            if not first_part.endswith(']'):
+                raise Exception(
+                    'Unmatched brackets: {}'.format(first_part))
+            law.set_version_text(self.current_version, first_part)
+            return ' '.join(parts[1:])
 
+        title_split = first_part.split('.', 1)
         law.set_version_title(self.current_version, title_split[0])
+
         text_buffer = title_split[1]
-
+        return_parts_index = 1
         while not text_buffer.rstrip().endswith(']'):
-            section = sections[continue_index].strip()
-            text_buffer += section
-            continue_index += 1
-
+            print('here!')
+            return_parts_index += 1
+            break
         law.set_version_text(self.current_version, text_buffer)
-        logger.debug('created law: {v}'.format(v=law))
-        return continue_index
+        return (law, ' '.join(parts[return_parts_index:]))
+        # next_section_hit = re.search()
+        # logger.debug('next_section_hit: {v}'.format(v=next_section_hit))
+
+
+        # subsection = start_section
+        # next_section = sections[start_index + 1]
+        # continue_index = start_index + 2
+
+
+        # if next_section.lstrip().startswith('['):
+        #     law.set_version_text(self.current_version, next_section)
+        #     return (law, continue_index)
+
+        # title_split = next_section.split('.', 1)
+        # if not len(title_split) > 1:
+        #     raise Exception(
+        #         'Unexpected title split: {} ({}) (start section: {})'.format(
+        #             title_split, next_section, start_section))
+
+        # law.set_version_title(self.current_version, title_split[0])
+        # text_buffer = title_split[1]
+
+        # while not text_buffer.rstrip().endswith(']'):
+        #     section = sections[continue_index].strip()
+        #     text_buffer += section
+        #     continue_index += 1
+
+        # law.set_version_text(self.current_version, text_buffer)
+        # logger.debug('created law: {v}'.format(v=law))
+        # return continue_index
 
     def expected_subsections_from_pdf_text(self, text):
-        first_hit = self.subsection_re_pdf.search(text)
+        first_hit = self.pdf_subsection_re.search(text)
         first_subsection = first_hit.group(1)
         first_subsection_re = re.compile(r'{}'.format(first_subsection))
         second_hit = first_subsection_re.search(text, first_hit.end())
         text = text[first_hit.start():second_hit.start()]
-        subsections = self.subsection_re_pdf.findall(text)
+        logger.debug('text: {v}'.format(v=text))
+        subsections = self.pdf_subsection_re.findall(text)
         return (sorted(subsections, key=float), second_hit.start())
 
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
+        # Title \d+ Page \d+ \(\d{4} Edition\) [A-Z\s;]+
+        text = self.pdf_footer_re.sub(' ', text)
+
         first_subsection = None
         first_subsection_reached = False
         count = 0
         text_buffer = ''
 
         # Create list of expected subsections
-        # subs_hit = self.subsection_re_pdf.search(text)
+        # subs_hit = self.pdf_subsection_re.search(text)
         subsections, start_index = self.expected_subsections_from_pdf_text(
             text)
-        logger.debug('subsections: {v}'.format(v=subsections))
         text = text[start_index:]
-        logger.debug('starting text: {}'.format(text[:600]))
         current_law = None
+        processed_subsections = []
+        logger.debug('subsections: {v}'.format(v=subsections))
         for i in range(len(subsections) - 1):
             subsection = subsections[i]
+            if subsection in processed_subsections:
+                continue
             logger.debug('subsection: {v}'.format(v=subsection))
             if not re.match(r'{}'.format(subsection), text):
                 exception_print_idx = min(600, len(text))
@@ -348,7 +384,9 @@ class OrLawParser(LawParser):
                 next_subsection = None
             else:
                 next_subsection = subsections[i + 1]
-            self.create_law_from_pdf_text(text, subsection, next_subsection)
+            law, remainder_text = self.create_law_from_pdf_text(
+                text, subsection, next_subsection)
+            text = remainder_text
         return
 
         # Get to the start of the subsections
@@ -357,10 +395,10 @@ class OrLawParser(LawParser):
         subs_hit = re.search(r'{}'.format(first_subsection), text)
         text = text[subs_hit.start():]
 
-        subsections = [s for s in self.subsection_re_pdf.split(text) if s]
+        subsections = [s for s in self.pdf_subsection_re.split(text) if s]
         for i in range(len(subsections) - 1):
             section = subsections[i]
-            if self.subsection_re_pdf.match(section.strip()):
+            if self.pdf_subsection_re.match(section.strip()):
                 if i == 0 or (subsections[i - 1].strip().endswith(']')):
                     self.create_law_from_pdf_text(subsections, i)
         return
