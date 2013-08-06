@@ -224,6 +224,9 @@ class OrLawParser(LawParser):
             ), (
                 'representing and 8.690 Advising',
                 '8.690 Advising and representing'
+            ), (
+                'judge; of 14.250 Disqualification',
+                '14.250 Disqualification of judge;'
             )
             ]
         },
@@ -275,7 +278,11 @@ class OrLawParser(LawParser):
             link_url = self.current_url_base + link.get('href')
             # if not '003.pdf' in link_url:
             #     continue
-            self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
+            try:
+                self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
+            except urllib2.HTTPError:
+                # TODO: Track error somehow
+                pass
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
         logger.debug(
