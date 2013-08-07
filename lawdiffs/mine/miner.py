@@ -140,12 +140,29 @@ class LawParser(object):
         device = PDFPageAggregator(rsrcmgr, laparams=laparams)
         interpreter = PDFPageInterpreter(rsrcmgr, device)
         text_buffer = ' '
+
+        logger.setLevel(logging.DEBUG)
         for i, page in enumerate(doc.get_pages()):
+            if i not in [17]:
+                continue
+
+            logger.debug('\n--- {} ---\n'.format(i))
+
             interpreter.process_page(page)
             layout = device.get_result()
             for obj in layout:
                 try:
+                    if not hasattr(obj, 'y0'):
+                        continue
+                    if obj.y0 >= 728.45 or obj.y0 <= 46.26:
+                        continue
+                    logger.debug('---')
+                    logger.debug('obj.y0: {v}'.format(v=obj.y0))
+                    logger.debug('obj.y1: {v}'.format(v=obj.y0))
+                    logger.debug('obj.x0: {v}'.format(v=obj.y0))
+                    logger.debug('obj.x1: {v}'.format(v=obj.y0))
                     text = obj.get_text().encode('utf-8').rstrip()
+                    logger.debug('text: {v}'.format(v=text))
                     for line in text.splitlines():
                         line = line.strip()
                         line = self.pdf_text_pre_append_hook(line)
@@ -171,10 +188,10 @@ class LawParser(object):
 
     def fetch_pdf_text(self, url, callback):
         """Fetch pdf text from url"""
-        cached = self.fetch_cached_pdf_text(url)
-        if cached:
-            callback(cached)
-            return
+        # cached = self.fetch_cached_pdf_text(url)
+        # if cached:
+        #     callback(cached)
+        #     return
         self.with_open_pdf(url, self.extract_pdf_text, callback)
 
     def get_soup_text(self, soup_elem):
@@ -196,6 +213,9 @@ class LawParser(object):
             repos.write_file(l, version)
         logger.info('Committing version {}...'.format(version))
         repos.commit(self.law_code, version)
+
+    def do_nothing(self, *args):
+        pass
 
 
 class OrLawParser(LawParser):
@@ -271,8 +291,10 @@ class OrLawParser(LawParser):
         model = data_laws.get_chapter_model(self.law_code)
         model.drop_collection()
 
-        logger.setLevel(logging.DEBUG)
-        self.begin_pdf_crawl(self.sources[0])
+        self.fetch_pdf_text(
+            'http://www.leg.state.or.us/ors_archives/2007/018.pdf',
+            self.do_nothing)
+        # self.begin_pdf_crawl(self.sources[0])
         # self.commit(source['version'])
         return
 
@@ -360,6 +382,7 @@ class OrLawParser(LawParser):
 
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
+        logger.setLevel(logging.DEBUG)
         text = self.pdf_footer1_re.sub('', text)
         text = self.pdf_footer2_re.sub('', text)
 
@@ -381,13 +404,13 @@ class OrLawParser(LawParser):
                 tu=title_or_upper_pattern, ch=chapter)
         ]
 
-        if self.current_fixes and int(chapter) in self.current_fixes:
-            for fix in self.current_fixes[int(chapter)]:
-                try:
-                    text.index(fix[0])
-                    text = text.replace(fix[0], fix[1])
-                except ValueError:
-                    raise Exception('Could not find fix: {}'.format(fix))
+        # if self.current_fixes and int(chapter) in self.current_fixes:
+        #     for fix in self.current_fixes[int(chapter)]:
+        #         try:
+        #             text.index(fix[0])
+        #             text = text.replace(fix[0], fix[1])
+        #         except ValueError:
+        #             raise Exception('Could not find fix: {}'.format(fix))
 
         for pattern in heading_patterns:
             logger.debug('pattern: {v}'.format(v=pattern))
