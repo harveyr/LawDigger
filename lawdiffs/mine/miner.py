@@ -7,14 +7,13 @@ import md5
 import os
 import bs4
 import tempfile
+import subprocess
 
 from pdfminer.pdfparser import PDFParser, PDFDocument, PDFNoOutlines
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 
-from ..data.client import mongoengine_connect
-from ..data.access import laws as data_laws
 from . import repos
 
 logger = logging.getLogger(__name__)
@@ -143,7 +142,7 @@ class LawParser(object):
 
         logger.setLevel(logging.DEBUG)
         for i, page in enumerate(doc.get_pages()):
-            if i not in [17]:
+            if i not in [45]:
                 continue
 
             logger.debug('\n--- {} ---\n'.format(i))
@@ -174,10 +173,6 @@ class LawParser(object):
                 except AttributeError:
                     pass
 
-            # if i > 10:
-            #     logger.warn('breaking on page {}'.format(i))
-            #     break
-
         text_buffer = re.sub(r'\s{2}', ' ', text_buffer)
         self.cache_pdf_text(url, text_buffer)
         text_callback(text_buffer)
@@ -193,6 +188,36 @@ class LawParser(object):
         #     callback(cached)
         #     return
         self.with_open_pdf(url, self.extract_pdf_text, callback)
+
+    def fetch_pdf_as_html(self, url):
+        if not url.endswith('.pdf'):
+            raise Exception('{} does not point to a pdf'.format(url))
+        cached_html_path = self.cache_file_path_for_url(
+            url, force_extension='.html')
+        if os.path.exists(cached_html_path):
+            logger.debug('Returning cached html for ' + url)
+            with open(cached_html_path, 'r') as f:
+                return f.read()
+
+        cached_pdf_path = self.cache_file_path_for_url(url)
+        if not os.path.exists(cached_html_path):
+            logger.debug('Fetching fresh ' + url)
+            response = urllib2.urlopen(url)
+            with open(cached_pdf_path, 'wb') as f:
+                f.write(response.read())
+
+        logger.debug('Converting pdf to html ({})'.format(url))
+        jarfile = os.path.join(
+            os.path.split(__file__)[0], '../bin/pdfbox-app-1.8.2.jar')
+        cmd = ['java', '-jar', jarfile, 'ExtractText', '-html',
+               cached_pdf_path, cached_html_path]
+
+        returncode = subprocess.call(cmd)
+        if returncode != 0:
+            raise Exception('Bad returncode: {}'.format(returncode))
+
+        with open(cached_html_path, 'r') as f:
+            return f.read()
 
     def get_soup_text(self, soup_elem):
         try:
@@ -284,16 +309,11 @@ class OrLawParser(LawParser):
 
     def run(self):
         repos.wipe_and_init(self.law_code)
-        model = data_laws.get_statute_model(self.law_code)
-        model.drop_collection()
-        model = data_laws.get_volume_model(self.law_code)
-        model.drop_collection()
-        model = data_laws.get_chapter_model(self.law_code)
-        model.drop_collection()
 
-        self.fetch_pdf_text(
-            'http://www.leg.state.or.us/ors_archives/2007/018.pdf',
-            self.do_nothing)
+        logger.setLevel(logging.DEBUG)
+        html = self.fetch_pdf_as_html(
+            'http://www.leg.state.or.us/ors_archives/2007/018.pdf')
+        self.create_laws_from_pdf_html(html)
         # self.begin_pdf_crawl(self.sources[0])
         # self.commit(source['version'])
         return
@@ -305,6 +325,41 @@ class OrLawParser(LawParser):
 
     def pdf_text_pre_append_hook(self, text):
         return text
+
+    def create_laws_from_pdf_html(self, html):
+
+        # Replace prime char
+        html = html.replace('&#8242;', "'")
+
+        idx = html.index('18.029 Effect of chapte', 5000)
+        part = html[idx:idx+500]
+        logger.debug('part: {v}'.format(v=part))
+        return
+
+        chapter_num_re = re.compile(r'Chapter (\d+)')
+        soup = BeautifulSoup(html)
+        chapter_p_text = soup.find(text=chapter_num_re)
+        chapter = int(chapter_num_re.match(chapter_p_text).group(1))
+
+        subsection_re = re.compile(
+            r'(?:[A-Z\s]+\s)?({}\.\d+)\s[A-Z]'.format(chapter))
+
+        expected_subsections = set()
+        for subsection_text in soup.find_all(text=subsection_re):
+            subsection = subsection_re.search(subsection_text).group(1)
+            expected_subsections.add(subsection)
+        expected_subsections = sorted(list(expected_subsections))
+
+        count = 0
+        for s in expected_subsections:
+            regex = re.compile(
+                r'(?:[A-Z\s]+\s)?{}\s[A-Z][\w|\s]+\.\s[A-Z|\[]'.format(s))
+            start_elem = soup.find(text=regex)
+            logger.debug('searching for {}'.format(s))
+            logger.debug('start_elem: {v}'.format(v=start_elem))
+            count += 1
+            if count == 20:
+                break
 
     def begin_pdf_crawl(self, source_dict):
         url = source_dict['url']
@@ -390,7 +445,6 @@ class OrLawParser(LawParser):
         chapter = chapter_hit.group(1)
 
         text = text.decode('utf8')
-        # text = text
         prime_re = re.compile(u'\u2032\s?', re.UNICODE)
         text = prime_re.sub("'", text)
         text = text.encode('utf8')
@@ -529,7 +583,3 @@ class OrLawParser(LawParser):
                     text_buffer += ' ' + s
             if current_law:
                 current_law.set_version_text(version, text_buffer)
-
-mongoengine_connect()
-p = OrLawParser()
-p.run()
