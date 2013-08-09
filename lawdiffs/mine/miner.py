@@ -219,6 +219,36 @@ class LawParser(object):
         with open(cached_html_path, 'r') as f:
             return f.read()
 
+    def fetch_pdf_as_text(self, url):
+        if not url.endswith('.pdf'):
+            raise Exception('{} does not point to a pdf'.format(url))
+        cached_text_path = self.cache_file_path_for_url(
+            url, force_extension='.txt')
+        if os.path.exists(cached_text_path):
+            logger.debug('Returning cached text for ' + url)
+            with open(cached_text_path, 'r') as f:
+                return f.read()
+
+        cached_pdf_path = self.cache_file_path_for_url(url)
+        if not os.path.exists(cached_pdf_path):
+            logger.debug('Fetching fresh ' + url)
+            response = urllib2.urlopen(url)
+            with open(cached_pdf_path, 'wb') as f:
+                f.write(response.read())
+
+        logger.debug('Converting pdf to text ({})'.format(url))
+        jarfile = os.path.join(
+            os.path.split(__file__)[0], '../bin/pdfbox-app-1.8.2.jar')
+        cmd = ['java', '-jar', jarfile, 'ExtractText',
+               cached_pdf_path, cached_text_path]
+
+        returncode = subprocess.call(cmd)
+        if returncode != 0:
+            raise Exception('Bad returncode: {}'.format(returncode))
+
+        with open(cached_text_path, 'r') as f:
+            return f.read()
+
     def get_soup_text(self, soup_elem):
         try:
             text = soup_elem.get_text(',,,', strip=True).decode('utf-8')
@@ -311,9 +341,11 @@ class OrLawParser(LawParser):
         repos.wipe_and_init(self.law_code)
 
         logger.setLevel(logging.DEBUG)
-        html = self.fetch_pdf_as_html(
+        # html = self.fetch_pdf_as_html(
+        #     'http://www.leg.state.or.us/ors_archives/2007/018.pdf')
+        text = self.fetch_pdf_as_text(
             'http://www.leg.state.or.us/ors_archives/2007/018.pdf')
-        self.create_laws_from_pdf_html(html)
+        self.create_laws_from_pdf_text(text)
         # self.begin_pdf_crawl(self.sources[0])
         # self.commit(source['version'])
         return
@@ -331,10 +363,10 @@ class OrLawParser(LawParser):
         # Replace prime char
         html = html.replace('&#8242;', "'")
 
-        idx = html.index('18.029 Effect of chapte', 5000)
-        part = html[idx:idx+500]
-        logger.debug('part: {v}'.format(v=part))
-        return
+        # idx = html.index('18.029 Effect of chapte', 5000)
+        # part = html[idx:idx+500]
+        # logger.debug('part: {v}'.format(v=part))
+        # return
 
         chapter_num_re = re.compile(r'Chapter (\d+)')
         soup = BeautifulSoup(html)
@@ -356,7 +388,8 @@ class OrLawParser(LawParser):
                 r'(?:[A-Z\s]+\s)?{}\s[A-Z][\w|\s]+\.\s[A-Z|\[]'.format(s))
             start_elem = soup.find(text=regex)
             logger.debug('searching for {}'.format(s))
-            logger.debug('start_elem: {v}'.format(v=start_elem))
+            text = self.get_soup_text(start_elem)
+            logger.debug('text: {v}'.format(v=text))
             count += 1
             if count == 20:
                 break
@@ -437,65 +470,95 @@ class OrLawParser(LawParser):
 
     def create_laws_from_pdf_text(self, text):
         """Assume one, big, pre-extracted string."""
-        logger.setLevel(logging.DEBUG)
-        text = self.pdf_footer1_re.sub('', text)
-        text = self.pdf_footer2_re.sub('', text)
-
         chapter_hit = re.search(r'Chapter (\d+)', text)
         chapter = chapter_hit.group(1)
 
-        text = text.decode('utf8')
-        prime_re = re.compile(u'\u2032\s?', re.UNICODE)
-        text = prime_re.sub("'", text)
-        text = text.encode('utf8')
-
-        upper_pattern = r"[A-Z]+[A-Z;,'\-\s]+"
+        upper_pat = r"[A-Z]+[A-Z;,'\-\s]+"
         title_or_upper_pattern = r"[A-Z]+[A-Za-z;,'\-\s]+"
-        heading_patterns = [
-            r'{u}(?:\({tu}\))?\s+{ch}\.\d+'.format(
-                u=upper_pattern, tu=title_or_upper_pattern, ch=chapter),
-            r'(\({tu}\)\s+{ch}\.\d+)'.format(
-                tu=title_or_upper_pattern, ch=chapter)
-        ]
+        ch_subs_pat = '{}\.\d+'.format(chapter)  # Chapter subsections
+        dash_space_re = re.compile(r'\w\-\s\w')
 
-        # if self.current_fixes and int(chapter) in self.current_fixes:
-        #     for fix in self.current_fixes[int(chapter)]:
-        #         try:
-        #             text.index(fix[0])
-        #             text = text.replace(fix[0], fix[1])
-        #         except ValueError:
-        #             raise Exception('Could not find fix: {}'.format(fix))
+        first_heading_hit = re.search(
+            r'^{}\s{}$'.format(upper_pat, ch_subs_pat), text, re.MULTILINE)
+        full_subsections_start_idx = first_heading_hit.start()
 
-        for pattern in heading_patterns:
-            logger.debug('pattern: {v}'.format(v=pattern))
-            for match in re.findall(pattern, text):
-                if match.startswith('ORS'):
-                    continue
-                logger.debug('match: "{v}"'.format(v=match))
-                sub_str = [s for s in re.split(r'(\d+\.\d+)', match) if s][1]
-                text = text.replace(match, sub_str)
+        subsection_re = re.compile(
+            r'^({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
 
-        # Create list of expected subsections
-        # subs_hit = self.pdf_subsection_re.search(text)
-        subsections, start_index = self.expected_subsections_from_pdf_text(
-            text, chapter)
-        text = text[start_index:]
-        current_law = None
-        for i in range(len(subsections) - 1):
-            subsection = subsections[i]
-            logger.debug('starting subsection: {v}'.format(v=subsection))
-            if not re.match(r'{}'.format(subsection), text):
-                exception_print_idx = min(600, len(text))
-                raise Exception(
-                    'Text does not match expected subsection {}: "{}"'.format(
-                        subsection, text[:exception_print_idx]))
-            if i == len(subsections) - 1:
-                next_subsection = None
+        # Find all TOC subsections
+        search_text = text[:full_subsections_start_idx]
+        expected_subsections = subsection_re.findall(search_text)
+
+        # Start searching the full statute definitions
+        search_text = text[full_subsections_start_idx:]
+
+        heading1_re = re.compile(
+            r'^Title \d+ Page \d+ \(\d+ Edition\)$',
+            re.MULTILINE)
+        heading2_re = re.compile(
+            r'^{}\.\d+\s{}$'.format(chapter, upper_pat),
+            re.MULTILINE)
+        heading3_re = re.compile(
+            r'^{}\s{}$'.format(upper_pat, ch_subs_pat),
+            re.MULTILINE)
+        heading4_re = re.compile(
+            r'^{}$'.format(upper_pat),
+            re.MULTILINE)
+
+        search_text = heading1_re.sub('', search_text)
+        search_text = heading2_re.sub('', search_text)
+        search_text = heading3_re.sub('', search_text)
+        search_text = heading4_re.sub('', search_text)
+
+        subsection_re = re.compile(
+            r'^({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
+        full_subsections = subsection_re.findall(search_text)
+        if len(full_subsections) != len(expected_subsections):
+            raise Exception(
+                'Statute count mismatch: {} != {}'.format(
+                    len(full_subsections), len(expected_subsections)))
+
+        # text = text.decode('utf8')
+        # prime_re = re.compile(u'\u2032\s?', re.UNICODE)
+        # text = prime_re.sub("'", text)
+        # text = text.encode('utf8')
+
+        for i in range(len(expected_subsections) - 1):
+            target = expected_subsections[i]
+            logger.debug('Searching for ' + target)
+            subs_hit = re.search(
+                r'^{}\s[A-Z]'.format(target), search_text, re.MULTILINE)
+            if not subs_hit:
+                raise Exception('{} not found in text:\n{}'.format(
+                    target, search_text[:5000]))
+
+            search_text = search_text[subs_hit.start() + len(target):].lstrip()
+            parts = search_text.split('.')
+            title = ' '.join(parts[0].splitlines())
+            title = dash_space_re.sub('', title) + '.'
+            logger.debug('title: {v}'.format(v=title))
+
+            law_text = None
+            search_text = '.'.join(parts[1:])
+            if i < len(expected_subsections) - 1:
+                next_subsection = expected_subsections[i + 1]
+                next_subsection_hit = re.search(
+                    r'^{}\s[A-Z]'.format(expected_subsections[i + 1]),
+                    search_text,
+                    re.MULTILINE)
+                if not next_subsection_hit:
+                    raise Exception(
+                        "Couldn't find {} after {} with text:\n{}".format(
+                            next_subsection, target, search_text[:5000]))
+                law_text = search_text[:next_subsection_hit.start()].strip()
             else:
-                next_subsection = subsections[i + 1]
-            law, remainder_text = self.create_law_from_pdf_text(
-                text, subsection, next_subsection)
-            text = remainder_text
+                law_text = search_text.strip()
+            if not law_text:
+                raise Exception("Couldn't find law text for {}".format(target))
+
+            law_text = ' '.join(law_text.splitlines())
+            law_text = dash_space_re.sub('', law_text)
+
 
     def begin_crawl_html(self, source_dict):
         """Begin crawling html statutes"""
