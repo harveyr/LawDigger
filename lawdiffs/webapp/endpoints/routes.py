@@ -51,8 +51,6 @@ def fetch_division(law_code, division):
 
 @blueprint.route('/law/<law_code>/<version>/<subsection>')
 def fetch_law(law_code, version, subsection):
-    logger.setLevel(logging.DEBUG)
-
     law = da_laws.fetch_law(law_code=law_code, subsection=subsection)
     prev, next = da_laws.fetch_previous_and_next_subsections(
         law_code, subsection)

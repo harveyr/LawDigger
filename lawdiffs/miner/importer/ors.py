@@ -62,11 +62,24 @@ class OrsImporter(LawImporter):
         logger.info('Beginning ORS Version {}'.format(version))
         url = source_dict['url']
         self.current_url_base = self.url_base(url)
-        soup = BeautifulSoup(self.fetch_html(url))
-        for link in soup.find_all(href=source_dict['link_patterns'][0]):
-            link_url = self.current_url_base + link.get('href')
-            if not '065.pdf' in link_url:
-                continue
+
+        html = self.fetch_html(url)
+        hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
+
+        # Debugging
+        should_import = False
+        start_at = '072a'
+        only = None
+
+        for rel_pdf_href in hrefs:
+            link_url = self.current_url_base + rel_pdf_href
+            if not should_import:
+                if ((start_at and start_at in rel_pdf_href) or
+                        (only and only in link_url)):
+                    should_import = True
+                else:
+                    logger.info('Skipping ' + link_url)
+                    continue
             logger.info('Attempting {} ({})'.format(
                 link_url, self.hashed_filename(link_url)))
             try:
@@ -76,11 +89,16 @@ class OrsImporter(LawImporter):
                 logger.error('HTTPError while fetching {}'.format(link_url))
                 pass
 
+            if only:
+                should_import = False
+        logger.info('Finished importing ORS Version {}'.format(version))
+
     def begin_crawl_html(self, source_dict):
         """Begin crawling html statutes"""
         url = source_dict['url']
         self.current_url_base = self.url_base(url)
         soup = BeautifulSoup(self.fetch_html(url))
+
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
             text = self.get_soup_text(link)
             volume = self.volume_pat_html.search(text).group(1)

@@ -79,9 +79,9 @@ class LawImporter(object):
         hashed_filename = self.hashed_filename(url)
         path = os.path.join(CACHE_PATH, hashed_filename)
         if os.path.exists(path) and os.path.isfile(path):
+            logger.debug('Using cached {} ({})'.format(
+                url, hashed_filename))
             with open(path, 'r') as f:
-                logger.debug('Using cached {} ({})'.format(
-                    url, hashed_filename))
                 return f.read()
         else:
             return None

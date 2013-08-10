@@ -113,7 +113,6 @@ def get_or_create_volume(volume, law_code):
 
 
 def get_or_create_chapter(chapter, volume, law_code):
-    logger.setLevel(logging.DEBUG)
     model = get_chapter_model(law_code)
     obj, created = model.objects.get_or_create(
         chapter=chapter,

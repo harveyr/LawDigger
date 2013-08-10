@@ -25,7 +25,7 @@ class OrsPdfParser(object):
         return '{}\.\d+'.format(chapter)
 
     def get_chapter_from_pdf_text(self, text):
-        chapter_hit = re.search(r'Chapter (\d+)', text)
+        chapter_hit = re.search(r'Chapter (\d+[A-Z]?)', text)
         chapter = chapter_hit.group(1)
         return chapter
 
@@ -152,7 +152,7 @@ class OrsPdfParser(object):
             if i < len(expected_subs) - 1:
                 next_subsection = expected_subs[i + 1]
                 next_subsection_hit = re.search(
-                    r'^{}\s[A-Z]'.format(expected_subs[i + 1]),
+                    r'^\s?{}\s[A-Z]'.format(expected_subs[i + 1]),
                     search_text,
                     re.MULTILINE)
                 if not next_subsection_hit:
