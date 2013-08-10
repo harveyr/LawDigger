@@ -237,6 +237,7 @@ class OrLawParser(LawParser):
         for source in self.sources:
             crawl_func = getattr(self, source['crawl_func'])
             crawl_func(source)
+            return
             self.commit(source['version'])
 
     def begin_pdf_crawl(self, source_dict):
@@ -253,6 +254,7 @@ class OrLawParser(LawParser):
             except urllib2.HTTPError:
                 logger.error('HTTPError while fetching {}'.format(link_url))
                 pass
+            break
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
         logger.debug(
@@ -322,19 +324,28 @@ class OrLawParser(LawParser):
         ch_subs_pat = '{}\.\d+'.format(chapter)  # Chapter subsections
         dash_space_re = re.compile(r'\w\-\s\w')
 
-        first_heading_hit = re.search(
-            r'^{}\s{}$'.format(upper_pat, ch_subs_pat), text, re.MULTILINE)
-        full_subsections_start_idx = first_heading_hit.start()
+        first_subs_hit = re.search(
+            r'^({})\s[A-Z]'.format(ch_subs_pat), text, re.MULTILINE)
+        first_subs = first_subs_hit.group(1)
+        first_subs_idx = first_subs_hit.end()
 
+        search_text = text[first_subs_idx:]
+        first_full_subs_hit = re.search(
+            r'^({})\s[A-Z]'.format(first_subs),
+            search_text,
+            re.MULTILINE)
+
+        first_full_subs_idx = first_full_subs_hit.start() + first_subs_idx
+
+        # Find all TOC subsections
+        search_text = text[:first_full_subs_idx]
         subsection_re = re.compile(
             r'^({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
 
-        # Find all TOC subsections
-        search_text = text[:full_subsections_start_idx]
         expected_subsections = subsection_re.findall(search_text)
 
         # Start searching the full statute definitions
-        search_text = text[full_subsections_start_idx:]
+        search_text = text[first_full_subs_idx:]
 
         heading1_re = re.compile(
             r'^Title \d+ Page \d+ \(\d+ Edition\)$',
