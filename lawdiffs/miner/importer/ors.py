@@ -68,8 +68,8 @@ class OrsImporter(LawImporter):
 
         # Debugging
         should_import = False
-        start_at = None
-        only = '127'
+        start_at = '199'
+        only = None
 
         for rel_pdf_href in hrefs:
             link_url = self.current_url_base + rel_pdf_href
@@ -84,7 +84,7 @@ class OrsImporter(LawImporter):
                 link_url, self.hashed_filename(link_url)))
             try:
                 text = self.fetch_pdf_as_text(link_url)
-                parser.create_laws_from_pdf_text(text, version)
+                parser.create_laws(text, version)
             except ImportException:
                 logger.error('HTTPError while fetching {}'.format(link_url))
                 pass

@@ -2,6 +2,7 @@ import re
 import logging
 from ...data import law_codes
 from ...data.access import laws as da_laws
+from .base import ParseException
 
 logger = logging.getLogger(__name__)
 
@@ -39,34 +40,34 @@ class OrsPdfDebugger(object):
                 logger.debug(' - Hit: {}'.format(
                     text[hit.start() - 20:hit.end() + 20]))
 
-    def debug_find_sequence_fail(self, subs, next_subs, text, attempted_rex):
-        self.log_header('debug_find_sequence_fail')
+    def debug_find_fail(self, subs, text, attempted_rex):
+        self.log_header('debug_find_fail')
         logger.debug('Subsection:\t\t{}'.format(subs))
-        logger.debug('Next Subsection:\t{}'.format(next_subs))
         logger.debug('Attempted pattern:\t{}'.format(attempted_rex.pattern))
 
         self.find_and_report(
-            re.compile(r'{}'.format(next_subs)),
+            re.compile(r'{}'.format(subs)),
             text)
 
         self.find_and_report(
-            re.compile(r'^\s?{}'.format(next_subs)),
+            re.compile(r'^\s?{}'.format(subs)),
             text)
 
         self.find_and_report(
-            re.compile(r'{}.[A-Z]'.format(next_subs)),
+            re.compile(r'{}.[A-Z]'.format(subs)),
             text)
 
         self.find_and_report(
-            re.compile(ur'^\s?{}.{{1,2}}\u00A7'.format(next_subs),
+            re.compile(ur'^\s?{}.{{1,2}}\u00A7'.format(subs),
                 re.MULTILINE),
             text)
-
 
 debugger = OrsPdfDebugger()
 
 
 class OrsPdfParser(object):
+    """Using this one for at least the 2007 pdf text."""
+
     law_code = law_codes.OREGON_REVISED_STATUTES
 
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
@@ -97,19 +98,28 @@ class OrsPdfParser(object):
             return False
         return True
 
-    def find_expected_subs_in_pdf_text(self, text, chapter):
+    def find_expected_subs(self, text, chapter):
         ch_subs_pat = self.chapter_subs_pattern(chapter)
 
         first_subs_hit = re.search(
             r'^({})\s[A-Z]'.format(ch_subs_pat), text, re.MULTILINE)
         first_subs = first_subs_hit.group(1)
         first_subs_idx = first_subs_hit.end()
+        if first_subs_idx > 500:
+            raise ParseException('Unexpectedly high first subs index: {}'.format(
+                first_subs_idx))
 
         search_text = text[first_subs_idx:]
-        first_full_subs_hit = re.search(
-            r'^({})\s[A-Z]'.format(first_subs),
-            search_text,
-            re.MULTILINE)
+        first_full_subs_rex = re.compile(
+            r'^({})\s[A-Z]'.format(first_subs), re.MULTILINE)
+        first_full_subs_hit = first_full_subs_rex.search(search_text)
+
+        if not first_full_subs_hit:
+            debugger.debug_find_fail(
+                first_subs, search_text, first_full_subs_rex)
+            raise ParseException(
+                'Failed finding first subs {} in text {}:'.format(
+                    first_subs, search_text[:300]))
 
         first_full_subs_idx = first_full_subs_hit.start() + first_subs_idx
 
@@ -125,7 +135,7 @@ class OrsPdfParser(object):
                 filtered.append(sub)
         return (filtered, text[first_full_subs_idx:])
 
-    def purify_pdf_text(self, text, chapter):
+    def purify_text(self, text, chapter):
         """Remove headers, footers, double spaces, etc."""
         heading_rexes = [
             re.compile(
@@ -157,15 +167,44 @@ class OrsPdfParser(object):
         #     text = double_space_re.sub(' ', text)
         return text
 
-    def find_full_subs_in_pdf_text(self, version, chapter, subsection, text):
+    def find_full_subs(self, version, chapter, subsection, text):
         ch_subs_pat = self.chapter_subs_pattern(chapter)
         subsection_re = re.compile(
             r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
         full_subs = subsection_re.findall(search_text)
 
+    def text_has_empty_subsection(self, subs, text):
+        empty_subs_rex = re.compile(
+            r'^\s?({})\s\['.format(subs), re.MULTILINE)
+        return bool(empty_subs_rex.search(text))
 
-    def create_laws_from_pdf_text(self, text, version):
-        """Using this one for at least the 2007 pdf text."""
+    def assert_expected_subs_exist(self, chapter, expected_subs, text):
+        ch_subs_pat = self.chapter_subs_pattern(chapter)
+
+        full_subs_rex = re.compile(
+            r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
+
+        full_subs = full_subs_rex.findall(text)
+        not_found = set(expected_subs)
+        for hit in full_subs_rex.finditer(text):
+            if not hit:
+                pass
+            subs = hit.group(1)
+            try:
+                not_found.remove(subs)
+            except KeyError:
+                # Unexpected subsection. If it's empty, okay. If not, not.
+                if not self.text_has_empty_subsection(subs, text):
+                    raise ParseException(
+                        'Unexpected subsection: {}'.format(subs))
+
+        if len(not_found) != 0:
+            raise ParseException('Subsections not found in body: {}'.format(
+                not_found))
+
+        return True
+
+    def create_laws(self, text, version):
 
         chapter = self.get_chapter_from_pdf_text(text)
         if not self.pdf_text_has_laws(text, chapter):
@@ -173,36 +212,13 @@ class OrsPdfParser(object):
                 chapter))
             return
 
-        ch_subs_pat = self.chapter_subs_pattern(chapter)
-
-        expected_subs, search_text = self.find_expected_subs_in_pdf_text(
+        # ch_subs_pat = self.chapter_subs_pattern(chapter)
+        expected_subs, search_text = self.find_expected_subs(
             text, chapter)
 
-        # Start searching the full statute definitions
-        search_text = self.purify_pdf_text(search_text, chapter)
+        search_text = self.purify_text(search_text, chapter)
 
-        subsection_re = re.compile(
-            r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
-        full_subs = subsection_re.findall(search_text)
-        exception_rexes = {}
-        if len(full_subs) != len(expected_subs):
-
-            problems = []
-
-            for sub in full_subs:
-                if sub not in expected_subs:
-                    problems.append(sub)
-            for sub in expected_subs:
-                if sub not in full_subs:
-                    problems.append(sub)
-
-            for sub in problems:
-                rex = self.subs_rex_exception(version, chapter, sub)
-                if not rex:
-                    raise Exception('Problem subsection: {}'.format(sub))
-
-                if not rex.search(search_text):
-                    raise Exception('Exception rex failed for {}'.format(sub))
+        self.assert_expected_subs_exist(chapter, expected_subs, search_text)
 
         # text = text.decode('utf8')
         # prime_re = re.compile(u'\u2032\s?', re.UNICODE)
@@ -215,13 +231,13 @@ class OrsPdfParser(object):
             subs_hit = re.search(
                 r'^\s?{}\s[A-Z]'.format(target), search_text, re.MULTILINE)
             if not subs_hit:
+                if self.text_has_empty_subsection(target, search_text):
+                    logger.warn('HANDLE ME! Empty law')
+                    continue
+
                 exception_rex = self.subs_rex_exception(version, chapter, sub)
-                logger.debug('exception_rex: {v}'.format(v=exception_rex))
-                return
                 if exception_rex:
                     subs_hit = exception_rex.search(search_text)
-                    print('here')
-                    return
 
             if not subs_hit:
                 raise Exception('{} not found in text:\n{}'.format(
