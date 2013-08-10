@@ -1,12 +1,13 @@
 # import mongoengine as moe
 from .. import models
 from ...data import cache
+from .. import law_codes
 import logging
 
 logger = logging.getLogger(__name__)
 
 law_code_to_model_map = {
-    'ors': {
+    law_codes.OREGON_REVISED_STATUTES: {
         'statute': models.OregonRevisedStatute,
         'volume': models.ORSVolume,
         'chapter': models.ORSChapter
@@ -120,9 +121,18 @@ def get_or_create_chapter(chapter, volume, law_code):
     return obj
 
 
-def get_or_create_statute(subsection, law_code):
+def get_or_create_law(law_code, subsection):
     model = get_statute_model(law_code)
     obj, created = model.objects.get_or_create(subsection=subsection)
+    return obj
+
+
+def set_law_version(law, version, title, text):
+    model = models.LawVersion
+    obj, created = model.objects.get_or_create(law_id=law.id)
+    obj.title = title
+    obj.text = text
+    obj.save()
     return obj
 
 

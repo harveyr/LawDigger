@@ -2,41 +2,37 @@ import logging
 import datetime
 import calendar
 import json
+import pymongo
+from bson.objectid import ObjectId
 from werkzeug.contrib.cache import SimpleCache
-from sqlalchemy import create_engine
+logger = logging.getLogger(__name__)
+import mongoengine as moe
 
 from . import models
-
-logger = logging.getLogger(__name__)
-
-sqlalchemy_engine = create_engine(
-    'postgresql://harvey:asdf@127.0.0.1/lawdigger',
-    echo=True)
-models.Base.metadata.create_all(sqlalchemy_engine)
 
 
 class LawDiffSerializer(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, models.Serializeable):
             return o.serialize()
-#         if isinstance(o, ObjectId):
-#             return str(o)
+        if isinstance(o, ObjectId):
+            return str(o)
 
-#         elif isinstance(o, datetime.datetime):
-#             # Trying UTC times so we can consistently compare age in any timezone
-#             # and do updates to single log entries on front end without having
-#             # to refresh entire log in order to get updated times for sorting.
+        elif isinstance(o, datetime.datetime):
+            # Trying UTC times so we can consistently compare age in any timezone
+            # and do updates to single log entries on front end without having
+            # to refresh entire log in order to get updated times for sorting.
 
-#             obj_date = calendar.timegm(o.timetuple()) * 1000 + o.microsecond / 1000
-#             # now = timegm(datetime.utcnow().timetuple() )
-#             # now = time.mktime(datetime.datetime.now().timetuple())
-#             # dt = time.mktime(o.timetuple())
-#             # return now - obj_date
-#             return obj_date
-#         elif isinstance(o, pymongo.cursor.Cursor):
-#             return [obj for obj in o]
-#         elif isinstance(o, moe.queryset.QuerySet):
-#             return [obj for obj in o]
+            obj_date = calendar.timegm(o.timetuple()) * 1000 + o.microsecond / 1000
+            # now = timegm(datetime.utcnow().timetuple() )
+            # now = time.mktime(datetime.datetime.now().timetuple())
+            # dt = time.mktime(o.timetuple())
+            # return now - obj_date
+            return obj_date
+        elif isinstance(o, pymongo.cursor.Cursor):
+            return [obj for obj in o]
+        elif isinstance(o, moe.queryset.QuerySet):
+            return [obj for obj in o]
 
 
 def jsonify(obj):

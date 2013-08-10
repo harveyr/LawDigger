@@ -2,7 +2,7 @@ import logging
 from flask import (Blueprint, request)
 
 from ...data import jsonify
-from ...data.access import laws as data_laws
+from ...data.access import laws as da_laws
 from ...mine import repos
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def fetch_toc(law_code):
     serialized = {}
     if law_code == 'ors':
         serialized['volumes'] = []
-        volumes = data_laws.fetch_volumes(law_code)
+        volumes = da_laws.fetch_volumes(law_code)
         for v in volumes:
             chapters = v.fetch_chapters()
             d = v.serialize()
@@ -35,7 +35,7 @@ def fetch_toc(law_code):
 def fetch_division(law_code, division):
     data = {}
     if law_code == 'ors':
-        chapter, statutes = data_laws.fetch_ors_by_chapter(division)
+        chapter, statutes = da_laws.fetch_ors_by_chapter(division)
         data['chapter'] = chapter
         data['statutes'] = statutes
     if not data:
@@ -45,7 +45,7 @@ def fetch_division(law_code, division):
 
 # @blueprint.route('/laws/<law_code>')
 # def fetch_laws(law_code):
-#     laws = data_laws.fetch_by_code(law_code)
+#     laws = da_laws.fetch_by_code(law_code)
 #     return jsonify(laws)
 
 
@@ -53,8 +53,8 @@ def fetch_division(law_code, division):
 def fetch_law(law_code, version, subsection):
     logger.setLevel(logging.DEBUG)
 
-    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
-    prev, next = data_laws.fetch_previous_and_next_subsections(
+    law = da_laws.fetch_law(law_code=law_code, subsection=subsection)
+    prev, next = da_laws.fetch_previous_and_next_subsections(
         law_code, subsection)
     source = law.fetch_source(version)
     logger.debug('source: {v}'.format(v=source))
@@ -72,7 +72,7 @@ def fetch_law(law_code, version, subsection):
 
 @blueprint.route('/versions/<law_code>/<subsection>')
 def fetch_versions(law_code, subsection):
-    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    law = da_laws.fetch_law(law_code=law_code, subsection=subsection)
     d = {
         'versions': law.versions
     }
@@ -81,9 +81,9 @@ def fetch_versions(law_code, subsection):
 
 @blueprint.route('/diff/<law_code>/<subsection>/<version1>/<version2>')
 def fetch_diff(law_code, subsection, version1, version2):
-    law = data_laws.fetch_law(law_code=law_code, subsection=subsection)
+    law = da_laws.fetch_law(law_code=law_code, subsection=subsection)
     diff = repos.get_tag_diff(law, version1, version2)
-    prev, next = data_laws.fetch_previous_and_next_subsections(
+    prev, next = da_laws.fetch_previous_and_next_subsections(
         law_code, subsection)
     return jsonify({
         'diff': diff,

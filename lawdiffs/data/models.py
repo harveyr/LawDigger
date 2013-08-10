@@ -1,43 +1,10 @@
 import inspect
-# from .client import client
 import logging
 import mongoengine as moe
 import re
+from . import law_codes
 
 logger = logging.getLogger(__name__)
-
-
-# class MongoDocument(object):
-
-#     collection_name = None
-
-#     @classmethod
-#     def collection(self):
-#         return client.collection(self.collection_name)
-
-#     @classmethod
-#     def get_or_create(cls, doc_dict):
-#         c = cls.collection()
-#         for key in cls.unique_keys:
-#             result = c.find_one({key: doc_dict[key]})
-#             if result:
-#                 return (result, False)
-#         inserted_id = c.insert(doc_dict)
-#         inserted_doc = c.find_one({'_id': inserted_id})
-#         return (inserted_doc, True)
-
-#     def fetch_by_unique_keys(self):
-#         return None
-
-
-#     def save(self):
-#         serialized = self.serialize()
-#         doc, created = self.__class__.get_or_create(self.serialize())
-#         if not created:
-#             for key, val in serialized.items():
-#                 doc[key] = val
-#                 c = self.__class__.collection()
-#                 c.save(doc)
 
 
 class Serializeable(object):
@@ -135,11 +102,17 @@ class Chapter(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
         }
 
 
+class LawVersion(moe.Document):
+    law_id = moe.ObjectIdField()
+    title = moe.StringField()
+    text = moe.StringField()
+    source = moe.ObjectIdField()
+
+
 class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
     subsection = moe.StringField(unique=True, required=True)
-    texts = moe.DictField()
     file_path = moe.StringField()
-    sources = moe.DictField()
+    versions = moe.ListField()
 
     meta = {'allow_inheritance': True}
 
@@ -151,50 +124,9 @@ class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
             'law_code': obj.law_code
         }
 
-    @classmethod
-    def fetch_by_code_code(cls, law_code):
-        c = cls.collection()
-        return c.find({'law_code': law_code})
-
-    def set_version_text(self, version, text):
-        if not version:
-            raise Exception('No version provided')
-        self.texts[str(version)] = text
-        self.save_attr('texts')
-
-    @property
-    def versions(self):
-        return self.texts.keys()
-
-    def set_source(self, version, source):
-        assert(isinstance(source, LawSource))
-        self.sources[str(version)] = source.id
-        self.save()
-
-    def fetch_source(self, version):
-        version = str(version)
-        if not version in self.sources:
-            return None
-        source_id = self.sources[str(version)]
-        return LawSource.objects(id=source_id).first()
-
-    def text(self, version, formatted=False):
-        text = self.texts[str(version)]
-        if formatted:
-            return self.format_text(text)
-        return text
-
-    def htmlify(self, text):
-        """Not using this."""
-        logger.debug('text: {v}'.format(v=text))
-        html = ''
-        for p in [p for p in text.split('\n\n') if p]:
-            html += '<p>' + p + '</p>'
-        return html
-
 
 class ORSMixin(object):
-    law_code = 'ors'
+    law_code = law_codes.OREGON_REVISED_STATUTES
 
 
 class OregonRevisedStatute(Law, ORSMixin):
