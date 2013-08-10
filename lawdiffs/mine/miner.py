@@ -237,8 +237,7 @@ class OrLawParser(LawParser):
         for source in self.sources:
             crawl_func = getattr(self, source['crawl_func'])
             crawl_func(source)
-            return
-            self.commit(source['version'])
+            # self.commit(source['version'])
 
     def begin_pdf_crawl(self, source_dict):
         version = source_dict['version']
@@ -248,13 +247,14 @@ class OrLawParser(LawParser):
         soup = BeautifulSoup(self.fetch_html(url))
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
             link_url = self.current_url_base + link.get('href')
+            if not '004.pdf' in link_url:
+                continue
             try:
                 text = self.fetch_pdf_as_text(link_url)
                 self.create_laws_from_pdf_text(text, version)
             except urllib2.HTTPError:
                 logger.error('HTTPError while fetching {}'.format(link_url))
                 pass
-            break
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
         logger.debug(
