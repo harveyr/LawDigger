@@ -10,14 +10,21 @@ import re
 
 logger = logging.getLogger(__name__)
 
-CACHE_PATH = os.path.join(os.path.split(__file__)[0], '../.cache')
 
-class ImportException(Exception):
-    pass
+CACHE_PATH = os.path.join(os.path.split(__file__)[0], '../.cache')
+PDFBOX_BIN_PATH = os.path.join(
+    os.path.split(__file__)[0],
+    '../../bin/pdfbox-app-1.8.2.jar')
 
 if not os.path.exists(CACHE_PATH):
     raise Exception('Cache path does not exist: ' + CACHE_PATH)
 
+if not os.path.exists(PDFBOX_BIN_PATH):
+    raise Exception('PDFBox path does not exist: ' + PDFBOX_BIN_PATH)
+
+
+class ImportException(Exception):
+    pass
 
 
 class LawImporter(object):
@@ -122,9 +129,7 @@ class LawImporter(object):
                 f.write(contents)
 
         logger.debug('Converting pdf to html ({})'.format(url))
-        jarfile = os.path.join(
-            os.path.split(__file__)[0], '../bin/pdfbox-app-1.8.2.jar')
-        cmd = ['java', '-jar', jarfile, 'ExtractText', '-html',
+        cmd = ['java', '-jar', PDFBOX_BIN_PATH, 'ExtractText', '-html',
                cached_pdf_path, cached_html_path]
 
         returncode = subprocess.call(cmd)
@@ -153,9 +158,8 @@ class LawImporter(object):
                 f.write(url_contents)
 
         logger.debug('Converting pdf to text ({})'.format(url))
-        jarfile = os.path.join(
-            os.path.split(__file__)[0], '../bin/pdfbox-app-1.8.2.jar')
-        cmd = ['java', '-jar', jarfile, 'ExtractText', '-encoding', 'UTF-8',
+
+        cmd = ['java', '-jar', PDFBOX_BIN_PATH, 'ExtractText', '-encoding', 'UTF-8',
                cached_pdf_path, cached_text_path]
 
         returncode = subprocess.call(cmd)

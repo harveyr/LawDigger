@@ -50,7 +50,7 @@ class OrsImporter(LawImporter):
             raise Exception('No target source found for version {}'.format(
                 version))
         self.import_source(target_source)
-        self.commit(source['version'])
+        # self.commit(source['version'])
 
     def import_source(self, source_dict):
         crawl_func = getattr(self, source_dict['crawl_func'])
@@ -65,7 +65,7 @@ class OrsImporter(LawImporter):
         soup = BeautifulSoup(self.fetch_html(url))
         for link in soup.find_all(href=source_dict['link_patterns'][0]):
             link_url = self.current_url_base + link.get('href')
-            if not '030.pdf' in link_url:
+            if not '065.pdf' in link_url:
                 continue
             logger.info('Attempting {} ({})'.format(
                 link_url, self.hashed_filename(link_url)))

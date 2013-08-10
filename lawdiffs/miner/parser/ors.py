@@ -1,10 +1,13 @@
 import re
 import logging
+from ...data import law_codes
 from ...data.access import laws as da_laws
 logger = logging.getLogger(__name__)
 
 
 class OrsPdfParser(object):
+    law_code = law_codes.OREGON_REVISED_STATUTES
+
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
     chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
     pdf_subsection_re = re.compile(r'\b(\d+\.\d+)\b')
@@ -55,7 +58,11 @@ class OrsPdfParser(object):
             r'^({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
 
         expected_subsections = subsection_re.findall(search_text)
-        return (expected_subsections, text[first_full_subs_idx:])
+        filtered = []
+        for sub in expected_subsections:
+            if sub not in filtered:
+                filtered.append(sub)
+        return (filtered, text[first_full_subs_idx:])
 
     def remove_margins_from_pdf_text(self, text, chapter):
         """Remove headers and footers."""
@@ -103,11 +110,21 @@ class OrsPdfParser(object):
         search_text = self.remove_margins_from_pdf_text(search_text, chapter)
 
         subsection_re = re.compile(
-            r'^({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
-        full_subsections = subsection_re.findall(search_text)
-        if len(full_subsections) != len(expected_subs):
+            r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
+        full_subs = subsection_re.findall(search_text)
+        if len(full_subs) != len(expected_subs):
+            for sub in full_subs:
+                if sub not in expected_subs:
+                    logger.error('Unexpected: {}'.format(sub))
+                if not sub:
+                    logger.error('Bad sub: "{}"'.format(sub))
+            for sub in expected_subs:
+                if sub not in full_subs:
+                    logger.error('Not found: {}'.format(sub))
+                if not sub:
+                    logger.error('Bad sub: "{}"'.format(sub))
             msg = 'Expected {} statutes in ch {}, found {}'.format(
-                len(expected_subs), chapter, len(full_subsections))
+                len(expected_subs), chapter, len(full_subs))
             raise Exception(msg)
 
         # text = text.decode('utf8')
@@ -119,7 +136,7 @@ class OrsPdfParser(object):
             target = expected_subs[i]
             logger.debug('Searching for ' + target)
             subs_hit = re.search(
-                r'^{}\s[A-Z]'.format(target), search_text, re.MULTILINE)
+                r'^\s?{}\s[A-Z]'.format(target), search_text, re.MULTILINE)
             if not subs_hit:
                 raise Exception('{} not found in text:\n{}'.format(
                     target, search_text[:5000]))
