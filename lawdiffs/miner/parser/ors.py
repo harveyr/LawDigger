@@ -2,7 +2,68 @@ import re
 import logging
 from ...data import law_codes
 from ...data.access import laws as da_laws
+
 logger = logging.getLogger(__name__)
+
+
+class OrsPdfDebugger(object):
+
+    def log_header(self, func_name):
+        logger.setLevel(logging.DEBUG)
+        logger.debug('--- OrsPdfDebugger.{} ---'.format(func_name))
+
+    def log_completion(self):
+        logger.debug('--- OrsPdfDebugger Finished ---')
+
+    def log_hits(self, hits):
+        for h in hits:
+            logger.debug(' - Hit: {}'.format(h))
+
+    def find_and_report(self, rex, text, log_hits=False):
+        result_col = 50
+        hits = rex.findall(text)
+        count = str(len(hits))
+        msg = '{} hits '.format(rex.pattern.encode('utf8'))
+
+        dots = result_col - (len(msg) + len(count))
+        if dots > 0:
+            msg += ' '
+            for i in range(dots - 1):
+                msg += '.'
+            msg += ' '
+        msg += count
+        logger.debug(msg)
+
+        if log_hits:
+            for hit in rex.finditer(text):
+                logger.debug(' - Hit: {}'.format(
+                    text[hit.start() - 20:hit.end() + 20]))
+
+    def debug_find_sequence_fail(self, subs, next_subs, text, attempted_rex):
+        self.log_header('debug_find_sequence_fail')
+        logger.debug('Subsection:\t\t{}'.format(subs))
+        logger.debug('Next Subsection:\t{}'.format(next_subs))
+        logger.debug('Attempted pattern:\t{}'.format(attempted_rex.pattern))
+
+        self.find_and_report(
+            re.compile(r'{}'.format(next_subs)),
+            text)
+
+        self.find_and_report(
+            re.compile(r'^\s?{}'.format(next_subs)),
+            text)
+
+        self.find_and_report(
+            re.compile(r'{}.[A-Z]'.format(next_subs)),
+            text)
+
+        self.find_and_report(
+            re.compile(ur'^\s?{}.{{1,2}}\u00A7'.format(next_subs),
+                re.MULTILINE),
+            text)
+
+
+debugger = OrsPdfDebugger()
 
 
 class OrsPdfParser(object):
@@ -64,8 +125,8 @@ class OrsPdfParser(object):
                 filtered.append(sub)
         return (filtered, text[first_full_subs_idx:])
 
-    def remove_margins_from_pdf_text(self, text, chapter):
-        """Remove headers and footers."""
+    def purify_pdf_text(self, text, chapter):
+        """Remove headers, footers, double spaces, etc."""
         heading_rexes = [
             re.compile(
                 r'^Title \d+ Page \d+ \(\d+ Edition\)$',
@@ -90,7 +151,18 @@ class OrsPdfParser(object):
                         chapter, rex.pattern))
             else:
                 text = rex.sub('', text)
+
+        # double_space_re = re.compile(r'\s\s')
+        # while double_space_re.search(text):
+        #     text = double_space_re.sub(' ', text)
         return text
+
+    def find_full_subs_in_pdf_text(self, version, chapter, subsection, text):
+        ch_subs_pat = self.chapter_subs_pattern(chapter)
+        subsection_re = re.compile(
+            r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
+        full_subs = subsection_re.findall(search_text)
+
 
     def create_laws_from_pdf_text(self, text, version):
         """Using this one for at least the 2007 pdf text."""
@@ -107,25 +179,30 @@ class OrsPdfParser(object):
             text, chapter)
 
         # Start searching the full statute definitions
-        search_text = self.remove_margins_from_pdf_text(search_text, chapter)
+        search_text = self.purify_pdf_text(search_text, chapter)
 
         subsection_re = re.compile(
             r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
         full_subs = subsection_re.findall(search_text)
+        exception_rexes = {}
         if len(full_subs) != len(expected_subs):
+
+            problems = []
+
             for sub in full_subs:
                 if sub not in expected_subs:
-                    logger.error('Unexpected: {}'.format(sub))
-                if not sub:
-                    logger.error('Bad sub: "{}"'.format(sub))
+                    problems.append(sub)
             for sub in expected_subs:
                 if sub not in full_subs:
-                    logger.error('Not found: {}'.format(sub))
-                if not sub:
-                    logger.error('Bad sub: "{}"'.format(sub))
-            msg = 'Expected {} statutes in ch {}, found {}'.format(
-                len(expected_subs), chapter, len(full_subs))
-            raise Exception(msg)
+                    problems.append(sub)
+
+            for sub in problems:
+                rex = self.subs_rex_exception(version, chapter, sub)
+                if not rex:
+                    raise Exception('Problem subsection: {}'.format(sub))
+
+                if not rex.search(search_text):
+                    raise Exception('Exception rex failed for {}'.format(sub))
 
         # text = text.decode('utf8')
         # prime_re = re.compile(u'\u2032\s?', re.UNICODE)
@@ -138,8 +215,17 @@ class OrsPdfParser(object):
             subs_hit = re.search(
                 r'^\s?{}\s[A-Z]'.format(target), search_text, re.MULTILINE)
             if not subs_hit:
+                exception_rex = self.subs_rex_exception(version, chapter, sub)
+                logger.debug('exception_rex: {v}'.format(v=exception_rex))
+                return
+                if exception_rex:
+                    subs_hit = exception_rex.search(search_text)
+                    print('here')
+                    return
+
+            if not subs_hit:
                 raise Exception('{} not found in text:\n{}'.format(
-                    target, search_text[:5000]))
+                    target, search_text[:500]))
 
             search_text = search_text[subs_hit.start() + len(target):].lstrip()
             parts = search_text.split('.')
@@ -150,16 +236,19 @@ class OrsPdfParser(object):
             law_text = None
             search_text = '.'.join(parts[1:])
             if i < len(expected_subs) - 1:
-                next_subsection = expected_subs[i + 1]
-                next_subsection_hit = re.search(
-                    r'^\s?{}\s[A-Z]'.format(expected_subs[i + 1]),
-                    search_text,
-                    re.MULTILINE)
-                if not next_subsection_hit:
+                next_subs = expected_subs[i + 1]
+                next_subs_rex = re.compile(
+                    r'^\s?{}\s[A-Z]'.format(next_subs), re.MULTILINE)
+                next_subs_hit = next_subs_rex.search(search_text)
+
+                if not next_subs_hit:
+                    rex = self.subs_rex_exception(version, chapter, next_subs)
+                    next_subs_hit = rex.search(search_text)
+                if not next_subs_hit:
                     raise Exception(
-                        "Couldn't find {} after {} with text:\n{}".format(
-                            next_subsection, target, search_text[:5000]))
-                law_text = search_text[:next_subsection_hit.start()].strip()
+                        "Couldn't find {} after {}".format(
+                            next_subs, target))
+                law_text = search_text[:next_subs_hit.start()].strip()
             else:
                 law_text = search_text.strip()
             if not law_text:
@@ -173,3 +262,32 @@ class OrsPdfParser(object):
             if not version in law.versions:
                 law.versions.append(version)
                 law.save()
+
+    def subs_rex_exception(self, version, chapter, subsection):
+        if int(version) == 2007:
+            if int(chapter) == 127:
+                if subsection in [
+                        '127.800',
+                        '127.805',
+                        '127.810',
+                        '127.815',
+                        '127.820',
+                        '127.825',
+                        '127.830',
+                        '127.835',
+                        '127.840',
+                        '127.845',
+                        '127.850',
+                        '127.855',
+                        '127.860',
+                        '127.865',
+                        '127.870',
+                        '127.875',
+                        '127.880',
+                        '127.885',
+                        '127.890',
+                        '127.895',
+                        '127.897']:
+                    return re.compile(
+                        ur'^\s?%s.{1,2}\u00A7' % subsection,
+                        re.UNICODE | re.MULTILINE)

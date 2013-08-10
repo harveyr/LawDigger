@@ -68,8 +68,8 @@ class OrsImporter(LawImporter):
 
         # Debugging
         should_import = False
-        start_at = '072a'
-        only = None
+        start_at = None
+        only = '127'
 
         for rel_pdf_href in hrefs:
             link_url = self.current_url_base + rel_pdf_href
@@ -78,7 +78,7 @@ class OrsImporter(LawImporter):
                         (only and only in link_url)):
                     should_import = True
                 else:
-                    logger.info('Skipping ' + link_url)
+                    logger.debug('Skipping ' + link_url)
                     continue
             logger.info('Attempting {} ({})'.format(
                 link_url, self.hashed_filename(link_url)))
