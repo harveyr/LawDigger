@@ -3,12 +3,16 @@ import datetime
 import calendar
 import json
 from werkzeug.contrib.cache import SimpleCache
-from sqlalchemy.orm import sessionmaker
-logger = logging.getLogger(__name__)
+from sqlalchemy import create_engine
 
 from . import models
 
-Session = sessionmaker(bind=models.engine)
+logger = logging.getLogger(__name__)
+
+sqlalchemy_engine = create_engine(
+    'postgresql://harvey:asdf@127.0.0.1/lawdigger',
+    echo=True)
+models.Base.metadata.create_all(sqlalchemy_engine)
 
 
 class LawDiffSerializer(json.JSONEncoder):

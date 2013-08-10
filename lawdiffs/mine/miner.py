@@ -15,6 +15,8 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LAParams, LTTextBox, LTTextLine, LTFigure, LTImage
 
 from . import repos
+from ..data import law_codes, models
+from ..data.access import laws as da_laws
 
 logger = logging.getLogger(__name__)
 
@@ -81,15 +83,6 @@ class LawParser(object):
                 return f.read()
         else:
             return None
-
-    def fetch_cached_pdf(self, url):
-        hashed_filename = self.hashed_filename(url)
-        path = os.path.join(CACHE_PATH, hashed_filename)
-        if os.path.exists(path) and os.path.isfile(path):
-            logger.info('Using cached {} ({})'.format(
-                url, hashed_filename))
-            with open(path, 'rb') as f:
-                return f.read()
 
     def fetch_html(self, url):
         cached = self.fetch_cached_url(url)
@@ -233,13 +226,13 @@ class LawParser(object):
         if not os.path.exists(cached_pdf_path):
             logger.debug('Fetching fresh ' + url)
             response = urllib2.urlopen(url)
-            with open(cached_pdf_path, 'wb') as f:
+            with open(cached_pdf_path, 'w') as f:
                 f.write(response.read())
 
         logger.debug('Converting pdf to text ({})'.format(url))
         jarfile = os.path.join(
             os.path.split(__file__)[0], '../bin/pdfbox-app-1.8.2.jar')
-        cmd = ['java', '-jar', jarfile, 'ExtractText',
+        cmd = ['java', '-jar', jarfile, 'ExtractText', '-encoding', 'UTF-8',
                cached_pdf_path, cached_text_path]
 
         returncode = subprocess.call(cmd)
@@ -275,7 +268,7 @@ class LawParser(object):
 
 class OrLawParser(LawParser):
 
-    law_code = 'ors'
+    law_code = law_codes.OREGON_REVISED_STATUTES
 
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
     chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
@@ -293,33 +286,6 @@ class OrLawParser(LawParser):
             'link_patterns': [
                 re.compile(r'\d+\.pdf')
             ],
-            'fixes': {
-                8: [(
-                        u'Fees imposed under ORS 21.112. c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711] im[2001'.encode('utf-8'),
-                        u'Fees imposed under ORS 21.112. [2001 c.823 \u00A725 (enacted in lieu of 8.172); 2003 c.518 \u00A711]'.encode('utf-8')
-                    ),
-                    (
-                        'representing and 8.690 Advising',
-                        '8.690 Advising and representing'
-                    )],
-                14: [(
-                        'judge; of 14.250 Disqualification',
-                        '14.250 Disqualification of judge;'
-                    )],
-                18: [(
-                        'in 18.190 Spousal support awards',
-                        '18.190 Spousal support awards in'
-                    ),
-                    (
-                        u'under this section. \u00A731] [2003 c.576 18.268 Conduct of debtor examination;'.encode('utf-8'),
-                        u'under this section. [2003 c.576 \u00A731] 18.268 Conduct of debtor examination;'.encode('utf-8')
-                    ),
-                    (
-                        u'this section. c.249 \u00A737; 2003 c.576 \u00A764] [2001 18.730 Payment'.encode('utf8'),
-                        u'this section. [2001 c.249 \u00A737; 2003 c.576 \u00A764] 18.730 Payment'.encode('utf8')
-
-                    )]
-            }
         },
         {
             'version': 2011,
@@ -334,6 +300,7 @@ class OrLawParser(LawParser):
 
     def __init__(self):
         super(OrLawParser, self).__init__()
+
         self.subsection_re = re.compile('(\d+\.\d+)')
         self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
 
@@ -341,11 +308,9 @@ class OrLawParser(LawParser):
         repos.wipe_and_init(self.law_code)
 
         logger.setLevel(logging.DEBUG)
-        # html = self.fetch_pdf_as_html(
-        #     'http://www.leg.state.or.us/ors_archives/2007/018.pdf')
         text = self.fetch_pdf_as_text(
             'http://www.leg.state.or.us/ors_archives/2007/018.pdf')
-        self.create_laws_from_pdf_text(text)
+        self.create_laws_from_pdf_text(text, 2007)
         # self.begin_pdf_crawl(self.sources[0])
         # self.commit(source['version'])
         return
@@ -354,45 +319,6 @@ class OrLawParser(LawParser):
             crawl_func = getattr(self, source['crawl_func'])
             crawl_func(source)
             self.commit(source['version'])
-
-    def pdf_text_pre_append_hook(self, text):
-        return text
-
-    def create_laws_from_pdf_html(self, html):
-
-        # Replace prime char
-        html = html.replace('&#8242;', "'")
-
-        # idx = html.index('18.029 Effect of chapte', 5000)
-        # part = html[idx:idx+500]
-        # logger.debug('part: {v}'.format(v=part))
-        # return
-
-        chapter_num_re = re.compile(r'Chapter (\d+)')
-        soup = BeautifulSoup(html)
-        chapter_p_text = soup.find(text=chapter_num_re)
-        chapter = int(chapter_num_re.match(chapter_p_text).group(1))
-
-        subsection_re = re.compile(
-            r'(?:[A-Z\s]+\s)?({}\.\d+)\s[A-Z]'.format(chapter))
-
-        expected_subsections = set()
-        for subsection_text in soup.find_all(text=subsection_re):
-            subsection = subsection_re.search(subsection_text).group(1)
-            expected_subsections.add(subsection)
-        expected_subsections = sorted(list(expected_subsections))
-
-        count = 0
-        for s in expected_subsections:
-            regex = re.compile(
-                r'(?:[A-Z\s]+\s)?{}\s[A-Z][\w|\s]+\.\s[A-Z|\[]'.format(s))
-            start_elem = soup.find(text=regex)
-            logger.debug('searching for {}'.format(s))
-            text = self.get_soup_text(start_elem)
-            logger.debug('text: {v}'.format(v=text))
-            count += 1
-            if count == 20:
-                break
 
     def begin_pdf_crawl(self, source_dict):
         url = source_dict['url']
@@ -405,9 +331,9 @@ class OrLawParser(LawParser):
             if not '018.pdf' in link_url:
                 continue
             try:
-                self.fetch_pdf_text(link_url, self.create_laws_from_pdf_text)
+                self.fetch_pdf_as_text(link_url, self.create_laws_from_pdf_text)
             except urllib2.HTTPError:
-                # TODO: Track error somehow
+                logger.error('HTTPError while fetching {}'.format(link_url))
                 pass
 
     def create_law_from_pdf_text(self, text, subsection, next_subsection=None):
@@ -468,7 +394,7 @@ class OrLawParser(LawParser):
         hit = first_subsection_re.search(text)
         return subsections, hit.start()
 
-    def create_laws_from_pdf_text(self, text):
+    def create_laws_from_pdf_text(self, text, version):
         """Assume one, big, pre-extracted string."""
         chapter_hit = re.search(r'Chapter (\d+)', text)
         chapter = chapter_hit.group(1)
@@ -558,6 +484,9 @@ class OrLawParser(LawParser):
 
             law_text = ' '.join(law_text.splitlines())
             law_text = dash_space_re.sub('', law_text)
+
+            law = da_laws.get_or_create_law(self.law_code, target)
+            da_laws.set_law_version(law, version, title, law_text)
 
 
     def begin_crawl_html(self, source_dict):
