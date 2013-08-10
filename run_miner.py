@@ -1,5 +1,5 @@
-from lawdiffs.mine import repos
-from lawdiffs.mine.importer import OrsImporter
+from lawdiffs.miner import repos
+from lawdiffs.miner.importer.ors import OrsImporter
 from lawdiffs.data.client import mongoengine_connect
 from lawdiffs.data.access import laws as da_laws
 
