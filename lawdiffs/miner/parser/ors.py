@@ -1,8 +1,11 @@
 import re
 import logging
+from bs4 import BeautifulSoup
+
 from ...data import law_codes
-from ...data.access import laws as da_laws
+from ...data.access import ors as da_ors
 from .base import ParseException
+from .. import util
 
 logger = logging.getLogger(__name__)
 
@@ -149,49 +152,22 @@ class OrsPdfDebugger(object):
 debugger = OrsPdfDebugger()
 
 
-class OrsPdfParser(object):
-    """Using this one for at least the 2007 pdf text."""
-
+class OrsParserBase(object):
     law_code = law_codes.OREGON_REVISED_STATUTES
-
-    volume_pat_html = re.compile(r'ORS Volume (\d+),')
-    chapter_pat_html = re.compile(r'ORS Chapter (\d+)')
-    pdf_subsection_re = re.compile(r'\b(\d+\.\d+)\b')
-    pdf_footer1_re = re.compile(
-        r'Title \d+ Page \d+ \(\d+ Edition\) \d+\.\d+ [A-Z;\s]+')
-    pdf_footer2_re = re.compile(
-        r'Title \d+ Page \d+ \(\d+ Edition\) [A-Z;\s]+ \d+\.\d+\s')
 
     upper_pat = r"[A-Z]+[A-Z;,'\-\s]+"
     title_or_upper_pat = r"[A-Z]+[A-Za-z;,'\-\s]+"
-    dash_space_re = re.compile(r'\w\-\s\w')
-
     subs_title_start_pat = r'[A-Z{}{}]'.format(
         u'\u201C'.encode('utf8'),
         u'\u00A7'.encode('utf8'))
 
-    def chapter_subs_pattern(self, chapter):
+    end_of_sentence_rex = re.compile(r'\.$', re.MULTILINE)
+
+    def chapter_subs_pattern(self, chapter_str):
         """Get basic chapter subsection pattern."""
-        return '{}\.\d+'.format(chapter)
+        return '{}\.\d+'.format(chapter_str)
 
-    def get_chapter(self, text):
-        rex = re.compile(r'^Chapter (\w+)$', re.MULTILINE)
-        chapter_hit = rex.search(text)
-        if not chapter_hit:
-            debugger.debug_chapter_search(text, rex=rex)
-            raise ParseException('Failed to find chapter')
-        chapter = chapter_hit.group(1)
-        return chapter
-
-    def pdf_text_has_laws(self, text, chapter):
-        rex = re.compile(
-            r'^Chapter {}\s\(Former Provisions\)'.format(chapter),
-            re.MULTILINE)
-        if rex.search(text):
-            return False
-        return True
-
-    def find_expected_subs(self, text, chapter):
+    def get_expected_subs(self, text, chapter):
         ch_subs_pat = self.chapter_subs_pattern(chapter)
 
         first_sub_rex = re.compile(
@@ -246,7 +222,144 @@ class OrsPdfParser(object):
 
         return (filtered, text[first_full_subs_idx:])
 
-    def purify_text(self, text, chapter):
+    def assert_expected_subs_exist(self, chapter_str, expected_subs, text):
+        ch_subs_pat = self.chapter_subs_pattern(chapter_str)
+
+        full_subs_rex = re.compile(
+            r'^\s?({})\s{}'.format(ch_subs_pat, self.subs_title_start_pat),
+            re.MULTILINE)
+
+        full_subs = set(full_subs_rex.findall(text))
+
+        unexpected = [x for x in full_subs if x not in expected_subs]
+
+        for sub in unexpected:
+            if not self.text_has_empty_subsection(sub, text):
+                logger.error('expected_subs: {v}'.format(v=expected_subs))
+                raise ParseException(
+                    'Unexpected subsection: {}'.format(sub))
+
+        not_found = [x for x in expected_subs if x not in full_subs]
+        if len(not_found) > 0:
+            debugger.debug_missing_body_sub(not_found[0], text, full_subs_rex)
+            raise ParseException('Subsections not found in body: {}'.format(
+                not_found))
+
+        return True
+
+    def parse_and_create(self, chapter, search_text, expected_subs):
+
+        only = '1.180'
+        only = False
+
+        for i in range(len(expected_subs) - 1):
+            target_sub = expected_subs[i]
+            if only and target_sub != only:
+                continue
+
+            logger.debug('--- Searching for {} ---'.format(target_sub))
+            subs_hit = re.search(
+                r'^\s?{}\s{}'.format(target_sub, self.subs_title_start_pat),
+                search_text,
+                re.MULTILINE)
+
+            if not subs_hit:
+                if self.text_has_empty_subsection(target_sub, search_text):
+                    logger.warn('HANDLE ME! Empty law')
+                    continue
+
+                exception_rex = self.subs_rex_exception(version, chapter, target_sub)
+                if exception_rex:
+                    subs_hit = exception_rex.search(search_text)
+
+            if not subs_hit:
+                raise Exception('{} not found in text:\n{}'.format(
+                    target_sub, search_text[:500]))
+
+            title_idx = subs_hit.start() + len(target_sub) + 1
+            search_text = search_text[title_idx:].lstrip()
+            # logger.debug('search_text[:100]: {v}'.format(v=search_text[:100]))
+
+            end_of_sentence_hit = self.end_of_sentence_rex.search(
+                search_text)
+            title = ' '.join(
+                search_text[:end_of_sentence_hit.end()].splitlines())
+            search_text = search_text[end_of_sentence_hit.end():]
+
+            if i < len(expected_subs) - 1:
+                next_subs = expected_subs[i + 1]
+                next_subs_rex = re.compile(
+                    r'^\s?{}\s{}'.format(next_subs, self.subs_title_start_pat),
+                    re.MULTILINE)
+                next_subs_hit = next_subs_rex.search(search_text)
+
+                if not next_subs_hit:
+                    rex = self.subs_rex_exception(version, chapter, next_subs)
+                    if rex:
+                        next_subs_hit = rex.search(search_text)
+                if not next_subs_hit:
+                    debugger.debug_sequential_find(
+                        target_sub, next_subs, text, next_subs_rex)
+                    raise ParseException(
+                        "Couldn't find {} after {}".format(
+                            next_subs, target_sub))
+                law_text = search_text[:next_subs_hit.start()].strip()
+            else:
+                law_text = search_text.strip()
+            if not law_text:
+                raise Exception("Couldn't find law text for {}".format(target_sub))
+
+            law_text = ' '.join(law_text.splitlines())
+            law_text = self.law_text_hook(law_text)
+
+            self.save_law(chapter, target_sub, title, law_text)
+
+            # law = da_ors.get_or_create_law(self.law_code, target)
+            # da_ors.set_law_version(law, version, title, law_text)
+            # if not version in law.versions:
+            #     law.versions.append(version)
+            #     law.save()
+
+    def save_law(self, chapter, subsection, title, text):
+        da_ors.create_statute(chapter, subsection, title, text)
+
+    def title_hook(self, title):
+        return title
+
+    def law_text_hook(self, law_text):
+        return law_text
+
+
+class OrsPdfParser(OrsParserBase):
+    """Using this one for at least the 2007 pdf text."""
+
+    volume_pat_html = re.compile(r'ORS Volume (\d+),')
+    pdf_subsection_re = re.compile(r'\b(\d+\.\d+)\b')
+    pdf_footer1_re = re.compile(
+        r'Title \d+ Page \d+ \(\d+ Edition\) \d+\.\d+ [A-Z;\s]+')
+    pdf_footer2_re = re.compile(
+        r'Title \d+ Page \d+ \(\d+ Edition\) [A-Z;\s]+ \d+\.\d+\s')
+
+    dash_space_re = re.compile(r'\w\-\s\w')
+
+    def get_chapter(self, text):
+        rex = re.compile(r'^Chapter (\w+)$', re.MULTILINE)
+        chapter_hit = rex.search(text)
+        if not chapter_hit:
+            debugger.debug_chapter_search(text, rex=rex)
+            raise ParseException('Failed to find chapter')
+        chapter = chapter_hit.group(1)
+        return chapter
+
+    def pdf_text_has_laws(self, text, chapter):
+        rex = re.compile(
+            r'^Chapter {}\s\(Former Provisions\)'.format(chapter),
+            re.MULTILINE)
+        if rex.search(text):
+            return False
+        return True
+
+    def purified_text(self, text, chapter):
         """Remove headers, footers, double spaces, etc."""
         heading_rexes = [
             re.compile(
@@ -288,31 +401,6 @@ class OrsPdfParser(object):
             r'^\s?({})\s\['.format(subs), re.MULTILINE)
         return bool(empty_subs_rex.search(text))
 
-    def assert_expected_subs_exist(self, chapter, expected_subs, text):
-        ch_subs_pat = self.chapter_subs_pattern(chapter)
-
-        full_subs_rex = re.compile(
-            r'^\s?({})\s{}'.format(ch_subs_pat, self.subs_title_start_pat),
-            re.MULTILINE)
-
-        full_subs = set(full_subs_rex.findall(text))
-
-        unexpected = [x for x in full_subs if x not in expected_subs]
-
-        for sub in unexpected:
-            if not self.text_has_empty_subsection(sub, text):
-                logger.error('expected_subs: {v}'.format(v=expected_subs))
-                raise ParseException(
-                    'Unexpected subsection: {}'.format(sub))
-
-        not_found = [x for x in expected_subs if x not in full_subs]
-        if len(not_found) > 0:
-            debugger.debug_missing_body_sub(not_found[0], text, full_subs_rex)
-            raise ParseException('Subsections not found in body: {}'.format(
-                not_found))
-
-        return True
-
     def create_laws(self, text, version):
 
         chapter = self.get_chapter(text)
@@ -329,10 +417,10 @@ class OrsPdfParser(object):
             return
 
         # ch_subs_pat = self.chapter_subs_pattern(chapter)
-        expected_subs, search_text = self.find_expected_subs(
+        expected_subs, search_text = self.get_expected_subs(
             text, chapter)
 
-        search_text = self.purify_text(search_text, chapter)
+        search_text = self.purified_text(search_text, chapter)
 
         self.assert_expected_subs_exist(chapter, expected_subs, search_text)
 
@@ -395,8 +483,8 @@ class OrsPdfParser(object):
             law_text = ' '.join(law_text.splitlines())
             law_text = self.dash_space_re.sub('', law_text)
 
-            law = da_laws.get_or_create_law(self.law_code, target)
-            da_laws.set_law_version(law, version, title, law_text)
+            law = da_ors.get_or_create_law(self.law_code, target)
+            da_ors.set_law_version(law, version, title, law_text)
             if not version in law.versions:
                 law.versions.append(version)
                 law.save()
@@ -441,3 +529,69 @@ class OrsPdfParser(object):
         except KeyError:
             return False
 
+
+class OrsHtmlParser(OrsParserBase):
+
+    chapter_rex = re.compile(r'^Chapter (\w+)\b')
+    content_start_rex = re.compile(r'^TITLE \w+', re.MULTILINE)
+
+    def __init__(self):
+        self.heading_rexes = [
+            re.compile(
+                r'^{upper}$'.format(upper=self.upper_pat),
+                re.MULTILINE)
+        ]
+
+    def get_chapter(self, html):
+        logger.setLevel(logging.DEBUG)
+        soup = BeautifulSoup(html)
+
+        chapter_elem = soup.find(text=self.chapter_rex)
+        text = util.soup_text(chapter_elem)
+        chapter = self.chapter_rex.search(text).group(1)
+        return chapter
+
+    def get_content_text(self, html):
+        soup = BeautifulSoup(html)
+        text = util.soup_text(soup)
+        content_start_hit = self.content_start_rex.search(text)
+        if not content_start_hit:
+            raise ParseException('Content start not found')
+        return text[content_start_hit.start():]
+
+    def purified_text(self, text):
+        for rex in self.heading_rexes:
+            text = rex.sub('', text)
+        return text
+
+    def create_laws_from_html(self, html, chapter):
+        version = chapter.version
+        current_law = None
+        text_buffer = ''
+        set_title = False
+        count = 0
+
+        logger.setLevel(logging.DEBUG)
+
+        search_text = self.get_content_text(html)
+
+        chapter_str = chapter.division
+        if not chapter.title:
+            rex = re.compile(
+                r'TITLE \w+\b.+?({upper}).{{1,2}}Chapter'.format(
+                    upper=self.upper_pat),
+                re.DOTALL)
+            hit = rex.search(search_text)
+            title = ' '.join(hit.group(1).splitlines())
+            chapter.title = title
+            chapter.save()
+
+        expected_subs, search_text = self.get_expected_subs(
+            search_text, chapter.division)
+
+        self.assert_expected_subs_exist(
+            chapter_str, expected_subs, search_text)
+
+        search_text = self.purified_text(search_text)
+
+        self.parse_and_create(chapter, search_text, expected_subs)

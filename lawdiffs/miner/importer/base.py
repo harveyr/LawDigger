@@ -169,18 +169,6 @@ class LawImporter(object):
         with open(cached_text_path, 'r') as f:
             return f.read()
 
-    def get_soup_text(self, soup_elem):
-        try:
-            text = soup_elem.get_text(',,,', strip=True).decode('utf-8')
-            text = self.newline_re.sub(" ", text)
-            text = re.sub(r',,,', '\n', text)
-            return text
-        except AttributeError:
-            if isinstance(soup_elem, bs4.element.NavigableString):
-                return unicode(soup_elem)
-            else:
-                raise Exception('Unhandled type: ' + str(soup_elem))
-
     # def commit(self, version):
     #     laws = da_laws.fetch_code_version(self.law_code, version)
     #     logger.info('Writing version {}...'.format(version))
@@ -191,3 +179,4 @@ class LawImporter(object):
 
     def do_nothing(self, *args):
         pass
+
