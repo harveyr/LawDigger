@@ -67,18 +67,19 @@ class OrsImporter(LawImporter):
         hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
 
         # Debugging
-        should_import = False
-        start_at = '199'
-        only = None
+        should_import = True
+        start_at = '127'
+        only_one = True
+        if start_at or only_one:
+            should_import = False
 
         for rel_pdf_href in hrefs:
             link_url = self.current_url_base + rel_pdf_href
             if not should_import:
-                if ((start_at and start_at in rel_pdf_href) or
-                        (only and only in link_url)):
+                if start_at and start_at in rel_pdf_href:
                     should_import = True
                 else:
-                    logger.debug('Skipping ' + link_url)
+                    # logger.debug('Skipping ' + link_url)
                     continue
             logger.info('Attempting {} ({})'.format(
                 link_url, self.hashed_filename(link_url)))
@@ -89,8 +90,8 @@ class OrsImporter(LawImporter):
                 logger.error('HTTPError while fetching {}'.format(link_url))
                 pass
 
-            if only:
-                should_import = False
+            if only_one and should_import:
+                return
         logger.info('Finished importing ORS Version {}'.format(version))
 
     def begin_crawl_html(self, source_dict):
