@@ -67,11 +67,9 @@ class OrsImporter(LawImporter):
         hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
 
         # Debugging
-        should_import = True
-        start_at = '128'
+        start_at = '326'
         only_one = False
-        if start_at or only_one:
-            should_import = False
+        should_import = not bool(start_at or only_one)
 
         for rel_pdf_href in hrefs:
             link_url = self.current_url_base + rel_pdf_href

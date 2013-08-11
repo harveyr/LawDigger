@@ -84,10 +84,10 @@ class OrsPdfDebugger(object):
         hit = rex.search(text)
         s = text[hit.start():hit.end() + 15]
 
-
     def debug_toc_find_fail(self, text, attempted_rex=None):
         self.log_header('debug_toc_find_fail')
         logger.debug('Attempted pattern: {}'.format(attempted_rex.pattern))
+
 
     def debug_subs_find_fail(self, sub, text, attempted_rex):
         self.log_header('debug_subs_find_fail')
@@ -177,9 +177,10 @@ class OrsPdfParser(object):
         return chapter
 
     def pdf_text_has_laws(self, text, chapter):
-        if re.search(
-                r'^Chapter {}\s\(Former Provisions\)'.format(chapter),
-                text):
+        rex = re.compile(
+            r'^Chapter {}\s\(Former Provisions\)'.format(chapter),
+            re.MULTILINE)
+        if rex.search(text):
             return False
         return True
 
@@ -197,7 +198,7 @@ class OrsPdfParser(object):
 
         first_subs = first_subs_hit.group(1)
         first_subs_idx = first_subs_hit.end()
-        if first_subs_idx > 1200:
+        if first_subs_idx > 2000:
             raise ParseException('Unexpectedly high first subs index: {}'.format(
                 first_subs_idx))
 
@@ -426,7 +427,7 @@ class OrsPdfParser(object):
             }
         }
         try:
-            return skippies[version][chapter]
+            return skippies[str(version)][str(chapter)]
         except KeyError:
             return False
 
