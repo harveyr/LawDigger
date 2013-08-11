@@ -106,10 +106,17 @@ class OrsPdfDebugger(object):
             re.compile(r'{}.[A-Z]'.format(sub)),
             text)
 
-        self.find_and_report(
-            re.compile(ur'^\s?{}.{{1,2}}\u00A7'.format(sub),
-                re.MULTILINE),
-            text)
+        # self.find_and_report(
+        #     re.compile(ur'^\s?{}.{{1,2}}\u00A7'.format(sub),
+        #         re.MULTILINE),
+        #     text)
+
+    def debug_sequential_find(self, sub, next_sub, text, rex=None):
+        self.log_header('debug_sequential_find')
+        logger.debug('Subsection:\t\t{}'.format(sub))
+        logger.debug('Next Subsection:\t{}'.format(next_sub))
+        if rex:
+            logger.debug('Rex Used:\t\t{}'.format(rex.pattern))
 
     def debug_heading_search(self, text):
         logger.setLevel(logging.DEBUG)
@@ -228,6 +235,7 @@ class OrsPdfParser(object):
         for sub in expected_subsections:
             if sub not in filtered:
                 filtered.append(sub)
+        filtered.sort()
 
         # Testing
         # if not '279C.650' in filtered:
@@ -373,7 +381,9 @@ class OrsPdfParser(object):
                     if rex:
                         next_subs_hit = rex.search(search_text)
                 if not next_subs_hit:
-                    raise Exception(
+                    debugger.debug_sequential_find(
+                        target, next_subs, text, next_subs_rex)
+                    raise ParseException(
                         "Couldn't find {} after {}".format(
                             next_subs, target))
                 law_text = search_text[:next_subs_hit.start()].strip()
