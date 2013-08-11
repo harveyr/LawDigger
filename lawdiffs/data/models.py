@@ -117,6 +117,10 @@ class LawVersion(moe.Document):
     title = moe.StringField()
     text = moe.StringField()
 
+    def __str__(self):
+        return '<LawVersion {} (div {})>'.format(
+            self.subsection, self.division_id)
+
 # class Law(moe.Document, VersionTitlesMixin, PyMongoMixin, Serializeable):
 #     subsection = moe.StringField(unique=True, required=True)
 #     file_path = moe.StringField()

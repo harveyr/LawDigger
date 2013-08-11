@@ -3,6 +3,15 @@ import re
 
 logger = logging.getLogger(__name__)
 
+unicode_characters = {
+    'em_dash': u'\u2014'.encode('utf8'),
+    'en_dash': u'\u2013'.encode('utf8'),
+    'curly_left_quote': u'\u201C'.encode('utf8'),
+    'curly_right_quote': u'\u201D'.encode('utf8'),
+    'prime': u'\u2032'.encode('utf8'),
+    'section': u'\u00A7'.encode('utf8')
+}
+
 curly_left_quote_re = re.compile(u'\u201C'.encode('utf8'))
 curly_right_quote_re = re.compile(u'\u201D'.encode('utf8'))
 # apostrophe_re = re.compile(u'\u0027'.encode('utf8'))

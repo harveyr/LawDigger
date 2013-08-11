@@ -121,16 +121,16 @@ class OrsImporter(LawImporter):
         parser = OrsHtmlParser()
         soup = BeautifulSoup(html)
         chapter_rex = re.compile(r'Chapter (\w+)\b')
+        only = '17'
         for link in soup.find_all(href=link_pattern):
             text = util.soup_text(link)
             chapter_str = chapter_rex.search(text).group(1)
             chapter = da_ors.get_or_create_chapter(volume, chapter_str)
 
             link_url = url_base + link.get('href')
-            # self.current_source = da_laws.get_or_create_web_source(
-            #     link_url)
-            # source_label = 'ORS Chapter {}'.format(chapter)
-            # self.current_source.set_label(source_label)
             html = self.fetch_html(link_url)
+
+            if only and chapter_str != only:
+                continue
+
             parser.create_laws_from_html(html, chapter)
-            break

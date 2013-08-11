@@ -1,6 +1,10 @@
+import logging
+
 from . import laws as da_laws
 from .. import law_codes
 from .. import models
+
+logger = logging.getLogger(__name__)
 
 law_code = law_codes.OREGON_REVISED_STATUTES
 
@@ -35,4 +39,5 @@ def create_statute(chapter, subsection, title, text):
         subsection=subsection,
         title=title,
         text=text)
+    logger.info('Created ORS: {}'.format(law))
     return law

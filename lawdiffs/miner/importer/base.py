@@ -23,6 +23,19 @@ if not os.path.exists(PDFBOX_BIN_PATH):
     raise Exception('PDFBox path does not exist: ' + PDFBOX_BIN_PATH)
 
 
+def debug_unicode_exception(e, text):
+    logger.setLevel(logging.DEBUG)
+    position = int(re.search(r'in position (\d+)', str(e)).group(1))
+    context = text[position - 20:position + 10]
+    logger.debug('context: {v}'.format(v=context))
+
+    # em_dash = re.search(ur'\u2014'.encode('utf8'), context)
+    em_dash = re.search(r'{}'.format(u'\u2014'.encode('utf8')), context)
+    if em_dash:
+        logger.debug('Contains em dash')
+    else:
+        logger.debug('No em dash')
+
 class ImportException(Exception):
     pass
 
@@ -89,12 +102,18 @@ class LawImporter(object):
     def fetch_html(self, url):
         cached = self.fetch_cached_url(url)
         if cached:
+            logger.info('Using cached {} ({})'.format(
+                url, self.hashed_filename(url)))
             return cached
         logger.info('Fetching ' + url)
 
         html = self.fetch_url_contents(url)
         # html = html.decode('utf8', 'ignore')
-        html = html.decode('utf8')
+        # try:
+        #     html = html.encode('utf8')
+        # except UnicodeDecodeError as e:
+        #     debug_unicode_exception(e, html)
+        #     raise e
         self.cache_url_contents(url, html)
 
         return html

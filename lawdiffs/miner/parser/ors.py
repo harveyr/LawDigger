@@ -2,7 +2,7 @@ import re
 import logging
 from bs4 import BeautifulSoup
 
-from ...data import law_codes
+from ...data import law_codes, encoder
 from ...data.access import ors as da_ors
 from .base import ParseException
 from .. import util
@@ -42,6 +42,29 @@ class OrsPdfDebugger(object):
             for hit in rex.finditer(text):
                 logger.debug(' - Hit: {}'.format(
                     text[hit.start() - 20:hit.end() + 20]))
+
+    def log_unicode_characters(self, text):
+        for key in encoder.unicode_characters:
+            char = encoder.unicode_characters[key]
+            exists = text.find(char) != -1
+            logger.debug('{} str find:\t\t{}'.format(key, exists))
+            hit = re.search(r'{}'.format(char), text)
+            logger.debug('{} re search:\t\t{}'.format(key, hit))
+
+    def debug_chapter_title(self, chapter_str, text, rex):
+        self.log_header('debug_chapter_title')
+        logger.debug('Chapter:\t\t'.format(chapter_str))
+        logger.debug('Attempted pattern:\t{}'.format(rex.pattern))
+
+        idx = text.index('Chapter {}'.format(chapter_str))
+        context = text[idx:idx + 50]
+        logger.debug('First instance:\t\t{}'.format(context))
+        self.log_unicode_characters(context)
+
+    def debug_content_start(self, text, rex):
+        self.log_header('debug_content_start')
+        logger.debug('Attempted pattern:\t{}'.format(rex.pattern))
+        # logger.debug('Text start:\t\t{}'.format(text[:50]))
 
     def debug_missing_expected_sub(self, sub, text):
         self.log_header('debug_missing_expected_sub')
@@ -122,7 +145,7 @@ class OrsPdfDebugger(object):
             logger.debug('Rex Used:\t\t{}'.format(rex.pattern))
 
     def debug_heading_search(self, text):
-        logger.setLevel(logging.DEBUG)
+        self.log_header('debug_heading_search')
         rex = re.compile(r'^\([A-Z][a-z]+[^\.]', re.MULTILINE)
         result = rex.search(text)
         for match in rex.finditer(text):
@@ -155,6 +178,8 @@ debugger = OrsPdfDebugger()
 class OrsParserBase(object):
     law_code = law_codes.OREGON_REVISED_STATUTES
 
+    em_dash_unichar = u'\u2014'.encode('utf8')
+
     upper_pat = r"[A-Z]+[A-Z;,'\-\s]+"
     title_or_upper_pat = r"[A-Z]+[A-Za-z;,'\-\s]+"
     subs_title_start_pat = r'[A-Z{}{}]'.format(
@@ -167,8 +192,28 @@ class OrsParserBase(object):
         """Get basic chapter subsection pattern."""
         return '{}\.\d+'.format(chapter_str)
 
-    def get_expected_subs(self, text, chapter):
-        ch_subs_pat = self.chapter_subs_pattern(chapter)
+    def get_content_text(self, version_str, chapter_str, text):
+        rex = re.compile(r'{} EDITION'.format(version_str))
+        hit = rex.search(text)
+        if not hit:
+            debugger.debug_content_start(text, rex)
+            raise ParseException(
+                'Content start not found for Chapter {}'.format(chapter_str))
+        return text[hit.end():]
+
+    def text_has_laws(self, chapter_str, text):
+        logger.setLevel(logging.DEBUG)
+        rex = re.compile(
+            r'^Chapter {}.+\(Former.Provisions\)$'.format(chapter_str),
+            re.MULTILINE | re.DOTALL)
+
+        if rex.search(text):
+            return False
+
+        return True
+
+    def get_expected_subs(self, chapter_str, text):
+        ch_subs_pat = self.chapter_subs_pattern(chapter_str)
 
         first_sub_rex = re.compile(
             r'^({})\s{}'.format(ch_subs_pat, self.subs_title_start_pat),
@@ -212,13 +257,6 @@ class OrsParserBase(object):
             if sub not in filtered:
                 filtered.append(sub)
         filtered.sort()
-
-        # Testing
-        # if not '279C.650' in filtered:
-        #     logger.setLevel(logging.DEBUG)
-        #     logger.debug('filtered: {v}'.format(v=filtered))
-        #     debugger.debug_missing_expected_sub('279C.650', search_text)
-        #     raise Exception('nope')
 
         return (filtered, text[first_full_subs_idx:])
 
@@ -418,7 +456,7 @@ class OrsPdfParser(OrsParserBase):
 
         # ch_subs_pat = self.chapter_subs_pattern(chapter)
         expected_subs, search_text = self.get_expected_subs(
-            text, chapter)
+            chapter, text)
 
         search_text = self.purified_text(search_text, chapter)
 
@@ -533,7 +571,6 @@ class OrsPdfParser(OrsParserBase):
 class OrsHtmlParser(OrsParserBase):
 
     chapter_rex = re.compile(r'^Chapter (\w+)\b')
-    content_start_rex = re.compile(r'^TITLE \w+', re.MULTILINE)
 
     def __init__(self):
         self.heading_rexes = [
@@ -542,27 +579,18 @@ class OrsHtmlParser(OrsParserBase):
                 re.MULTILINE)
         ]
 
-    def get_chapter(self, html):
-        logger.setLevel(logging.DEBUG)
-        soup = BeautifulSoup(html)
-
-        chapter_elem = soup.find(text=self.chapter_rex)
-        text = util.soup_text(chapter_elem)
-        chapter = self.chapter_rex.search(text).group(1)
-        return chapter
-
-    def get_content_text(self, html):
-        soup = BeautifulSoup(html)
-        text = util.soup_text(soup)
-        content_start_hit = self.content_start_rex.search(text)
-        if not content_start_hit:
-            raise ParseException('Content start not found')
-        return text[content_start_hit.start():]
-
-    def purified_text(self, text):
-        for rex in self.heading_rexes:
-            text = rex.sub('', text)
-        return text
+    def get_chapter_title(self, chapter_str, text):
+        rex = re.compile(
+            r'^Chapter {ch}.+?([A-Z][\w\s;-]+)$'.format(
+                ch=chapter_str),
+            re.MULTILINE)
+        hit = rex.search(text)
+        if not hit:
+            debugger.debug_chapter_title(chapter_str, text, rex)
+            raise ParseException(
+                'No title found for chapter {}'.format(chapter_str))
+        title = ' '.join(hit.group(1).splitlines())
+        return title
 
     def create_laws_from_html(self, html, chapter):
         version = chapter.version
@@ -571,27 +599,33 @@ class OrsHtmlParser(OrsParserBase):
         set_title = False
         count = 0
 
-        logger.setLevel(logging.DEBUG)
-
-        search_text = self.get_content_text(html)
-
+        soup = BeautifulSoup(html)
+        search_text = util.soup_text(soup)
         chapter_str = chapter.division
+        version_str = chapter.version
+
+        if not self.text_has_laws(chapter_str, search_text):
+            logger.warn('Skipping Chapter {} because it has no laws.'.format(
+                chapter))
+            return
+
         if not chapter.title:
-            rex = re.compile(
-                r'TITLE \w+\b.+?({upper}).{{1,2}}Chapter'.format(
-                    upper=self.upper_pat),
-                re.DOTALL)
-            hit = rex.search(search_text)
-            title = ' '.join(hit.group(1).splitlines())
+            title = self.get_chapter_title(chapter_str, search_text)
             chapter.title = title
             chapter.save()
 
-        expected_subs, search_text = self.get_expected_subs(
-            search_text, chapter.division)
+        search_text = self.get_content_text(
+            version_str, chapter_str, search_text)
 
+        expected_subs, search_text = self.get_expected_subs(
+            chapter_str, search_text)
         self.assert_expected_subs_exist(
             chapter_str, expected_subs, search_text)
 
         search_text = self.purified_text(search_text)
-
         self.parse_and_create(chapter, search_text, expected_subs)
+
+    def purified_text(self, text):
+        for rex in self.heading_rexes:
+            text = rex.sub('', text)
+        return text
