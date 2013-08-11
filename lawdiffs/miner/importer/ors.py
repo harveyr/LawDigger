@@ -68,8 +68,8 @@ class OrsImporter(LawImporter):
 
         # Debugging
         should_import = True
-        start_at = '127'
-        only_one = True
+        start_at = '128'
+        only_one = False
         if start_at or only_one:
             should_import = False
 

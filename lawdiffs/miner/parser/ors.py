@@ -75,6 +75,16 @@ class OrsPdfDebugger(object):
         if rex:
             logger.debug('Pattern used:\t\t{}'.format(rex.pattern))
 
+        first_char_pat = r'[A-Z{}{}]'.format(
+            u'\u201C'.encode('utf8'),
+            u'\u00A7'.encode('utf8'))
+        rex = re.compile(
+            r'^\s?127\.800\s{}'.format(first_char_pat),
+            re.MULTILINE)
+        hit = rex.search(text)
+        s = text[hit.start():hit.end() + 15]
+
+
     def debug_toc_find_fail(self, text, attempted_rex=None):
         self.log_header('debug_toc_find_fail')
         logger.debug('Attempted pattern: {}'.format(attempted_rex.pattern))
@@ -149,7 +159,9 @@ class OrsPdfParser(object):
     title_or_upper_pat = r"[A-Z]+[A-Za-z;,'\-\s]+"
     dash_space_re = re.compile(r'\w\-\s\w')
 
-    subs_title_start_pat = r'[A-Z{}]'.format(u'\u201C'.encode('utf8'))
+    subs_title_start_pat = r'[A-Z{}{}]'.format(
+        u'\u201C'.encode('utf8'),
+        u'\u00A7'.encode('utf8'))
 
     def chapter_subs_pattern(self, chapter):
         """Get basic chapter subsection pattern."""
@@ -185,7 +197,7 @@ class OrsPdfParser(object):
 
         first_subs = first_subs_hit.group(1)
         first_subs_idx = first_subs_hit.end()
-        if first_subs_idx > 1000:
+        if first_subs_idx > 1200:
             raise ParseException('Unexpectedly high first subs index: {}'.format(
                 first_subs_idx))
 
