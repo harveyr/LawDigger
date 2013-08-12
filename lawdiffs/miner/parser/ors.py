@@ -43,9 +43,9 @@ class OrsPdfDebugger(object):
                 logger.debug(' - Hit: {}'.format(
                     text[hit.start() - 20:hit.end() + 20]))
 
-    def log_unicode_characters(self, text):
-        for key in encoder.unicode_characters:
-            char = encoder.unicode_characters[key]
+    def log_unicode_chars(self, text):
+        for key in encoder.unicode_chars:
+            char = encoder.unicode_chars[key]
             exists = text.find(char) != -1
             logger.debug('{} str find:\t\t{}'.format(key, exists))
             hit = re.search(r'{}'.format(char), text)
@@ -59,7 +59,7 @@ class OrsPdfDebugger(object):
         idx = text.index('Chapter {}'.format(chapter_str))
         context = text[idx:idx + 50]
         logger.debug('First instance:\t\t{}'.format(context))
-        self.log_unicode_characters(context)
+        self.log_unicode_chars(context)
 
     def debug_content_start(self, text, rex):
         self.log_header('debug_content_start')
@@ -144,6 +144,10 @@ class OrsPdfDebugger(object):
         if rex:
             logger.debug('Rex Used:\t\t{}'.format(rex.pattern))
 
+        idx = text.find(next_sub)
+        logger.debug('{} Index:\t{}'.format(next_sub, idx))
+        logger.debug('Text:\n{}'.format(text[:500]))
+
     def debug_heading_search(self, text):
         self.log_header('debug_heading_search')
         rex = re.compile(r'^\([A-Z][a-z]+[^\.]', re.MULTILINE)
@@ -186,7 +190,9 @@ class OrsParserBase(object):
         u'\u201C'.encode('utf8'),
         u'\u00A7'.encode('utf8'))
 
-    end_of_sentence_rex = re.compile(r'\.$', re.MULTILINE)
+    end_of_sentence_rex = re.compile(
+        r'\.{}?$'.format(encoder.unicode_chars['curly_right_quote']),
+        re.MULTILINE)
 
     def chapter_subs_pattern(self, chapter_str):
         """Get basic chapter subsection pattern."""
@@ -202,7 +208,6 @@ class OrsParserBase(object):
         return text[hit.end():]
 
     def text_has_laws(self, chapter_str, text):
-        logger.setLevel(logging.DEBUG)
         rex = re.compile(
             r'^Chapter {}.+\(Former.Provisions\)$'.format(chapter_str),
             re.MULTILINE | re.DOTALL)
@@ -285,38 +290,9 @@ class OrsParserBase(object):
 
         return True
 
-    def parse_and_create(self, chapter, search_text, expected_subs):
-
-        only = '1.180'
-        only = False
-
-        for i in range(len(expected_subs) - 1):
-            target_sub = expected_subs[i]
-            if only and target_sub != only:
-                continue
-
-            logger.debug('--- Searching for {} ---'.format(target_sub))
-            subs_hit = re.search(
-                r'^\s?{}\s{}'.format(target_sub, self.subs_title_start_pat),
-                search_text,
-                re.MULTILINE)
-
-            if not subs_hit:
-                if self.text_has_empty_subsection(target_sub, search_text):
-                    logger.warn('HANDLE ME! Empty law')
-                    continue
-
-                exception_rex = self.subs_rex_exception(version, chapter, target_sub)
-                if exception_rex:
-                    subs_hit = exception_rex.search(search_text)
-
-            if not subs_hit:
-                raise Exception('{} not found in text:\n{}'.format(
-                    target_sub, search_text[:500]))
-
-            title_idx = subs_hit.start() + len(target_sub) + 1
+    def parse_law(self, sub, next_sub, search_text):
+            title_idx = len(sub) + 1
             search_text = search_text[title_idx:].lstrip()
-            # logger.debug('search_text[:100]: {v}'.format(v=search_text[:100]))
 
             end_of_sentence_hit = self.end_of_sentence_rex.search(
                 search_text)
@@ -324,39 +300,77 @@ class OrsParserBase(object):
                 search_text[:end_of_sentence_hit.end()].splitlines())
             search_text = search_text[end_of_sentence_hit.end():]
 
-            if i < len(expected_subs) - 1:
-                next_subs = expected_subs[i + 1]
-                next_subs_rex = re.compile(
-                    r'^\s?{}\s{}'.format(next_subs, self.subs_title_start_pat),
+            if next_sub:
+                next_sub_rex = re.compile(
+                    r'^\s?{}\s{}'.format(next_sub, self.subs_title_start_pat),
                     re.MULTILINE)
-                next_subs_hit = next_subs_rex.search(search_text)
+                next_sub_hit = next_sub_rex.search(search_text)
 
-                if not next_subs_hit:
-                    rex = self.subs_rex_exception(version, chapter, next_subs)
-                    if rex:
-                        next_subs_hit = rex.search(search_text)
-                if not next_subs_hit:
+                # if not next_sub_hit:
+                #     rex = self.subs_rex_exception(version, chapter, next_sub)
+                #     if rex:
+                #         next_sub_hit = rex.search(search_text)
+
+                if not next_sub_hit:
                     debugger.debug_sequential_find(
-                        target_sub, next_subs, text, next_subs_rex)
+                        sub, next_sub, search_text, next_sub_rex)
                     raise ParseException(
                         "Couldn't find {} after {}".format(
-                            next_subs, target_sub))
-                law_text = search_text[:next_subs_hit.start()].strip()
+                            next_sub, sub))
+                law_text = search_text[:next_sub_hit.start()].strip()
+                remainder = search_text[next_sub_hit.start():]
             else:
                 law_text = search_text.strip()
+                remainder = None
             if not law_text:
-                raise Exception("Couldn't find law text for {}".format(target_sub))
+                raise Exception("Couldn't find law text for {}".format(sub))
 
             law_text = ' '.join(law_text.splitlines())
             law_text = self.law_text_hook(law_text)
 
-            self.save_law(chapter, target_sub, title, law_text)
+            d = {
+                'title': title,
+                'text': law_text
+            }
+            return (d, remainder)
 
-            # law = da_ors.get_or_create_law(self.law_code, target)
-            # da_ors.set_law_version(law, version, title, law_text)
-            # if not version in law.versions:
-            #     law.versions.append(version)
-            #     law.save()
+    def build_subsection_rex(self, sub):
+        return re.compile(
+            r'^\s?{}\s{}'.format(sub, self.subs_title_start_pat),
+            re.MULTILINE)
+
+    def parse_and_create_laws(self, chapter, search_text, expected_subs):
+        for i in range(len(expected_subs) - 1):
+            target_sub = expected_subs[i]
+
+            logger.debug('--- Searching for {} ---'.format(target_sub))
+            rex = self.build_subsection_rex(target_sub)
+            subs_hit = rex.search(search_text)
+
+            if not subs_hit:
+                if self.text_has_empty_subsection(target_sub, search_text):
+                    logger.warn('HANDLE ME! Empty law')
+                    continue
+
+                # exception_rex = self.subs_rex_exception(version, chapter, target_sub)
+                # if exception_rex:
+                #     subs_hit = exception_rex.search(search_text)
+
+            if not subs_hit:
+                raise Exception('{} not found in text:\n{}'.format(
+                    target_sub, search_text[:500]))
+
+            if i < len(expected_subs) - 1:
+                next_sub = expected_subs[i + 1]
+            else:
+                next_sub = None
+
+            law_dict, search_text = self.parse_law(
+                target_sub,
+                next_sub,
+                text[subs_hit.start():])
+            self.save_law(
+                chapter, target_sub, law_dict['title'], law_dict['text'])
 
     def save_law(self, chapter, subsection, title, text):
         da_ors.create_statute(chapter, subsection, title, text)
@@ -592,15 +606,8 @@ class OrsHtmlParser(OrsParserBase):
         title = ' '.join(hit.group(1).splitlines())
         return title
 
-    def create_laws_from_html(self, html, chapter):
+    def create_laws(self, search_text, chapter):
         version = chapter.version
-        current_law = None
-        text_buffer = ''
-        set_title = False
-        count = 0
-
-        soup = BeautifulSoup(html)
-        search_text = util.soup_text(soup)
         chapter_str = chapter.division
         version_str = chapter.version
 
@@ -623,7 +630,7 @@ class OrsHtmlParser(OrsParserBase):
             chapter_str, expected_subs, search_text)
 
         search_text = self.purified_text(search_text)
-        self.parse_and_create(chapter, search_text, expected_subs)
+        self.parse_and_create_laws(chapter, search_text, expected_subs)
 
     def purified_text(self, text):
         for rex in self.heading_rexes:

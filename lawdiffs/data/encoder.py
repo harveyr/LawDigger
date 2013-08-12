@@ -3,7 +3,7 @@ import re
 
 logger = logging.getLogger(__name__)
 
-unicode_characters = {
+unicode_chars = {
     'em_dash': u'\u2014'.encode('utf8'),
     'en_dash': u'\u2013'.encode('utf8'),
     'curly_left_quote': u'\u201C'.encode('utf8'),
