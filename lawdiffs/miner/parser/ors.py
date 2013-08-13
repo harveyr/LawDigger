@@ -101,14 +101,6 @@ class OrsPdfDebugger(object):
         if rex:
             logger.debug('Pattern used:\t\t{}'.format(rex.pattern))
 
-        first_char_pat = r'[A-Z{}{}]'.format(
-            u'\u201C'.encode('utf8'),
-            u'\u00A7'.encode('utf8'))
-        rex = re.compile(
-            r'^\s?127\.800\s{}'.format(first_char_pat),
-            re.MULTILINE)
-        hit = rex.search(text)
-        s = text[hit.start():hit.end() + 15]
 
     def debug_toc_find_fail(self, text, attempted_rex=None):
         self.log_header('debug_toc_find_fail')
@@ -276,6 +268,7 @@ class OrsParserBase(object):
             re.MULTILINE)
 
         full_subs = set(full_subs_rex.findall(text))
+        print('full_subs: {v}'.format(v=full_subs))
 
         unexpected = [x for x in full_subs if x not in expected_subs]
 
@@ -577,6 +570,9 @@ class OrsPdfParser(OrsParserBase):
                         ur'^\s?%s.{1,2}\u00A7' % subsection,
                         re.UNICODE | re.MULTILINE)
 
+    def unexpected_sub_exception(version, subsection):
+        return False
+
     def should_skip_for_now(self, version, chapter):
         skippies = {
             '2007': {
@@ -593,6 +589,10 @@ class OrsHtmlParser(OrsParserBase):
 
     chapter_rex = re.compile(r'^Chapter (\w+)\b')
 
+    unexpected_sub_exceptions = {
+        2011: ['129.200']
+    }
+
     def __init__(self):
         self.heading_rexes = [
             re.compile(
@@ -602,7 +602,7 @@ class OrsHtmlParser(OrsParserBase):
 
     def get_chapter_title(self, chapter_str, text):
         rex = re.compile(
-            r'^Chapter {ch}.+?([A-Z][\w\s;-]+)$'.format(
+            r'^Chapter {ch}.+?([A-Z][\w\s,;]+)$'.format(
                 ch=chapter_str),
             re.MULTILINE)
         hit = rex.search(text)
@@ -611,7 +611,17 @@ class OrsHtmlParser(OrsParserBase):
             raise ParseException(
                 'No title found for chapter {}'.format(chapter_str))
         title = ' '.join(hit.group(1).splitlines())
-        return title
+        return self.filter_chapter_title(title)
+
+    def filter_chapter_title(self, title_str):
+        hit = re.search(r'ORS sections in this chapter were', title_str)
+        if hit:
+            title_str = title_str[:hit.start()]
+
+        hit = re.search(r'\d+ EDITION', title_str)
+        if hit:
+            title_str = title_str[:hit.start()]
+        return title_str.strip()
 
     def create_laws(self, search_text, chapter):
         version = chapter.version
@@ -643,3 +653,9 @@ class OrsHtmlParser(OrsParserBase):
         for rex in self.heading_rexes:
             text = rex.sub('', text)
         return text
+
+    def unexpected_sub_exception(version, subsection):
+        version = int(version)
+        if not version in self.unexpected_sub_exceptions:
+            return False
+        return subsection in self.unexpected_sub_exceptions[version]

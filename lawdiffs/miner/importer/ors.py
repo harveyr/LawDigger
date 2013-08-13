@@ -115,7 +115,6 @@ class OrsImporter(LawImporter):
             html = self.fetch_html(link_url)
             self.crawl_vol_page_html(
                 html, url_base, volume, next_link_pattern)
-            break
 
     def crawl_vol_page_html(self, html, url_base, volume, link_pattern):
         parser = OrsHtmlParser()

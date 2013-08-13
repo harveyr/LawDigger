@@ -85,3 +85,14 @@ class ParseTester(TestBase):
         nt.assert_equal(
             expected_end,
             end_of_text)
+
+    def test_find_title_with_commas(self):
+        text = self.get_content('ors_ch40_2011.html')
+        expected_title = 'Execution, Formalities and Interpretation of Writings'
+
+        parser = OrsHtmlParser()
+        found_title = parser.get_chapter_title('42', text)
+
+        nt.assert_equal(
+            expected_title,
+            found_title)
