@@ -1,8 +1,8 @@
 import re
 from nose import tools as nt
-from mock import Mock
+from mock import Mock, patch
 
-from .base import TestBase, TheNothing
+from .base import TestBase, MockDoc
 from ..miner.parser.ors import OrsHtmlParser
 
 
@@ -96,3 +96,35 @@ class ParseTester(TestBase):
         nt.assert_equal(
             expected_title,
             found_title)
+
+    def test_ors_ch_129_html(self):
+        """This chapter has 'UPIA' after each section number. This breaks
+        with the original heading regexes."""
+        content_file = 'ors_ch129_2011.html'
+        text = self.get_content(content_file)
+        version = 2011
+        chapter_str = '129'
+        target = '129.200'
+        expected_body_start = "129.200\nUPIA\n101. Short title.\nThis chapter may"
+
+        parser = OrsHtmlParser()
+
+        text = parser.preprocess_text(version, chapter_str, text)
+
+        expected_subs, body_text = parser.get_expected_subs(chapter_str, text)
+
+        nt.assert_in(target, expected_subs)
+        self.assert_startswith(body_text, expected_body_start)
+        body_text = parser.purified_text(body_text)
+        parser.assert_expected_subs_exist(chapter_str, expected_subs, body_text)
+
+        return
+
+        text = self.get_content(content_file)
+        chapter = MockDoc()
+        chapter.version = version
+        chapter.division = chapter_str
+        chapter.title = None
+
+        with patch.object(OrsHtmlParser, 'save_law') as mock_save:
+            parser.create_laws(text, chapter)

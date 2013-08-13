@@ -10,8 +10,10 @@ from ..data import encoder
 TEST_CONTENT_PATH = os.path.join(os.path.split(__file__)[0], 'content')
 
 
-class TheNothing(object):
-    pass
+class MockDoc(object):
+
+    def save(self, *args):
+        return self
 
 
 class TestBase(unittest.TestCase):

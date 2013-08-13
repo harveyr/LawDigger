@@ -1,3 +1,6 @@
+# Mine ORS by subsection
+# ---------------------------
+
 import re
 import logging
 from bs4 import BeautifulSoup
@@ -171,6 +174,145 @@ class OrsPdfDebugger(object):
 debugger = OrsPdfDebugger()
 
 
+class OrsImporter(LawImporter):
+
+    law_code = law_codes.OREGON_REVISED_STATUTES
+
+    sources = [
+        {
+            'version': 2007,
+            'url': 'http://www.leg.state.or.us/ors_archives/2007/2007ORS.html',
+            'type': 'pdf',
+            'link_patterns': [
+                re.compile(r'\d+\.pdf')
+            ],
+        },
+        {
+            'version': 2011,
+            'url': 'http://www.leg.state.or.us/ors/ors_info.html',
+            'type': 'html',
+            'link_patterns': [
+                re.compile(r'vol\d+.html'),
+                re.compile(r'\d+\.html')
+            ]
+        }
+    ]
+
+    def __init__(self):
+        super(OrsImporter, self).__init__()
+
+        self.subsection_re = re.compile('(\d+\.\d+)')
+        self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
+
+    def import_version(self, version):
+        target_source = None
+        for source in self.sources:
+            if source['version'] == version:
+                target_source = source
+                break
+        if not target_source:
+            raise Exception('No target source found for version {}'.format(
+                version))
+        self.import_source(target_source)
+        # self.commit(source['version'])
+
+    def import_source(self, source_dict):
+        source_type = source_dict['type']
+        if source_type == 'html':
+            self.begin_html_crawl(source_dict)
+        elif source_type == 'pdf':
+            self.begin_pdf_crawl(source_dict)
+        else:
+            raise Exception('Unhandled source type: {}'.format(source_type))
+
+    def begin_pdf_crawl(self, source_dict):
+        parser = OrsPdfParser()
+        version = source_dict['version']
+        logger.info('Beginning ORS Version {}'.format(version))
+        url = source_dict['url']
+        self.current_url_base = self.url_base(url)
+
+        html = self.fetch_html(url)
+        hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
+
+        # Debugging
+        start_at = '459a'
+        only_one = False
+        should_import = not bool(start_at or only_one)
+
+        for rel_pdf_href in hrefs:
+            link_url = self.current_url_base + rel_pdf_href
+            if not should_import:
+                if start_at and start_at in rel_pdf_href:
+                    should_import = True
+                else:
+                    # logger.debug('Skipping ' + link_url)
+                    continue
+            logger.info('Attempting {} ({})'.format(
+                link_url, self.hashed_filename(link_url)))
+            try:
+                text = self.fetch_pdf_as_text(link_url)
+                parser.create_laws(text, version)
+            except ImportException:
+                logger.error('HTTPError while fetching {}'.format(link_url))
+                pass
+
+            if only_one and should_import:
+                return
+        logger.info('Finished importing ORS Version {}'.format(version))
+
+    def begin_html_crawl(self, source_dict):
+        """Begin crawling html statutes"""
+        url = source_dict['url']
+        url_base = self.url_base(url)
+        soup = BeautifulSoup(self.fetch_html(url))
+        version = source_dict['version']
+        volume_rex = re.compile(r'Volume (\w+),')
+
+        link_pattern = source_dict['link_patterns'][0]
+        next_link_pattern = source_dict['link_patterns'][1]
+
+        for link in soup.find_all(href=link_pattern):
+            link_text = util.soup_text(link)
+            volume_hit = volume_rex.search(link_text)
+            volume_str = volume_hit.group(1)
+            volume = da_ors.get_or_create_volume(
+                version=version, volume_str=volume_str)
+            link_url = url_base + link.get('href')
+            html = self.fetch_html(link_url)
+            self.crawl_vol_page_html(
+                html, url_base, volume, next_link_pattern)
+
+    def crawl_vol_page_html(self, html, url_base, volume, link_pattern):
+        parser = OrsHtmlParser()
+        soup = BeautifulSoup(html)
+        chapter_rex = re.compile(r'Chapter (\w+)\b')
+
+        start_at = '129'
+        only_one = True
+        do_it = not bool(start_at)
+
+        for link in soup.find_all(href=link_pattern):
+            text = util.soup_text(link)
+            chapter_str = chapter_rex.search(text).group(1)
+
+            if start_at and start_at == chapter_str:
+                do_it = True
+            if not do_it:
+                continue
+
+            chapter = da_ors.get_or_create_chapter(volume, chapter_str)
+
+            link_url = url_base + link.get('href')
+            html = self.fetch_html(link_url)
+
+            text = util.html_to_text(html)
+            parser.create_laws(text, chapter)
+
+            if start_at and only_one and do_it:
+                break
+
+
 class OrsParserBase(object):
     law_code = law_codes.OREGON_REVISED_STATUTES
 
@@ -260,17 +402,19 @@ class OrsParserBase(object):
 
         return (filtered, text[first_full_subs_idx:])
 
-    def assert_expected_subs_exist(self, chapter_str, expected_subs, text):
+    def get_body_subs(self, chapter_str, body_text):
         ch_subs_pat = self.chapter_subs_pattern(chapter_str)
 
-        full_subs_rex = re.compile(
+        body_subs_rex = re.compile(
             r'^\s?({})\s{}'.format(ch_subs_pat, self.subs_title_start_pat),
             re.MULTILINE)
 
-        full_subs = set(full_subs_rex.findall(text))
-        print('full_subs: {v}'.format(v=full_subs))
+        body_subs = set(body_subs_rex.findall(body_text))
+        return body_subs
 
-        unexpected = [x for x in full_subs if x not in expected_subs]
+    def assert_expected_subs_exist(self, chapter_str, expected_subs, text):
+        body_subs = self.get_body_subs(chapter_str, text)
+        unexpected = [x for x in body_subs if x not in expected_subs]
 
         for sub in unexpected:
             if not self.text_has_empty_subsection(sub, text):
@@ -278,9 +422,8 @@ class OrsParserBase(object):
                 raise ParseException(
                     'Unexpected subsection: {}'.format(sub))
 
-        not_found = [x for x in expected_subs if x not in full_subs]
+        not_found = [x for x in expected_subs if x not in body_subs]
         if len(not_found) > 0:
-            debugger.debug_missing_body_sub(not_found[0], text, full_subs_rex)
             raise ParseException('Subsections not found in body: {}'.format(
                 not_found))
 
@@ -326,7 +469,6 @@ class OrsParserBase(object):
                 raise Exception("Couldn't find law text for {}".format(sub))
 
             law_text = ' '.join(law_text.splitlines())
-            law_text = self.law_text_hook(law_text)
 
             d = {
                 'title': title.strip(),
@@ -357,7 +499,7 @@ class OrsParserBase(object):
                 #     subs_hit = exception_rex.search(search_text)
 
             if not subs_hit:
-                raise Exception('{} not found in text:\n{}'.format(
+                raise ParseException('{} not found in text:\n{}'.format(
                     target_sub, search_text[:500]))
 
             if i < len(expected_subs) - 1:
@@ -372,14 +514,13 @@ class OrsParserBase(object):
             self.save_law(
                 chapter, target_sub, law_dict['title'], law_dict['text'])
 
+    def text_has_empty_subsection(self, subs, text):
+        empty_subs_rex = re.compile(
+            r'^\s?({})\s\['.format(subs), re.MULTILINE)
+        return bool(empty_subs_rex.search(text))
+
     def save_law(self, chapter, subsection, title, text):
         da_ors.create_statute(chapter, subsection, title, text)
-
-    def title_hook(self, title):
-        return title
-
-    def law_text_hook(self, law_text):
-        return law_text
 
 
 class OrsPdfParser(OrsParserBase):
@@ -447,11 +588,6 @@ class OrsPdfParser(OrsParserBase):
         subsection_re = re.compile(
             r'^\s?({})\s[A-Z]'.format(ch_subs_pat), re.MULTILINE)
         full_subs = subsection_re.findall(search_text)
-
-    def text_has_empty_subsection(self, subs, text):
-        empty_subs_rex = re.compile(
-            r'^\s?({})\s\['.format(subs), re.MULTILINE)
-        return bool(empty_subs_rex.search(text))
 
     def create_laws(self, text, version):
 
@@ -570,9 +706,6 @@ class OrsPdfParser(OrsParserBase):
                         ur'^\s?%s.{1,2}\u00A7' % subsection,
                         re.UNICODE | re.MULTILINE)
 
-    def unexpected_sub_exception(version, subsection):
-        return False
-
     def should_skip_for_now(self, version, chapter):
         skippies = {
             '2007': {
@@ -588,10 +721,6 @@ class OrsPdfParser(OrsParserBase):
 class OrsHtmlParser(OrsParserBase):
 
     chapter_rex = re.compile(r'^Chapter (\w+)\b')
-
-    unexpected_sub_exceptions = {
-        2011: ['129.200']
-    }
 
     def __init__(self):
         self.heading_rexes = [
@@ -624,9 +753,11 @@ class OrsHtmlParser(OrsParserBase):
         return title_str.strip()
 
     def create_laws(self, search_text, chapter):
-        version = chapter.version
-        chapter_str = chapter.division
         version_str = chapter.version
+        chapter_str = chapter.division
+
+        search_text = self.preprocess_text(
+            version_str, chapter_str, search_text)
 
         if not self.text_has_laws(chapter_str, search_text):
             logger.warn('Skipping Chapter {} because it has no laws.'.format(
@@ -643,6 +774,7 @@ class OrsHtmlParser(OrsParserBase):
 
         expected_subs, search_text = self.get_expected_subs(
             chapter_str, search_text)
+
         self.assert_expected_subs_exist(
             chapter_str, expected_subs, search_text)
 
@@ -654,8 +786,15 @@ class OrsHtmlParser(OrsParserBase):
             text = rex.sub('', text)
         return text
 
-    def unexpected_sub_exception(version, subsection):
-        version = int(version)
-        if not version in self.unexpected_sub_exceptions:
-            return False
-        return subsection in self.unexpected_sub_exceptions[version]
+    def preprocess_text(self, version, chapter_str, text):
+        if int(version) == 2011:
+            if int(chapter_str) == 129:
+                # debugging
+                # print('replacing 1293080')
+                # idx = text.index('1293080')
+                # print('TEXT: ' + text[idx:idx + 50])
+
+                text = text.replace('1293080', '129.200')
+                # print('REPL: ' + text[idx:idx + 50])
+
+        return text
