@@ -12,6 +12,12 @@ unicode_chars = {
     'section': u'\u00A7'.encode('utf8')
 }
 
+substitutions = {
+    'curly_left_quote': '"',
+    'curly_right_quote': '"',
+    'prime': "'"
+}
+
 curly_left_quote_re = re.compile(u'\u201C'.encode('utf8'))
 curly_right_quote_re = re.compile(u'\u201D'.encode('utf8'))
 # apostrophe_re = re.compile(u'\u0027'.encode('utf8'))
@@ -19,6 +25,16 @@ curly_right_quote_re = re.compile(u'\u201D'.encode('utf8'))
 acute_accent_re = re.compile(u'\u00B4'.encode('utf8'))
 prime_re = re.compile(u'\u2032'.encode('utf8'))
 section_symbol_re = re.compile(u'\u00A7'.encode('utf8'))
+
+
+def unicode_char(key):
+    return unicode_chars[key]
+
+
+def sub_nonstandard_chars(self, text):
+    for key in substitutions:
+        sub_char = unicode_char(key)
+        text = re.sub(r'{}'.format(unicode_char(key)), sub_char, text)
 
 
 def utf8(text):

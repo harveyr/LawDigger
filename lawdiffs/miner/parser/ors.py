@@ -142,7 +142,7 @@ class OrsPdfDebugger(object):
         logger.debug('Subsection:\t\t{}'.format(sub))
         logger.debug('Next Subsection:\t{}'.format(next_sub))
         if rex:
-            logger.debug('Rex Used:\t\t{}'.format(rex.pattern))
+            logger.debug('Rex Used:\t\t\t{}'.format(rex.pattern))
 
         idx = text.find(next_sub)
         logger.debug('{} Index:\t{}'.format(next_sub, idx))
@@ -190,8 +190,11 @@ class OrsParserBase(object):
         u'\u201C'.encode('utf8'),
         u'\u00A7'.encode('utf8'))
 
+    # end_of_sentence_rex = re.compile(
+    #     r'\.{}?$'.format(encoder.unicode_chars['curly_right_quote']),
+    #     re.MULTILINE)
     end_of_sentence_rex = re.compile(
-        r'\.{}?$'.format(encoder.unicode_chars['curly_right_quote']),
+        r'(\.|\.{})$'.format(encoder.unicode_chars['curly_right_quote']),
         re.MULTILINE)
 
     def chapter_subs_pattern(self, chapter_str):
@@ -296,14 +299,18 @@ class OrsParserBase(object):
 
             end_of_sentence_hit = self.end_of_sentence_rex.search(
                 search_text)
+
+            if not end_of_sentence_hit:
+                logger.error('No end of sentence ({}): "{}"'.format(
+                    sub, search_text[:100]))
+                raise Exception('No end of sentence found for {}'.format(sub))
+
             title = ' '.join(
                 search_text[:end_of_sentence_hit.end()].splitlines())
             search_text = search_text[end_of_sentence_hit.end():]
 
             if next_sub:
-                next_sub_rex = re.compile(
-                    r'^\s?{}\s{}'.format(next_sub, self.subs_title_start_pat),
-                    re.MULTILINE)
+                next_sub_rex = self.build_subsection_rex(next_sub)
                 next_sub_hit = next_sub_rex.search(search_text)
 
                 # if not next_sub_hit:
@@ -317,10 +324,10 @@ class OrsParserBase(object):
                     raise ParseException(
                         "Couldn't find {} after {}".format(
                             next_sub, sub))
-                law_text = search_text[:next_sub_hit.start()].strip()
+                law_text = search_text[:next_sub_hit.start()]
                 remainder = search_text[next_sub_hit.start():]
             else:
-                law_text = search_text.strip()
+                law_text = search_text
                 remainder = None
             if not law_text:
                 raise Exception("Couldn't find law text for {}".format(sub))
@@ -329,8 +336,8 @@ class OrsParserBase(object):
             law_text = self.law_text_hook(law_text)
 
             d = {
-                'title': title,
-                'text': law_text
+                'title': title.strip(),
+                'text': law_text.strip()
             }
             return (d, remainder)
 
@@ -368,7 +375,7 @@ class OrsParserBase(object):
             law_dict, search_text = self.parse_law(
                 target_sub,
                 next_sub,
-                text[subs_hit.start():])
+                search_text[subs_hit.start():])
             self.save_law(
                 chapter, target_sub, law_dict['title'], law_dict['text'])
 

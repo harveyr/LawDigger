@@ -1,9 +1,11 @@
 import os
 import unittest
+from nose import tools as nt
+
 from ..miner import util
 from ..miner.parser.ors import OrsParserBase
 
-from ..data.encoder import unicode_chars
+from ..data import encoder
 
 TEST_CONTENT_PATH = os.path.join(os.path.split(__file__)[0], 'content')
 
@@ -38,6 +40,15 @@ class TestBase(unittest.TestCase):
 
     def curly_quote_wrap(self, text):
         return '{}{}{}'.format(
-            unicode_chars['curly_left_quote'],
+            encoder.unicode_char('curly_left_quote'),
             text,
-            unicode_chars['curly_right_quote'])
+            encoder.unicode_char('curly_right_quote'))
+
+    def unicode_char(self, key):
+        return encoder.unicode_char(key)
+
+    def assert_startswith(self, text, expected_str):
+        text_start = text[:len(expected_str)]
+        nt.assert_equal(
+            expected_str,
+            text_start)

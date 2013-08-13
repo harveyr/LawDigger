@@ -121,7 +121,7 @@ class OrsImporter(LawImporter):
         parser = OrsHtmlParser()
         soup = BeautifulSoup(html)
         chapter_rex = re.compile(r'Chapter (\w+)\b')
-        only = '30'
+        only = None
         for link in soup.find_all(href=link_pattern):
             text = util.soup_text(link)
             chapter_str = chapter_rex.search(text).group(1)
@@ -133,5 +133,5 @@ class OrsImporter(LawImporter):
             if only and chapter_str != only:
                 continue
 
-            text = util.soup_text(html)
+            text = util.html_to_text(html)
             parser.create_laws(text, chapter)

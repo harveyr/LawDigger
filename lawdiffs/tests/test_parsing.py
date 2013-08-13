@@ -1,3 +1,4 @@
+import re
 from nose import tools as nt
 from mock import Mock
 
@@ -22,22 +23,40 @@ class ParseTester(TestBase):
             len(returned_subs),
             "Length of returned subs does not match expected")
 
-    def test_end_of_sentence_rex(self):
-        text = self.get_content('ors_ch30.html')
-        target = '30.932'
-        expected_start_of_law = 'As used in ORS 30.930 to 30.947,'
-        parser = OrsHtmlParser()
-        rex = parser.build_subsection_rex(target)
-        hit = rex.search(text[20000:])
-        text = text[hit.start():]
+    def test_end_of_sentence_rex_with_typical_case(self):
+        target = '1.001'
+        text = self.get_content('ors_ch1.html')
+        text = self.get_text_start_at_sub(target, text, 5000)
+        expected_title = 'State policy for courts.'
+        expected_start_of_law = 'The Legislative Assembly hereby declares that,'
 
-        rex = parser.end_of_sentence_rex
-        search = rex.search(text)
-        nt.assert_true(search)
-        law_text = text[search.start():]
-        nt.assert_true(
-            law_text[:len(expected_start_of_law)],
-            expected_start_of_law)
+        sub_and_title = text[:text.index('.', 10) + 1]
+        nt.assert_equal(
+            '{} {}'.format(target, expected_title),
+            sub_and_title)
+
+        print('text[:200]: {v}'.format(v=text[:200]))
+
+        rex = OrsHtmlParser.end_of_sentence_rex
+        hit = rex.search(text)
+        nt.assert_true(hit)
+        law_text = text[hit.end():].strip()
+        self.assert_startswith(law_text, expected_start_of_law)
+
+    def test_end_of_sentence_rex_with_end_quote(self):
+        target = '30.932'
+        text = self.get_content('ors_ch30.html')
+        text = self.get_text_start_at_sub(target, text, 50000)
+        expected_start_of_law = 'As used in ORS 30.930 to 30.947,'
+
+        # print('text[:100]: {v}'.format(v=text[:100]))
+
+        rex = OrsHtmlParser.end_of_sentence_rex
+        hit = rex.search(text)
+        # hit_str = text[hit.start():hit.end()]
+        nt.assert_true(hit)
+        law_text = text[hit.end():].strip()
+        self.assert_startswith(law_text, expected_start_of_law)
 
     def test_parse_ors_ends_with_quote(self):
         target = '30.932'
@@ -49,12 +68,20 @@ class ParseTester(TestBase):
             self.curly_quote_wrap('nuisance'),
             self.curly_quote_wrap('trespass.'))
         expected_start = '{} {}'.format(target, expected_title)
+        expected_end = '[1993 c.792 {sec}33; 1995 c.703 {sec}2]'.format(
+            sec=self.unicode_char('section'))
 
         parser = OrsHtmlParser()
         nt.assert_equal(expected_start, text[:len(expected_start)])
 
         law_dict, remainder = parser.parse_law(target, next, text)
         nt.assert_equal(
-            law_dict['title'],
-            expected_title)
+            expected_title,
+            law_dict['title'])
 
+        law_text = law_dict['text']
+        end_of_text = law_text[-1 * len(expected_end):]
+        # print('law_text[-50:]: {v}'.format(v=law_text[-50:]))
+        nt.assert_equal(
+            expected_end,
+            end_of_text)

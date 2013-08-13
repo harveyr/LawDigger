@@ -1,5 +1,5 @@
 import bs4
-
+from ..data.encoder import unicode_chars
 
 def soup_text(soup_elem):
     try:
@@ -7,6 +7,7 @@ def soup_text(soup_elem):
         # text = self.newline_re.sub(" ", text)
         # text = re.sub(r',,,', '\n', text)
         text = soup_elem.get_text('\n', strip=True).encode('utf8')
+
         return text
     except AttributeError:
         if isinstance(soup_elem, bs4.element.NavigableString):
