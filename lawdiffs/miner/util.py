@@ -1,5 +1,5 @@
 import bs4
-from ..data.encoder import unicode_chars
+
 
 def soup_text(soup_elem):
     try:

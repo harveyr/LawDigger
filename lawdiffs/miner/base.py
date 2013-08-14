@@ -11,10 +11,10 @@ import re
 logger = logging.getLogger(__name__)
 
 
-CACHE_PATH = os.path.join(os.path.split(__file__)[0], '../.cache')
+CACHE_PATH = os.path.join(os.path.split(__file__)[0], '.cache')
 PDFBOX_BIN_PATH = os.path.join(
     os.path.split(__file__)[0],
-    '../../bin/pdfbox-app-1.8.2.jar')
+    '../bin/pdfbox-app-1.8.2.jar')
 
 if not os.path.exists(CACHE_PATH):
     raise Exception('Cache path does not exist: ' + CACHE_PATH)

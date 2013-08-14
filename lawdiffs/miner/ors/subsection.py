@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from ...data import law_codes, encoder
 from ...data.access import ors as da_ors
-from .base import ParseException
+from .base import OrsImporterBase, ImportException
 from .. import util
 
 logger = logging.getLogger(__name__)
@@ -174,146 +174,22 @@ class OrsPdfDebugger(object):
 debugger = OrsPdfDebugger()
 
 
-class OrsImporter(LawImporter):
+class OrsSubsectionImporter(OrsImporterBase):
 
-    law_code = law_codes.OREGON_REVISED_STATUTES
-
-    sources = [
-        {
-            'version': 2007,
-            'url': 'http://www.leg.state.or.us/ors_archives/2007/2007ORS.html',
-            'type': 'pdf',
-            'link_patterns': [
-                re.compile(r'\d+\.pdf')
-            ],
-        },
-        {
-            'version': 2011,
-            'url': 'http://www.leg.state.or.us/ors/ors_info.html',
-            'type': 'html',
-            'link_patterns': [
-                re.compile(r'vol\d+.html'),
-                re.compile(r'\d+\.html')
-            ]
-        }
-    ]
-
-    def __init__(self):
-        super(OrsImporter, self).__init__()
-
-        self.subsection_re = re.compile('(\d+\.\d+)')
-        self.title_re = re.compile('\d+\.\d+\s([\w|\s|;|,]+\.)')
-
-    def import_version(self, version):
-        target_source = None
-        for source in self.sources:
-            if source['version'] == version:
-                target_source = source
-                break
-        if not target_source:
-            raise Exception('No target source found for version {}'.format(
-                version))
-        self.import_source(target_source)
-        # self.commit(source['version'])
-
-    def import_source(self, source_dict):
-        source_type = source_dict['type']
+    def create_parser(self, source_type, by_subsection):
         if source_type == 'html':
-            self.begin_html_crawl(source_dict)
+            if by_subsection:
+                return OrsHtmlSubsectionParser()
+            else:
+                raise NotImplementedError()
         elif source_type == 'pdf':
-            self.begin_pdf_crawl(source_dict)
-        else:
-            raise Exception('Unhandled source type: {}'.format(source_type))
-
-    def begin_pdf_crawl(self, source_dict):
-        parser = OrsPdfParser()
-        version = source_dict['version']
-        logger.info('Beginning ORS Version {}'.format(version))
-        url = source_dict['url']
-        self.current_url_base = self.url_base(url)
-
-        html = self.fetch_html(url)
-        hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
-
-        # Debugging
-        start_at = '459a'
-        only_one = False
-        should_import = not bool(start_at or only_one)
-
-        for rel_pdf_href in hrefs:
-            link_url = self.current_url_base + rel_pdf_href
-            if not should_import:
-                if start_at and start_at in rel_pdf_href:
-                    should_import = True
-                else:
-                    # logger.debug('Skipping ' + link_url)
-                    continue
-            logger.info('Attempting {} ({})'.format(
-                link_url, self.hashed_filename(link_url)))
-            try:
-                text = self.fetch_pdf_as_text(link_url)
-                parser.create_laws(text, version)
-            except ImportException:
-                logger.error('HTTPError while fetching {}'.format(link_url))
-                pass
-
-            if only_one and should_import:
-                return
-        logger.info('Finished importing ORS Version {}'.format(version))
-
-    def begin_html_crawl(self, source_dict):
-        """Begin crawling html statutes"""
-        url = source_dict['url']
-        url_base = self.url_base(url)
-        soup = BeautifulSoup(self.fetch_html(url))
-        version = source_dict['version']
-        volume_rex = re.compile(r'Volume (\w+),')
-
-        link_pattern = source_dict['link_patterns'][0]
-        next_link_pattern = source_dict['link_patterns'][1]
-
-        for link in soup.find_all(href=link_pattern):
-            link_text = util.soup_text(link)
-            volume_hit = volume_rex.search(link_text)
-            volume_str = volume_hit.group(1)
-            volume = da_ors.get_or_create_volume(
-                version=version, volume_str=volume_str)
-            link_url = url_base + link.get('href')
-            html = self.fetch_html(link_url)
-            self.crawl_vol_page_html(
-                html, url_base, volume, next_link_pattern)
-
-    def crawl_vol_page_html(self, html, url_base, volume, link_pattern):
-        parser = OrsHtmlParser()
-        soup = BeautifulSoup(html)
-        chapter_rex = re.compile(r'Chapter (\w+)\b')
-
-        start_at = '129'
-        only_one = True
-        do_it = not bool(start_at)
-
-        for link in soup.find_all(href=link_pattern):
-            text = util.soup_text(link)
-            chapter_str = chapter_rex.search(text).group(1)
-
-            if start_at and start_at == chapter_str:
-                do_it = True
-            if not do_it:
-                continue
-
-            chapter = da_ors.get_or_create_chapter(volume, chapter_str)
-
-            link_url = url_base + link.get('href')
-            html = self.fetch_html(link_url)
-
-            text = util.html_to_text(html)
-            parser.create_laws(text, chapter)
-
-            if start_at and only_one and do_it:
-                break
+            if by_subsection:
+                return OrsPdfSubsectionParser()
+            else:
+                raise NotImplementedError()
 
 
-class OrsParserBase(object):
+class OrsSubsectionParserBase(object):
     law_code = law_codes.OREGON_REVISED_STATUTES
 
     em_dash_unichar = u'\u2014'.encode('utf8')
@@ -340,7 +216,7 @@ class OrsParserBase(object):
         hit = rex.search(text)
         if not hit:
             debugger.debug_content_start(text, rex)
-            raise ParseException(
+            raise ImportException(
                 'Content start not found for Chapter {}'.format(chapter_str))
         return text[hit.end():]
 
@@ -364,12 +240,12 @@ class OrsParserBase(object):
 
         if not first_subs_hit:
             debugger.debug_toc_find_fail(text, first_sub_rex)
-            raise ParseException('Failed to find first subsection')
+            raise ImportException('Failed to find first subsection')
 
         first_subs = first_subs_hit.group(1)
         first_subs_idx = first_subs_hit.end()
         if first_subs_idx > 2000:
-            raise ParseException('Unexpectedly high first subs index: {}'.format(
+            raise ImportException('Unexpectedly high first subs index: {}'.format(
                 first_subs_idx))
 
         search_text = text[first_subs_idx:]
@@ -381,7 +257,7 @@ class OrsParserBase(object):
         if not first_full_subs_hit:
             debugger.debug_subs_find_fail(
                 first_subs, search_text, first_full_subs_rex)
-            raise ParseException(
+            raise ImportException(
                 'Failed finding first subs {} in text {}:'.format(
                     first_subs, search_text[:300]))
 
@@ -419,12 +295,12 @@ class OrsParserBase(object):
         for sub in unexpected:
             if not self.text_has_empty_subsection(sub, text):
                 logger.error('expected_subs: {v}'.format(v=expected_subs))
-                raise ParseException(
+                raise ImportException(
                     'Unexpected subsection: {}'.format(sub))
 
         not_found = [x for x in expected_subs if x not in body_subs]
         if len(not_found) > 0:
-            raise ParseException('Subsections not found in body: {}'.format(
+            raise ImportException('Subsections not found in body: {}'.format(
                 not_found))
 
         return True
@@ -457,7 +333,7 @@ class OrsParserBase(object):
                 if not next_sub_hit:
                     debugger.debug_sequential_find(
                         sub, next_sub, search_text, next_sub_rex)
-                    raise ParseException(
+                    raise ImportException(
                         "Couldn't find {} after {}".format(
                             next_sub, sub))
                 law_text = search_text[:next_sub_hit.start()]
@@ -499,7 +375,7 @@ class OrsParserBase(object):
                 #     subs_hit = exception_rex.search(search_text)
 
             if not subs_hit:
-                raise ParseException('{} not found in text:\n{}'.format(
+                raise ImportException('{} not found in text:\n{}'.format(
                     target_sub, search_text[:500]))
 
             if i < len(expected_subs) - 1:
@@ -523,7 +399,7 @@ class OrsParserBase(object):
         da_ors.create_statute(chapter, subsection, title, text)
 
 
-class OrsPdfParser(OrsParserBase):
+class OrsPdfSubsectionParser(OrsSubsectionParserBase):
     """Using this one for at least the 2007 pdf text."""
 
     volume_pat_html = re.compile(r'ORS Volume (\d+),')
@@ -540,7 +416,7 @@ class OrsPdfParser(OrsParserBase):
         chapter_hit = rex.search(text)
         if not chapter_hit:
             debugger.debug_chapter_search(text, rex=rex)
-            raise ParseException('Failed to find chapter')
+            raise ImportException('Failed to find chapter')
         chapter = chapter_hit.group(1)
         return chapter
 
@@ -659,7 +535,7 @@ class OrsPdfParser(OrsParserBase):
                 if not next_subs_hit:
                     debugger.debug_sequential_find(
                         target, next_subs, text, next_subs_rex)
-                    raise ParseException(
+                    raise ImportException(
                         "Couldn't find {} after {}".format(
                             next_subs, target))
                 law_text = search_text[:next_subs_hit.start()].strip()
@@ -718,7 +594,7 @@ class OrsPdfParser(OrsParserBase):
             return False
 
 
-class OrsHtmlParser(OrsParserBase):
+class OrsHtmlSubsectionParser(OrsSubsectionParserBase):
 
     chapter_rex = re.compile(r'^Chapter (\w+)\b')
 
@@ -737,7 +613,7 @@ class OrsHtmlParser(OrsParserBase):
         hit = rex.search(text)
         if not hit:
             debugger.debug_chapter_title(chapter_str, text, rex)
-            raise ParseException(
+            raise ImportException(
                 'No title found for chapter {}'.format(chapter_str))
         title = ' '.join(hit.group(1).splitlines())
         return self.filter_chapter_title(title)

@@ -4,5 +4,7 @@ from .base import OrsImporterBase
 
 
 class OrsChapterImporter(OrsImporterBase):
-    pass
+
+    def import_version(self, version):
+        pass
 
