@@ -523,19 +523,52 @@
   });
 
   angular.module(APP_NAME).controller('OrsTocCtrl', function($route, $scope, $rootScope, $http, $routeParams, Laws, UrlBuilder) {
-    var chapter, lawCode, promise, version;
+    var chapter, getChapterVolume, lawCode, promise, simpleNumPat, version;
     lawCode = $rootScope.currentLawCode;
     version = $rootScope.currentVersion;
     $scope.chapterLinkBase = UrlBuilder.app("/toc/" + lawCode + "/" + version);
     $scope.statuteLinkBase = UrlBuilder.app("/view/" + lawCode + "/" + version);
+    simpleNumPat = /\d+/;
     if ($routeParams.division) {
       chapter = $routeParams.division;
       promise = Laws.fetchDivision($rootScope.currentLawCode, chapter);
-      return promise.then(function(data) {
+      promise.then(function(data) {
         $scope.currentChapter = data.chapter;
         return $scope.chapterStatutes = data.statutes;
       });
     }
+    getChapterVolume = function(chapterStr) {
+      var chapterNum, volume;
+      chapterNum = simpleNumPat.exec(chapterStr);
+      if (!chapterNum) {
+        throw "No number found for chapter " + chapterStr;
+      }
+      chapterNum = chapterNum[0];
+      volume = _.find($scope.tocData.volumes, function(volume) {
+        return chapterNum >= volume.chapters[0] && chapterNum <= volume.chapters[1];
+      });
+      return volume;
+    };
+    $scope.searchInputChange = function(searchInput) {
+      var parts, subs, subsectionPat;
+      subsectionPat = /\d+\.\d+/;
+      subs = subsectionPat.exec(searchInput);
+      if (subs) {
+        subs = subs[0];
+        $scope.interpretedSearch = "ORS " + subs;
+        parts = subs.split('.');
+        $scope.searchChapter = parts[0];
+        $scope.searchSubsection = parts[1];
+        return $scope.searchVolume = getChapterVolume($scope.searchChapter);
+      } else {
+        return $scope.interpretedSearch = "Type some more ...";
+      }
+    };
+    return $scope.$watch('tocData', function() {
+      return _.each($scope.tocData.volumes, function(val, key, list) {
+        return $scope.tocData.volumes[key]['volume'] = key;
+      });
+    });
   });
 
   angular.module(APP_NAME).controller('TocParentCtrl', function($route, $scope, $rootScope, $http, $routeParams, UrlBuilder) {
@@ -543,12 +576,8 @@
     $scope.m = {};
     if (!$scope.tocData && !$routeParams.division) {
       url = UrlBuilder.api("/laws/" + $rootScope.currentLawCode + "/toc");
-      $http.get(url).success(function(data) {
-        $scope.tocData = data;
-        if (!$rootScope.currentVersion) {
-          $rootScope.currentVersion = data.versions[0];
-        }
-        return $scope.m.selectedVersion = $rootScope.currentVersion;
+      $http.get(url).then(function(response) {
+        return $scope.tocData = response.data;
       });
     }
     switch ($rootScope.currentLawCode) {

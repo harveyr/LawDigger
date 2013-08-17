@@ -3,12 +3,8 @@ angular.module(APP_NAME).controller 'TocParentCtrl', ($route, $scope, $rootScope
 
     if not $scope.tocData and not $routeParams.division
         url = UrlBuilder.api("/laws/#{$rootScope.currentLawCode}/toc")
-        $http.get(url)
-            .success (data) ->
-                $scope.tocData = data
-                if not $rootScope.currentVersion
-                    $rootScope.currentVersion = data.versions[0]
-                $scope.m.selectedVersion = $rootScope.currentVersion
+        $http.get(url).then (response) ->
+            $scope.tocData = response.data
 
     switch $rootScope.currentLawCode
         when 'ors'

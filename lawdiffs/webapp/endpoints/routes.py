@@ -3,7 +3,8 @@ from flask import (Blueprint, request)
 
 from ...data import jsonify
 from ...data.access import laws as da_laws
-from ...mine import repos
+from ...data.access import ors as da_ors
+from ...miner import repos
 
 logger = logging.getLogger(__name__)
 
@@ -13,22 +14,9 @@ blueprint = Blueprint(
 
 @blueprint.route('/laws/<law_code>/toc')
 def fetch_toc(law_code):
-    serialized = {}
     if law_code == 'ors':
-        serialized['volumes'] = []
-        volumes = da_laws.fetch_volumes(law_code)
-        for v in volumes:
-            chapters = v.fetch_chapters()
-            d = v.serialize()
-            d['chapters'] = [c.serialize() for c in chapters]
-            serialized['volumes'].append(d)
-
-            if not 'versions' in serialized:
-                serialized['versions'] = chapters[0].title_versions()
-
-    if not serialized:
-        raise Exception('No TOC serialized for code' + str(law_code))
-    return jsonify(serialized)
+        return jsonify(da_ors.get_toc_map())
+    raise Exception('Unhandled law code: {}'.format(law_code))
 
 
 @blueprint.route('/laws/<law_code>/division/<division>')
