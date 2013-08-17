@@ -3,7 +3,8 @@ from nose import tools as nt
 from mock import Mock, patch
 
 from .base import TestBase, MockDoc
-from ..miner.parser.ors import OrsHtmlParser
+from ..miner.ors.subsection import OrsHtmlSubsectionParser
+from ..data import encoder
 
 
 class ParseTester(TestBase):
@@ -15,7 +16,7 @@ class ParseTester(TestBase):
 
         expected_subs = ['17.065', '17.075', '17.085', '17.095', '17.990']
 
-        parser = OrsHtmlParser()
+        parser = OrsHtmlSubsectionParser()
         returned_subs, text = parser.get_expected_subs(chapter_str, text)
 
         nt.assert_equal(
@@ -37,7 +38,7 @@ class ParseTester(TestBase):
 
         print('text[:200]: {v}'.format(v=text[:200]))
 
-        rex = OrsHtmlParser.end_of_sentence_rex
+        rex = OrsHtmlSubsectionParser.end_of_sentence_rex
         hit = rex.search(text)
         nt.assert_true(hit)
         law_text = text[hit.end():].strip()
@@ -51,7 +52,7 @@ class ParseTester(TestBase):
 
         # print('text[:100]: {v}'.format(v=text[:100]))
 
-        rex = OrsHtmlParser.end_of_sentence_rex
+        rex = OrsHtmlSubsectionParser.end_of_sentence_rex
         hit = rex.search(text)
         # hit_str = text[hit.start():hit.end()]
         nt.assert_true(hit)
@@ -71,7 +72,7 @@ class ParseTester(TestBase):
         expected_end = '[1993 c.792 {sec}33; 1995 c.703 {sec}2]'.format(
             sec=self.unicode_char('section'))
 
-        parser = OrsHtmlParser()
+        parser = OrsHtmlSubsectionParser()
         nt.assert_equal(expected_start, text[:len(expected_start)])
 
         law_dict, remainder = parser.parse_law(target, next, text)
@@ -90,41 +91,55 @@ class ParseTester(TestBase):
         text = self.get_content('ors_ch40_2011.html')
         expected_title = 'Execution, Formalities and Interpretation of Writings'
 
-        parser = OrsHtmlParser()
+        parser = OrsHtmlSubsectionParser()
         found_title = parser.get_chapter_title('42', text)
 
         nt.assert_equal(
             expected_title,
             found_title)
 
-    def test_ors_ch_129_html(self):
+    def test_ors_2011_ch_129(self):
         """This chapter has 'UPIA' after each section number. This breaks
         with the original heading regexes."""
+
         content_file = 'ors_ch129_2011.html'
         text = self.get_content(content_file)
         version = 2011
         chapter_str = '129'
-        target = '129.200'
         expected_body_start = "129.200\nUPIA\n101. Short title.\nThis chapter may"
 
-        parser = OrsHtmlParser()
+        parser = OrsHtmlSubsectionParser()
 
         text = parser.preprocess_text(version, chapter_str, text)
+        expected_subs, body_text = parser.get_expected_subs(chapter_str, text)
+        self.assert_startswith(body_text, '129.200')
+        # print('expected_subs: {v}'.format(v=exected_subs))
+        # print(body_text[:500])
+
+        body_text = parser.purified_body_text(body_text)
+
+        self.assert_startswith(
+            body_text,
+            expected_body_start)
 
         expected_subs, body_text = parser.get_expected_subs(chapter_str, text)
-
-        nt.assert_in(target, expected_subs)
-        self.assert_startswith(body_text, expected_body_start)
-        body_text = parser.purified_text(body_text)
+        nt.assert_equal('129.200', expected_subs[0])
         parser.assert_expected_subs_exist(chapter_str, expected_subs, body_text)
 
-        return
-
+    def test_ch_title_with_apostrophe(self):
+        content_file = 'ors_ch251_2011.html'
         text = self.get_content(content_file)
-        chapter = MockDoc()
-        chapter.version = version
-        chapter.division = chapter_str
-        chapter.title = None
+        version_str = '2011'
+        chapter_str = '251'
 
-        with patch.object(OrsHtmlParser, 'save_law') as mock_save:
-            parser.create_laws(text, chapter)
+        parser = OrsHtmlSubsectionParser()
+        parser.get_chapter_title(version_str, chapter_str, text)
+
+    def test_ch_title_with_comma(self):
+        content_file = 'ors_ch473_2011.html'
+        text = self.get_content(content_file)
+        version_str = '2011'
+        chapter_str = '473'
+
+        parser = OrsHtmlSubsectionParser()
+        parser.get_chapter_title(version_str, chapter_str, text)

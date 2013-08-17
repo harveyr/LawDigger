@@ -8,6 +8,7 @@ unicode_chars = {
     'en_dash': u'\u2013'.encode('utf8'),
     'curly_left_quote': u'\u201C'.encode('utf8'),
     'curly_right_quote': u'\u201D'.encode('utf8'),
+    'curly_apostrophe': u'\u2019'.encode('utf8'),
     'prime': u'\u2032'.encode('utf8'),
     'section': u'\u00A7'.encode('utf8')
 }

@@ -76,7 +76,7 @@ class OrsImporterBase(LawImporter):
         hrefs = re.findall(r'href="(\d+[a-z]?\.pdf)"', html)
 
         # Debugging
-        start_at = '459a'
+        start_at = '259'
         only_one = False
         should_import = not bool(start_at or only_one)
 
@@ -127,8 +127,8 @@ class OrsImporterBase(LawImporter):
         soup = BeautifulSoup(html)
         chapter_rex = re.compile(r'Chapter (\w+)\b')
 
-        start_at = '129'
-        only_one = True
+        start_at = False
+        only_one = False
         do_it = not bool(start_at)
 
         for link in soup.find_all(href=link_pattern):
@@ -150,3 +150,4 @@ class OrsImporterBase(LawImporter):
 
             if start_at and only_one and do_it:
                 break
+

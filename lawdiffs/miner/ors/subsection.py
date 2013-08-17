@@ -194,8 +194,11 @@ class OrsSubsectionParserBase(object):
 
     em_dash_unichar = u'\u2014'.encode('utf8')
 
-    upper_pat = r"[A-Z]+[A-Z;,'\-\s]+"
-    title_or_upper_pat = r"[A-Z]+[A-Za-z;,'\-\s]+"
+    title_punct_pat = r";,'{}\-\s".format(
+        encoder.unicode_char('curly_apostrophe'))
+    upper_pat = r"[A-Z]+[A-Z;,'{}\-\s]+".format(
+        encoder.unicode_char('curly_apostrophe'))
+    title_or_upper_pat = r"[A-Z]+[A-Za-z{}]+".format(title_punct_pat)
     subs_title_start_pat = r'[A-Z{}{}]'.format(
         u'\u201C'.encode('utf8'),
         u'\u00A7'.encode('utf8'))
@@ -220,13 +223,20 @@ class OrsSubsectionParserBase(object):
                 'Content start not found for Chapter {}'.format(chapter_str))
         return text[hit.end():]
 
-    def text_has_laws(self, chapter_str, text):
+    def text_has_laws(self, version_str, chapter_str, text):
         rex = re.compile(
             r'^Chapter {}.+\(Former.Provisions\)$'.format(chapter_str),
             re.MULTILINE | re.DOTALL)
 
         if rex.search(text):
             return False
+
+        empties = {
+            '2011': ['492']
+        }
+        if version_str in empties:
+            if chapter_str in empties[version_str]:
+                return False
 
         return True
 
@@ -599,20 +609,23 @@ class OrsHtmlSubsectionParser(OrsSubsectionParserBase):
     chapter_rex = re.compile(r'^Chapter (\w+)\b')
 
     def __init__(self):
-        self.heading_rexes = [
-            re.compile(
-                r'^{upper}$'.format(upper=self.upper_pat),
-                re.MULTILINE)
-        ]
+        self.upper_heading_rex = re.compile(
+            r'[^\d]\n{upper}$'.format(upper=self.upper_pat),
+            re.MULTILINE)
 
-    def get_chapter_title(self, chapter_str, text):
+    def get_chapter_title(self, version_str, chapter_str, text):
         rex = re.compile(
-            r'^Chapter {ch}.+?([A-Z][\w\s,;]+)$'.format(
-                ch=chapter_str),
+            r'^(?:Chapter )?{ch}\s.+?({titlechars})$'.format(
+                ch=chapter_str, titlechars=self.title_or_upper_pat),
             re.MULTILINE)
         hit = rex.search(text)
         if not hit:
-            debugger.debug_chapter_title(chapter_str, text, rex)
+            hc_title = self.hard_coded_title(version_str, chapter_str)
+            if hc_title:
+                return hc_title
+
+            logger.error('Failed to find chapter with pattern {}'.format(
+                rex.pattern))
             raise ImportException(
                 'No title found for chapter {}'.format(chapter_str))
         title = ' '.join(hit.group(1).splitlines())
@@ -632,16 +645,21 @@ class OrsHtmlSubsectionParser(OrsSubsectionParserBase):
         version_str = chapter.version
         chapter_str = chapter.division
 
+        if self.is_note_format(version_str, chapter_str):
+            logger.critical('Skipping note! ({} Chapter {}'.format(version_str, chapter_str))
+            return
+
         search_text = self.preprocess_text(
             version_str, chapter_str, search_text)
 
-        if not self.text_has_laws(chapter_str, search_text):
+        if not self.text_has_laws(version_str, chapter_str, search_text):
             logger.warn('Skipping Chapter {} because it has no laws.'.format(
                 chapter))
             return
 
         if not chapter.title:
-            title = self.get_chapter_title(chapter_str, search_text)
+            title = self.get_chapter_title(
+                version_str, chapter_str, search_text)
             chapter.title = title
             chapter.save()
 
@@ -654,23 +672,46 @@ class OrsHtmlSubsectionParser(OrsSubsectionParserBase):
         self.assert_expected_subs_exist(
             chapter_str, expected_subs, search_text)
 
-        search_text = self.purified_text(search_text)
+        # TODO: Move heading removal to the individual laws
+        # search_text = self.purified_body_text(search_text)
         self.parse_and_create_laws(chapter, search_text, expected_subs)
 
-    def purified_text(self, text):
-        for rex in self.heading_rexes:
-            text = rex.sub('', text)
+    def purified_body_text(self, text):
+        text = self.strip_upper_headings(text)
         return text
+
+    def strip_upper_headings(self, text):
+        return self.upper_heading_rex.sub('', text)
 
     def preprocess_text(self, version, chapter_str, text):
         if int(version) == 2011:
             if int(chapter_str) == 129:
-                # debugging
-                # print('replacing 1293080')
-                # idx = text.index('1293080')
-                # print('TEXT: ' + text[idx:idx + 50])
-
                 text = text.replace('1293080', '129.200')
-                # print('REPL: ' + text[idx:idx + 50])
+            elif int(chapter_str) == 374:
+                text = text.replace('\\374.300', '374.300')
 
         return text
+
+    def is_note_format(self, version, chapter_str):
+        notes = {
+            '2011': ['259']
+        }
+
+        if version in notes:
+            if chapter_str in notes[version]:
+                return True
+
+        return False
+
+    def hard_coded_title(self, version, chapter_str):
+        titles = {
+            '2011': {
+                '403': "9-1-1 Emergency Communications System; 2-1-1 System; Public Safety Communications Systems"
+            }
+        }
+
+        if version in titles:
+            if chapter_str in titles[version]:
+                return titles[version][chapter_str]
+
+        return False

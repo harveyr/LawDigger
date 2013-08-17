@@ -3,7 +3,7 @@ import unittest
 from nose import tools as nt
 
 from ..miner import util
-from ..miner.parser.ors import OrsParserBase
+from ..miner.ors.subsection import OrsSubsectionParserBase
 
 from ..data import encoder
 
@@ -34,7 +34,7 @@ class TestBase(unittest.TestCase):
     def get_text_start_at_sub(self, sub, text, start_at=None):
         if start_at:
             text = text[start_at:]
-        parser = OrsParserBase()
+        parser = OrsSubsectionParserBase()
         rex = parser.build_subsection_rex(sub)
         hit = rex.search(text)
         text = text[hit.start():]
