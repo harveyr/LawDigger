@@ -9,11 +9,19 @@ This project is tentatively abandoned.
 
 The goal was to provide pleasant, Github-esque browsing of statutory changes over time.
 
-The law-parsing logic is based on a series of regular expressions tailored to each body of law.
+The process, which is more or less implemented:
 
-Though I met with some initial success while testing and presenting the first few chapters of Oregon Revised Statutes, I got bogged down when trying to fine-tune the regexes to account for all the inconsistencies in the subsequent chapters' formatting.
+1. Scrape the web for the bodies of law in html.
+1. Parse the html (or PDF text, depending on the version) in Python, splitting up all the individual statutes.
+1. Store each body of law in its own git repo, tagged (or possibly branched—I hadn't decided yet) by version (e.g., 2005, 2007, etc.).
+1. Pull diffs from the repos for presentation in the frontend, allowing the user to easily diff any two versions of a law (or multiple laws).
+
+The law-parsing logic is based on a series of regular expressions tailored to each body of law. It also uses [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/), which is a huge help in filtering out all the extraneous html.
+
+Though I met with some initial success while testing and presenting the first few chapters of [Oregon Revised Statutes](http://www.leg.state.or.us/ors/), I got bogged down when trying to fine-tune the regexes to account for all the inconsistencies in the subsequent chapters' formatting.
 
 Ultimately, due to the number of those inconsistencies, I decided that I could not guarantee the accuracy that legal professionals would require when reading the law.
 
 (Plus, it just became a huge headache.)
 
+I don't intend to finish this project, though I'd like to get it back to screenshot-worthy status.
