@@ -1,19 +1,34 @@
-MANIFEST
-dist/
-*.swp
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
 *.egg-info
-venv/
-lib/
-venv/
-bin/
+dist
+build
+eggs
+parts
+bin
+var
+sdist
 include/
 local/
 share/
 lib64
+
+# Installer logs
+pip-log.txt
+
 repos/
 *.py[oc]
 *.py~
+nosetests.xml
+
+# Translations
 *.scssc
+
 *.map
 .DS_Store
 build
