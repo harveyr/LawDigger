@@ -11,8 +11,8 @@ The goal was to provide pleasant, Github-esque browsing of statutory changes ove
 
 The process, which is more or less implemented:
 
-1. Scrape the web for the bodies of law in html.
-1. Parse the html (or PDF text, depending on the version) in Python, splitting up all the individual statutes.
+1. Scrape the web for the bodies of law in html (or PDF, depending on the version).
+1. Parse the html/PDFs in Python, splitting up all the individual statutes.
 1. Store each body of law in its own git repo, tagged (or possibly branched—I hadn't decided yet) by version (e.g., 2005, 2007, etc.).
 1. Pull diffs from the repos for presentation in the frontend, allowing the user to easily diff any two versions of a law (or multiple laws).
 
