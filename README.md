@@ -3,6 +3,8 @@ LawDigger
 
 Github for the legal world (at least, that was the idea).
 
+The stack: MongoDB, Python, AngularJS, Zurb/Compass.
+
 This project is tentatively abandoned.
 
 The goal was to provide pleasant, Github-esque browsing of statutory changes over time.
