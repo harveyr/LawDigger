@@ -13,8 +13,8 @@ The process, which is more or less implemented:
 
 1. Scrape the web for the bodies of law in html (or PDF, depending on the version).
 1. Parse the html/PDFs in Python, splitting up all the individual statutes.
-1. Store each body of law in its own git repo, tagged (or possibly branched—I hadn't decided yet) by version (e.g., 2005, 2007, etc.). Each law is in its own file in the repo.
-1. Pull diffs from the repos for presentation in the frontend, allowing the user to easily diff arbitrary laws/versions.
+1. Store each body of law in its own git repo, tagged (or possibly branched—I hadn't decided yet) by version (e.g., 2005, 2007, etc.), with each law in its own file in the repo.
+1. Let the user diff arbitrary laws and versions, pulling the diffs from git and presenting them nicely.
 
 The law-parsing logic is based on a series of regular expressions tailored to each body of law. It also uses [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/), which is a huge help in filtering out all the extraneous html.
 
